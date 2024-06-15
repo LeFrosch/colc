@@ -1,0 +1,52 @@
+%import common.WS
+%import common.ESCAPED_STRING -> STRING
+
+%ignore WS
+
+DIGIT: "0".."9"
+
+INTEGER: DIGIT+
+LETTER_UPPER_CASE: "A".."Z"
+LETTER_LOWER_CASE: "a".."z"
+LETTER: LETTER_UPPER_CASE | LETTER_LOWER_CASE | DIGIT
+
+TYPE: "str" | "int" | "bool"
+NODE_TYPE: LETTER_UPPER_CASE LETTER*
+IDENTIFIER: LETTER_LOWER_CASE LETTER*
+
+COMPARISON: "==" | "!=" | "<=" | ">=" | "<" | ">" | "*=" | "**="
+QUANTIFIER: "all:" | "any:" | "one:"
+
+?expr: sum_expr
+
+?sum_expr: product_expr
+  | sum_expr "+" product_expr    -> add_expr
+  | sum_expr "-" product_expr    -> sub_expr
+
+?product_expr: atom_expr
+  | product_expr "*" atom_expr   -> mul_expr
+  | product_expr "/" atom_expr   -> div_expr
+
+?atom_expr: INTEGER              -> int_expr
+  | STRING                       -> str_expr
+  | "-" atom_expr                -> neg_expr
+  | IDENTIFIER                   -> val_expr
+  | "(" sum_expr ")"
+
+parameter: IDENTIFIER ":" TYPE
+reference: IDENTIFIER "(" expr ("," expr)* ")"
+
+predicate: INTEGER  -> int_predicate
+| reference -> reference_predicate
+
+statement: block ";" -> block_statement
+  | predicate NODE_TYPE [block] ";"  -> with_statement
+  | IDENTIFIER COMPARISON expr ";"          -> attribute_statement
+  | predicate reference ";" -> reference_statement
+
+block: "{" QUANTIFIER (statement*) "}"
+
+?definition: "con" "main" block -> main_constraint
+  | "con" IDENTIFIER "(" NODE_TYPE ("," parameter)* ")" block -> type_constraint
+
+start: definition*
