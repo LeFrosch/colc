@@ -1,0 +1,5 @@
+# INPUT
+con main { any: }
+
+# OUTPUT
+[ANY]

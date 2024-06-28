@@ -1,0 +1,9 @@
+# INPUT
+con main { any:
+  size == 3;
+  size **= 3;
+  size >= 3;
+}
+
+# OUTPUT
+[ANY, [EQUAL, [ATTR, 'size'], 3], [POWER, [ATTR, 'size'], 3], [GREATER_EQUAL, [ATTR, 'size'], 3]]
