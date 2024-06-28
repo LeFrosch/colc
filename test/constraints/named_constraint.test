@@ -1,0 +1,11 @@
+# INPUT
+con name(MACHINE) { all:
+  os == "linux";
+}
+
+con main { any:
+  3 name();
+}
+
+# OUTPUT
+[ANY, [WITH, 'MACHINE', 3, [ALL, [EQUAL, [ATTR, 'os'], 'linux']]]]

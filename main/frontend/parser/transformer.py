@@ -1,6 +1,7 @@
 import lark
 
 from ..ast import *
+from ..ast.nodes import ValueExpression
 
 
 @lark.v_args(meta=True)
@@ -20,7 +21,7 @@ class ASTTransformer(lark.Transformer):
             meta=meta,
             identifier=str(children[0]),
             kind=str(children[1]),
-            parameter=children[2:-1],
+            parameters=children[2:-1],
             block=children[-1],
         )
 
@@ -73,10 +74,22 @@ class ASTTransformer(lark.Transformer):
             literal=int(children[0]),
         )
 
+    def str_expr(self, meta, children):
+        return LiteralExpression(
+            meta=meta,
+            type=Type.STRING,
+            literal=str(children[0][1:-1]),
+        )
+
+    def val_expr(self, meta, children):
+        return ValueExpression(
+            meta=meta,
+            identifier=str(children[0]),
+        )
+
     def mul_expr(self, meta, children):
         return BinaryExpression(
             meta=meta,
-            type=Type.INTEGER,  # TODO: add type checking
             operator=Operator.MULTIPLICATION,
             left=children[0],
             right=children[1],

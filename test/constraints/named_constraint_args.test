@@ -1,0 +1,15 @@
+# INPUT
+con name(MACHINE, os: str, memory: int) { all:
+  os == os;
+
+  1 MEMORY { all:
+    size == memory * 1024;
+  };
+}
+
+con main { any:
+  3 name("windows", 4);
+}
+
+# OUTPUT
+[ANY, [WITH, 'MACHINE', 3, [ALL, [EQUAL, [ATTR, 'os'], 'windows'], [WITH, 'MEMORY', 1, [ALL, [EQUAL, [ATTR, 'size'], 4096]]]]]]

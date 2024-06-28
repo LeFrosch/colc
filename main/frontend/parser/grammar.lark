@@ -33,8 +33,10 @@ QUANTIFIER: "all:" | "any:" | "one:"
   | IDENTIFIER                   -> val_expr
   | "(" sum_expr ")"
 
+_list{item}: | item ("," item)* ","?
+
 parameter: IDENTIFIER ":" TYPE
-reference: IDENTIFIER "(" expr ("," expr)* ")"
+reference: IDENTIFIER "(" _list{expr} ")"
 
 predicate: INTEGER  -> int_predicate
 | reference -> reference_predicate
@@ -47,6 +49,6 @@ statement: block ";" -> block_statement
 block: "{" QUANTIFIER (statement*) "}"
 
 ?definition: "con" "main" block -> main_constraint
-  | "con" IDENTIFIER "(" NODE_TYPE ("," parameter)* ")" block -> type_constraint
+  | "con" IDENTIFIER "(" NODE_TYPE ("," _list{parameter})? ")" block -> type_constraint
 
 start: definition*

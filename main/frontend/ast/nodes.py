@@ -51,7 +51,7 @@ class Parameter(ASTNode):
 
 
 class Expression(ASTNode):
-    type: Type
+    pass
 
 
 class BinaryExpression(Expression):
@@ -67,10 +67,15 @@ class UnaryExpression(Expression):
 
 class LiteralExpression(Expression):
     literal: int | str
+    type: Type
+
+
+class ValueExpression(Expression):
+    identifier: str
 
 
 class Reference(ASTNode):
-    identifier: int
+    identifier: str
     arguments: list[Expression]
 
 
@@ -112,7 +117,7 @@ class WithStatement(Statement):
 class TypeConstraint(ASTNode):
     identifier: str
     kind: str
-    parameter: list[Parameter]
+    parameters: list[Parameter]
     block: Block
 
 

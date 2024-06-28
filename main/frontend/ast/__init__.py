@@ -5,6 +5,7 @@ from .nodes import (
     UnaryExpression,
     BinaryExpression,
     LiteralExpression,
+    ValueExpression,
     Reference,
     Predicate,
     Statement,

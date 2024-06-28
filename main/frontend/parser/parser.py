@@ -1,7 +1,7 @@
 import lark
 
 from .transformer import ASTTransformer
-from .file import File
+from ..ast import ASTNode
 
 _parser = lark.Lark.open(
     'grammar.lark',
@@ -12,9 +12,6 @@ _parser = lark.Lark.open(
 )
 
 
-def parse(source: str) -> File:
+def parse(source: str) -> list[ASTNode]:
     transformer = ASTTransformer()
-
-    definitions = transformer.transform(_parser.parse(source))
-
-    return File(definitions=definitions)
+    return transformer.transform(_parser.parse(source))

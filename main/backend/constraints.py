@@ -2,6 +2,8 @@ import enum
 import operator
 
 from frontend.ast import *
+from .scope import Scope
+from .file import File
 
 
 class LFunctions(enum.Enum):
@@ -53,6 +55,10 @@ class LExpression:
 
 
 class LVisitor(Visitor):
+    def __init__(self, file: File, scope: Scope):
+        self.file = file
+        self.scope = scope
+
     def block(self, block: Block) -> LExpression:
         return LExpression(LFunctions.from_quantifier(block.quantifier), self.accept_all(block.statements))
 
@@ -67,6 +73,19 @@ class LVisitor(Visitor):
             stmt.kind,
             self.accept(stmt.predicate),
             self.accept(stmt.block),
+        ])
+
+    def reference_statement(self, stmt: ReferenceStatement) -> LExpression:
+        arguments = self.accept_all(stmt.reference.arguments)
+
+        target = self.file.type_constraint(stmt.reference.identifier)
+        target_scope = Scope.from_call(target.parameters, arguments)
+        target_visitor = LVisitor(self.file, target_scope)
+
+        return LExpression(LFunctions.WITH, [
+            target.kind,
+            self.accept(stmt.predicate),
+            target_visitor.accept(target.block),
         ])
 
     def predicate(self, predicate: Predicate) -> int | LExpression:
@@ -85,6 +104,12 @@ class LVisitor(Visitor):
     def literal_expression(self, expr: LiteralExpression) -> int | str:
         return expr.literal
 
+    def value_expression(self, expr: ValueExpression) -> int | str:
+        return self.scope.lookup(expr.identifier)
 
-def encode_constraint(constraint: MainConstraint) -> LExpression:
-    return LVisitor().accept(constraint.block)
+
+def encode_main_constraint(file: File) -> LExpression:
+    constraint = file.main_constraint()
+    visitor = LVisitor(file, Scope())
+
+    return visitor.accept(constraint.block)
