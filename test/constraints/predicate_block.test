@@ -1,0 +1,12 @@
+# INPUT
+con test(list) { all:
+  { one: { any: }; };
+  { any: };
+}
+
+con main { all:
+  test() CORE;
+}
+
+# OUTPUT
+[ALL, [WITH, 'CORE', [ALL, [ONE, [ANY]], [ANY]]]]

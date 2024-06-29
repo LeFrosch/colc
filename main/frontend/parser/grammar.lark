@@ -11,44 +11,56 @@ LETTER_LOWER_CASE: "a".."z"
 LETTER: LETTER_UPPER_CASE | LETTER_LOWER_CASE | DIGIT
 
 TYPE: "str" | "int" | "bool"
-NODE_TYPE: LETTER_UPPER_CASE LETTER*
+NODE_KIND: LETTER_UPPER_CASE LETTER*
 IDENTIFIER: LETTER_LOWER_CASE LETTER*
 
 COMPARISON: "==" | "!=" | "<=" | ">=" | "<" | ">" | "*=" | "**="
 QUANTIFIER: "all:" | "any:" | "one:"
+AGGREGATOR: "min" | "max" | "sum" | "avg"
 
-?expr: sum_expr
+?expression: expression_sum
 
-?sum_expr: product_expr
-  | sum_expr "+" product_expr    -> add_expr
-  | sum_expr "-" product_expr    -> sub_expr
+?expression_sum: expression_prod
+  | expression_sum "+" expression_prod -> expression_add
+  | expression_sum "-" expression_prod -> expression_sub
 
-?product_expr: atom_expr
-  | product_expr "*" atom_expr   -> mul_expr
-  | product_expr "/" atom_expr   -> div_expr
+?expression_prod: expression_atom
+  | expression_prod "*" expression_atom -> expression_mul
+  | expression_prod "/" expression_atom -> expression_div
 
-?atom_expr: INTEGER              -> int_expr
-  | STRING                       -> str_expr
-  | "-" atom_expr                -> neg_expr
-  | IDENTIFIER                   -> val_expr
-  | "(" sum_expr ")"
+?expression_atom: INTEGER      -> expression_int
+  | STRING                     -> expression_str
+  | "-" expression_atom        -> expression_neg
+  | IDENTIFIER                 -> expression_ref
+  | call                       -> expression_call
+  | "(" expression_sum ")"
 
-_list{item}: | item ("," item)* ","?
+_list{item}: | item ("," item)*
+_c_list{item}: "," _list{item}
 
 parameter: IDENTIFIER ":" TYPE
-reference: IDENTIFIER "(" _list{expr} ")"
+call: IDENTIFIER "(" _list{expression} ")"
 
-predicate: INTEGER  -> int_predicate
-| reference -> reference_predicate
+c_statement: c_block ";"                 -> c_statement_block
+  | call NODE_KIND [c_block] ";"         -> c_statement_with
+  | IDENTIFIER COMPARISON expression ";" -> c_statement_attr
+  | call call ";"                        -> c_statement_call
 
-statement: block ";" -> block_statement
-  | predicate NODE_TYPE [block] ";"  -> with_statement
-  | IDENTIFIER COMPARISON expr ";"          -> attribute_statement
-  | predicate reference ";" -> reference_statement
+p_statement: p_block ";"                                   -> p_statement_block
+  | "size" COMPARISON expression ";"                       -> p_statement_size
+  | AGGREGATOR "(" NODE_KIND ")" COMPARISON expression ";" -> p_statement_aggr
 
-block: "{" QUANTIFIER (statement*) "}"
+f_statement: f_block ";"          -> f_statement_block
+  | IDENTIFIER "=" expression ";" -> f_statement_assign
+  | "return" expression ";"       -> f_statement_ret
 
-?definition: "con" "main" block -> main_constraint
-  | "con" IDENTIFIER "(" NODE_TYPE ("," _list{parameter})? ")" block -> type_constraint
+c_block: "{" QUANTIFIER c_statement* "}"
+p_block: "{" QUANTIFIER p_statement* "}"
+f_block: "{" f_statement* "}"
+
+?definition: "con" "main" c_block                                  -> c_definition_main
+  | "con" IDENTIFIER "(" NODE_KIND _c_list{parameter}? ")" c_block -> c_definition_type
+  | "con" IDENTIFIER "(" "list" _c_list{parameter}? ")" p_block    -> p_definition
+  | "fun" IDENTIFIER "(" _list{parameter} ")" f_block              -> f_definition
 
 start: definition*

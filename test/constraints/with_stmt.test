@@ -1,8 +1,0 @@
-# INPUT
-con main { any:
-  3 CORE;
-  1 SOCKET { all: };
-}
-
-# OUTPUT
-[ANY, [WITH, 'CORE', 3], [WITH, 'SOCKET', 1, [ALL]]]

@@ -37,3 +37,10 @@ class Quantifier(ASTEnum):
     ALL = 'all:'
     ANY = 'any:'
     ONE = 'one:'
+
+
+class Aggregator(ASTEnum):
+    MIN = 'min'
+    MAX = 'max'
+    SUM = 'sum'
+    AVG = 'avg'

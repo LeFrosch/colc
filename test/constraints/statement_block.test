@@ -1,0 +1,12 @@
+# INPUT
+con pred(list) { all:
+  size == 3;
+}
+
+con main { all:
+  { one: { all: }; };
+  { any: };
+}
+
+# OUTPUT
+[ALL, [ONE, [ALL]], [ANY]]

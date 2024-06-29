@@ -1,0 +1,12 @@
+# INPUT
+con const(list, n: int) { all:
+  size == n;
+}
+
+con main { any:
+  const(2) CORE;
+  const(1) SOCKET { all: };
+}
+
+# OUTPUT
+[ANY, [WITH, 'CORE', [ALL, [EQUAL, [LIST_SIZE], 2]]], [WITH, 'SOCKET', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL]]]

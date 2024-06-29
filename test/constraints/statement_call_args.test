@@ -1,0 +1,19 @@
+# INPUT
+con const(list, n: int) { all:
+  size == n;
+}
+
+con name(MACHINE, os: str, memory: int) { all:
+  os == os;
+
+  const(1) MEMORY { all:
+    size == memory * 1024;
+  };
+}
+
+con main { any:
+  const(1) name("windows", 4);
+}
+
+# OUTPUT
+[ANY, [WITH, 'MACHINE', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL, [EQUAL, [ATTR, 'os'], 'windows'], [WITH, 'MEMORY', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL, [EQUAL, [ATTR, 'size'], 4096]]]]]]

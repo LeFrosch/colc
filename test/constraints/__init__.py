@@ -1,10 +1,10 @@
 import unittest
 
-from ..utils import FileTestMeta
+from utils import FileTestMeta
 
 from frontend import parse
 from backend.file import File
-from backend.constraints import encode_main_constraint
+from backend.constraint import encode_main_constraint
 
 
 class ConstraintTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):

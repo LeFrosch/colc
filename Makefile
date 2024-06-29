@@ -6,7 +6,7 @@ run: .venv/bin/activate
 	.venv/bin/python3 main/main.py
 
 test: .venv/bin/activate
-	PYTHONPATH=main .venv/bin/python3 -m unittest discover -v
+	PYTHONPATH=main .venv/bin/python3 -m unittest discover -s test -v
 
 clean:
 	find . -name .venv -prune -o -name __pycache__ | xargs rm -rf

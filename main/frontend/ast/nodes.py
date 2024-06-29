@@ -3,7 +3,7 @@ import lark
 import typeguard
 
 from .type import Type
-from .enums import Quantifier, Operator, Comparison
+from .enums import Quantifier, Operator, Comparison, Aggregator
 
 
 def _to_snake_case(name):
@@ -54,72 +54,129 @@ class Expression(ASTNode):
     pass
 
 
-class BinaryExpression(Expression):
+class ExpressionBinary(Expression):
     operator: Operator
     left: Expression
     right: Expression
 
 
-class UnaryExpression(Expression):
+class ExpressionUnary(Expression):
     operator: Operator
     expression: Expression
 
 
-class LiteralExpression(Expression):
+class ExpressionLiteral(Expression):
     literal: int | str
     type: Type
 
 
-class ValueExpression(Expression):
+class ExpressionRef(Expression):
     identifier: str
 
 
-class Reference(ASTNode):
+class Call(ASTNode):
     identifier: str
     arguments: list[Expression]
 
 
-class Predicate(ASTNode):
-    literal: int | None
-    reference: Reference | None
-
-
-class Statement(ASTNode):
+class CStatement(ASTNode):
     pass
 
 
-class Block(ASTNode):
+class CBlock(ASTNode):
     quantifier: Quantifier
-    statements: list[Statement]
+    statements: list[CStatement]
 
 
-class BlockStatement(Statement):
-    block: Block
+class CStatementBlock(CStatement):
+    block: CBlock
 
 
-class AttributeStatement(Statement):
+class CStatementAttr(CStatement):
     identifier: str
     comparison: Comparison
     expression: Expression
 
 
-class ReferenceStatement(Statement):
-    predicate: Predicate
-    reference: Reference
+class CStatementCall(CStatement):
+    predicate: Call
+    constraint: Call
 
 
-class WithStatement(Statement):
-    predicate: Predicate
+class CStatementWith(CStatement):
+    predicate: Call
     kind: str
-    block: Block | None
+    block: CBlock | None
 
 
-class TypeConstraint(ASTNode):
+class PStatement(ASTNode):
+    pass
+
+
+class PBlock(ASTNode):
+    quantifier: Quantifier
+    statements: list[PStatement]
+
+
+class PStatementBlock(PStatement):
+    block: PBlock
+
+
+class PStatementSize(PStatement):
+    comparison: Comparison
+    expression: Expression
+
+
+class PStatementAggr(PStatement):
+    aggregator: Aggregator
+    kind: str
+    comparison: Comparison
+    expression: Expression
+
+
+class Definition(ASTNode):
+    pass
+
+
+class CDefinitionType(Definition):
     identifier: str
     kind: str
     parameters: list[Parameter]
-    block: Block
+    block: CBlock
 
 
-class MainConstraint(ASTNode):
-    block: Block
+class CDefinitionMain(Definition):
+    block: CBlock
+
+
+class PDefinition(Definition):
+    identifier: str
+    parameters: list[Parameter]
+    block: PBlock
+
+
+class FStatement(ASTNode):
+    pass
+
+
+class FBlock(ASTNode):
+    statements: list[FStatement]
+
+
+class FStatementBlock(FStatement):
+    block: FBlock
+
+
+class FStatementAssign(FStatement):
+    identifier: str
+    expression: Expression
+
+
+class FStatementReturn(FStatement):
+    expression: Expression
+
+
+class FDefinition(Definition):
+    identifier: str
+    parameters: list[Parameter]
+    block: FBlock

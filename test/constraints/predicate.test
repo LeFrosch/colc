@@ -1,0 +1,16 @@
+# INPUT
+con min(list, n: int) { all:
+  size >= n;
+}
+
+con const(list, n: int) { all:
+  size == n;
+}
+
+con main { all:
+  min(4) CORE;
+  const(1) MEMORY;
+}
+
+# OUTPUT
+[ALL, [WITH, 'CORE', [ALL, [GREATER_EQUAL, [LIST_SIZE], 4]]], [WITH, 'MEMORY', [ALL, [EQUAL, [LIST_SIZE], 1]]]]

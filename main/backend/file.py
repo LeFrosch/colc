@@ -1,6 +1,4 @@
-import dataclasses
-
-from frontend.ast import ASTNode, TypeConstraint, MainConstraint
+from frontend.ast import ASTNode, CDefinitionType, CDefinitionMain, PDefinition
 
 
 class Pool:
@@ -23,15 +21,22 @@ class File:
         self.definitions = definitions
         self.constants_pool = Pool()
 
-    def type_constraint(self, identifier: str) -> TypeConstraint:
-        constraints = [it for it in self.definitions if isinstance(it, TypeConstraint) and it.identifier == identifier]
+    def constraint_type(self, identifier: str) -> CDefinitionType:
+        constraints = [it for it in self.definitions if isinstance(it, CDefinitionType) and it.identifier == identifier]
 
         # TODO: ensure only one constraint
 
         return constraints[0]
 
-    def main_constraint(self) -> MainConstraint:
-        constraints = [it for it in self.definitions if isinstance(it, MainConstraint)]
+    def constraint_main(self) -> CDefinitionMain:
+        constraints = [it for it in self.definitions if isinstance(it, CDefinitionMain)]
+
+        # TODO: ensure only one constraint
+
+        return constraints[0]
+
+    def predicate(self, identifier: str) -> PDefinition:
+        constraints = [it for it in self.definitions if isinstance(it, PDefinition) and it.identifier == identifier]
 
         # TODO: ensure only one constraint
 
