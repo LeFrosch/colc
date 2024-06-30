@@ -1,5 +1,8 @@
 import enum
+import typing
 import lark
+
+import problems
 
 
 class ASTEnum(enum.Enum):
@@ -7,12 +10,12 @@ class ASTEnum(enum.Enum):
         return cases[self]
 
     @classmethod
-    def from_token(cls, token: lark.Token):
+    def from_token(cls, token: lark.Token) -> typing.Self:
         for element in cls:
             if element.value == token:
                 return element
 
-        raise f'Unknown element in {cls.__name__}: {token}'
+        problems.report_internal(f'unknown element in {cls.__name__}: {token}')
 
 
 class Comparison(ASTEnum):

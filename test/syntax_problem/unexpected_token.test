@@ -1,0 +1,7 @@
+# INPUT
+con main() { all: }
+
+# OUTPUT
+>> con main() { all: }
+>>         ^
+fatal problem: unexpected token

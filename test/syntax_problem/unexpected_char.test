@@ -1,0 +1,7 @@
+# INPUT
+con mäin { all: }
+
+# OUTPUT
+>> con mäin { all: }
+>>      ^
+fatal problem: unexpected character
