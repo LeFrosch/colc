@@ -1,18 +1,18 @@
 import operator
 
-from colc.frontend.ast import *
-from colc.backend.scope import Scope
-from colc.backend.file import File
+from colc.frontend import *
 
-from .l_expression import LExpression, LFunction
+from .scope import Scope
+from .file import File
+from .lexpression import LExpression, LFunction
 
 
 def process_constraint(file: File) -> LExpression:
     constraint = file.constraint_main()
-    return LVisitor(file, Scope()).accept(constraint.block)
+    return ConstraintVisitor(file, Scope()).accept(constraint.block)
 
 
-class LVisitor(Visitor):
+class ConstraintVisitor(Visitor):
     def __init__(self, file: File, scope: Scope):
         self.file = file
         self.scope = scope
@@ -33,9 +33,9 @@ class LVisitor(Visitor):
         arguments = self.accept_all(call.arguments)
 
         target = self.file.predicate(call.identifier)
-        target_scope = Scope.from_call(target.parameters, arguments)
+        target_scope = Scope.from_call(call, target.parameters, arguments)
 
-        return LVisitor(self.file, target_scope).accept(target.block)
+        return ConstraintVisitor(self.file, target_scope).accept(target.block)
 
     def c_statement_with(self, stmt: CStatementWith) -> LExpression:
         return LExpression(LFunction.WITH, [
@@ -48,8 +48,8 @@ class LVisitor(Visitor):
         arguments = self.accept_all(stmt.constraint.arguments)
 
         target = self.file.constraint_type(stmt.constraint.identifier)
-        target_scope = Scope.from_call(target.parameters, arguments)
-        target_visitor = LVisitor(self.file, target_scope)
+        target_scope = Scope.from_call(stmt.constraint, target.parameters, arguments)
+        target_visitor = ConstraintVisitor(self.file, target_scope)
 
         return LExpression(LFunction.WITH, [
             target.kind.value,

@@ -2,11 +2,11 @@ import enum
 import typing
 import lark
 
-from colc.problems import internal_problem
+from colc import problems
 
 
-class ASTEnum(enum.Enum):
-    def switch[T](self, cases: dict['ASTEnum', T]) -> T:
+class Enum(enum.Enum):
+    def switch[T](self, cases: dict[typing.Self, T]) -> T:
         return cases[self]
 
     @classmethod
@@ -15,10 +15,10 @@ class ASTEnum(enum.Enum):
             if element.value == token:
                 return element
 
-        internal_problem(f'unknown element in {cls.__name__}: {token}')
+        problems.internal(f'unknown element in {cls.__name__}: {token}')
 
 
-class Comparison(ASTEnum):
+class Comparison(Enum):
     EQUAL = '=='
     NOT_EQUAL = '!='
     LESS = '<'
@@ -29,21 +29,26 @@ class Comparison(ASTEnum):
     POWER = '**='
 
 
-class Operator(ASTEnum):
+class Operator(Enum):
     PLUS = '+'
     MINUS = '-'
     MULTIPLICATION = '*'
     DIVISION = '/'
 
 
-class Quantifier(ASTEnum):
+class Quantifier(Enum):
     ALL = 'all:'
     ANY = 'any:'
     ONE = 'one:'
 
 
-class Aggregator(ASTEnum):
+class Aggregator(Enum):
     MIN = 'min'
     MAX = 'max'
     SUM = 'sum'
     AVG = 'avg'
+
+
+class Type(Enum):
+    STRING = 'str'
+    INTEGER = 'int'

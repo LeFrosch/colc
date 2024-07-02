@@ -1,10 +1,10 @@
-import lark
+from colc import problems
 
-from ..ast import *
+from colc.frontend.ast import *
 
 
 @lark.v_args(meta=True)
-class ASTTransformer(lark.Transformer):
+class Transformer(lark.Transformer):
     def start(self, meta, children):
         return children
 
@@ -138,3 +138,30 @@ class ASTTransformer(lark.Transformer):
             identifier=children[0],
             arguments=children[1:],
         )
+
+
+_parser = lark.Lark.open(
+    'grammar.lark',
+    rel_to=__file__,
+    start='start',
+    parser='lalr',
+    propagate_positions=True,
+)
+
+
+def parse(text: str) -> list[Node]:
+    transformer = Transformer()
+
+    try:
+        return transformer.transform(_parser.parse(text))
+    except lark.UnexpectedToken as e:
+        if e.token.type == '$END':
+            problems.fatal('unexpected end of input')
+        else:
+            problems.fatal('unexpected token', at_token=e.token)
+    except lark.UnexpectedCharacters as e:
+        problems.fatal('unexpected character', at_pos=(e.line, e.column))
+    except lark.UnexpectedEOF:
+        problems.fatal('unexpected end of input')
+    except Exception as e:
+        problems.internal('unexpected lark exception', e)

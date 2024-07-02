@@ -2,8 +2,7 @@ import re
 import lark
 import typeguard
 
-from .type import Type
-from .enums import Quantifier, Operator, Comparison, Aggregator
+from .enums import Quantifier, Operator, Comparison, Aggregator, Type
 
 
 def _to_snake_case(name):
@@ -14,7 +13,7 @@ def _to_snake_case(name):
     return re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
 
 
-class ASTNode:
+class Node:
     meta: lark.tree.Meta
 
     def _collect_annotations(self) -> dict[str, type]:
@@ -45,12 +44,12 @@ class ASTNode:
         return f'{self.name}[{self.meta.start_pos}:{self.meta.end_pos}]({attributes})'
 
 
-class Parameter(ASTNode):
+class Parameter(Node):
     identifier: str
     type: Type
 
 
-class Expression(ASTNode):
+class Expression(Node):
     pass
 
 
@@ -74,16 +73,16 @@ class ExpressionRef(Expression):
     identifier: lark.Token
 
 
-class Call(ASTNode):
+class Call(Node):
     identifier: lark.Token
     arguments: list[Expression]
 
 
-class CStatement(ASTNode):
+class CStatement(Node):
     pass
 
 
-class CBlock(ASTNode):
+class CBlock(Node):
     quantifier: Quantifier
     statements: list[CStatement]
 
@@ -109,11 +108,11 @@ class CStatementWith(CStatement):
     block: CBlock | None
 
 
-class PStatement(ASTNode):
+class PStatement(Node):
     pass
 
 
-class PBlock(ASTNode):
+class PBlock(Node):
     quantifier: Quantifier
     statements: list[PStatement]
 
@@ -134,7 +133,7 @@ class PStatementAggr(PStatement):
     expression: Expression
 
 
-class Definition(ASTNode):
+class Definition(Node):
     identifier: lark.Token
 
 
@@ -153,11 +152,11 @@ class PDefinition(Definition):
     block: PBlock
 
 
-class FStatement(ASTNode):
+class FStatement(Node):
     pass
 
 
-class FBlock(ASTNode):
+class FBlock(Node):
     statements: list[FStatement]
 
 

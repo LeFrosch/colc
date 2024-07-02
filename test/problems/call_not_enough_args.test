@@ -1,0 +1,13 @@
+# INPUT
+con const(list, n: int) { all:
+  size == n;
+}
+
+con main { all:
+    const() MACHINE;
+}
+
+# OUTPUT
+>>     const() MACHINE;
+>>     ^^^^^
+fatal problem: not enough arguments @ line 6

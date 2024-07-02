@@ -1,6 +1,6 @@
 import enum
 
-from colc.frontend.ast import Quantifier, Comparison, Aggregator
+from colc.frontend import Quantifier, Comparison, Aggregator
 
 
 class LFunction(enum.Enum):

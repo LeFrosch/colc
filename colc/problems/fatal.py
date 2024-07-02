@@ -57,7 +57,7 @@ class FatalProblem(Exception):
         return sb.build()
 
 
-def fatal_problem(
+def fatal(
         message: str,
         at_token: typing.Optional[lark.Token] = None,
         at_pos: typing.Optional[typing.Tuple[int, int]] = None,

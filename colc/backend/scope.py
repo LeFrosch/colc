@@ -1,4 +1,5 @@
-from colc.frontend.ast import Parameter
+from colc import problems
+from colc.frontend import Parameter, Call
 
 
 class Scope:
@@ -12,8 +13,13 @@ class Scope:
         return self._declarations[key]
 
     @staticmethod
-    def from_call(parameters: list[Parameter], arguments: list) -> 'Scope':
-        # TODO: length and type check
+    def from_call(call: Call, parameters: list[Parameter], arguments: list) -> 'Scope':
+        if len(arguments) < len(parameters):
+            problems.fatal('not enough arguments', at_token=call.identifier)
+        if len(arguments) > len(parameters):
+            problems.fatal('too many arguments', at_token=call.identifier)
+
+        # TODO: add type checking
 
         scope = Scope()
         for (param, arg) in zip(parameters, arguments):

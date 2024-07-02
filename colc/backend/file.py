@@ -1,7 +1,7 @@
 import lark
 
-from colc.problems import fatal_problem
-from colc.frontend.ast import ASTNode, CDefinitionType, CDefinitionMain, PDefinition, Definition
+from colc import problems
+from colc.frontend import Node, CDefinitionType, CDefinitionMain, PDefinition, Definition
 
 
 class Pool:
@@ -20,15 +20,15 @@ class Pool:
 
 
 class File:
-    def __init__(self, definitions: list[ASTNode]):
+    def __init__(self, definitions: list[Node]):
         self.definitions = definitions
         self.constants_pool = Pool()
 
     def _report_problems(self, identifier: lark.Token, definitions: list[Definition]):
         if len(definitions) == 0:
-            fatal_problem('undefined identifier', at_token=identifier)
+            problems.fatal('undefined identifier', at_token=identifier)
         if len(definitions) > 1:
-            fatal_problem('already defined', at_token=definitions[1].identifier)
+            problems.fatal('already defined', at_token=definitions[1].identifier)
 
     def constraint_type(self, identifier: lark.Token) -> CDefinitionType:
         constraints = [it for it in self.definitions if isinstance(it, CDefinitionType) and it.identifier == identifier]
@@ -40,9 +40,9 @@ class File:
         constraints = [it for it in self.definitions if isinstance(it, CDefinitionMain)]
 
         if len(constraints) == 0:
-            fatal_problem('main constraint is undefined')
+            problems.fatal('main constraint is undefined')
         elif len(constraints) > 1:
-            fatal_problem('already defined', at_token=constraints[1].identifier)
+            problems.fatal('already defined', at_token=constraints[1].identifier)
 
         return constraints[0]
 

@@ -3,13 +3,10 @@ import unittest
 from utils import FileTestMeta
 
 from colc.frontend import parse
-from colc.backend.file import File
-from colc.backend.constraint import process_constraint
+from colc.backend import process
 
 
 class ConstraintTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
     def do_test(self, input: str, output: str):
-        file = File(parse(input))
-        encoded = process_constraint(file)
-
-        self.assertEqual(output, repr(encoded))
+        obj = process(parse(input))
+        self.assertEqual(output, repr(obj.constraint))

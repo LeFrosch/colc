@@ -1,2 +1,2 @@
-from .internal import InternalProblem, internal_problem
-from .fatal import FatalProblem, fatal_problem
+from .internal import InternalProblem, internal
+from .fatal import FatalProblem, fatal
