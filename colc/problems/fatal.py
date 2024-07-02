@@ -1,7 +1,7 @@
 import dataclasses
 import typing
 
-import lark
+from colc.frontend.text import Location
 
 from .string_builder import StringBuilder
 
@@ -18,66 +18,38 @@ class FatalProblem(Exception):
     Raised in case of fatal problem. Should only be raised in the case of unrecoverable input error.
     """
 
-    def __init__(self, message: str, location: SourceLocation | None):
+    def __init__(self, message: str, locations: list[Location]):
         super().__init__(message)
-        self.location = location
+        self.locations = locations
 
-    def _render_marker(self, sb: StringBuilder, text: str):
-        if self.location is None:
-            return
-        lines = text.splitlines()
+    def _render_location(self, sb: StringBuilder, range: Location):
+        text = range.file.text
 
-        if self.location.line <= 0 or self.location.line > len(lines):
-            return
-        line = lines[self.location.line - 1]
+        start = range.start_position
+        end = range.end_position
 
-        if self.location.column < 0 or self.location.column > len(line):
-            return
-        column = self.location.column - 1
-        length = len(line) - column
+        # TODO: support multi-line ranges
+        assert start.line == end.line
 
-        if self.location.length > 0:
-            length = min(len(line) - column, self.location.length)
+        line = text.splitlines()[start.line]
+        length = max(1, end.column - start.column)
+        marker = ' ' * start.column + '^' * length
 
-        marker = ' ' * column + '^' * length
-
+        sb.write_line(f'{range.file.path} @ line {start.line + 1}')
         sb.write_line('>> ' + line)
         sb.write_line('>> ' + marker)
 
-    def render(self, text: str) -> str:
+    def render(self) -> str:
         sb = StringBuilder()
 
-        line = ''
-        if self.location is not None:
-            line = f' @ line {self.location.line}'
+        for range in self.locations:
+            self._render_location(sb, range)
 
-        self._render_marker(sb, text)
-        sb.write_line(f'fatal problem: {str(self)}{line}')
+        sb.write_line(f'fatal problem: {str(self)}')
 
         return sb.build()
 
 
-def fatal(
-        message: str,
-        at_token: typing.Optional[lark.Token] = None,
-        at_pos: typing.Optional[typing.Tuple[int, int]] = None,
-) -> typing.NoReturn:
-    location = None
-
-    if at_token is not None:
-        assert at_token.line == at_token.end_line
-
-        location = SourceLocation(
-            line=at_token.line,
-            column=at_token.column,
-            length=len(str(at_token))
-        )
-
-    if at_pos is not None:
-        location = SourceLocation(
-            line=at_pos[0],
-            column=at_pos[1],
-            length=1,
-        )
-
-    raise FatalProblem(message, location)
+def fatal(message: str, *args) -> typing.NoReturn:
+    locations = [it if isinstance(it, Location) else it.location for it in args]
+    raise FatalProblem(message, locations)

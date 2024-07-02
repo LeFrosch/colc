@@ -24,10 +24,13 @@ class ConstraintVisitor(Visitor):
         return self.c_block(stmt.block)
 
     def c_statement_attr(self, stmt: CStatementAttr) -> LExpression:
-        return LExpression(LFunction.from_comparison(stmt.comparison), [
-            LExpression(LFunction.ATTR, [stmt.identifier.value]),
-            self.accept(stmt.expression),
-        ])
+        return LExpression(
+            LFunction.from_comparison(stmt.comparison),
+            [
+                LExpression(LFunction.ATTR, [stmt.identifier.name]),
+                self.accept(stmt.expression),
+            ],
+        )
 
     def _predicate(self, call: Call) -> LExpression:
         arguments = self.accept_all(call.arguments)
@@ -38,11 +41,14 @@ class ConstraintVisitor(Visitor):
         return ConstraintVisitor(self.file, target_scope).accept(target.block)
 
     def c_statement_with(self, stmt: CStatementWith) -> LExpression:
-        return LExpression(LFunction.WITH, [
-            stmt.kind.value,
-            self._predicate(stmt.predicate),
-            self.accept(stmt.block),
-        ])
+        return LExpression(
+            LFunction.WITH,
+            [
+                stmt.kind.name,
+                self._predicate(stmt.predicate),
+                self.accept(stmt.block),
+            ],
+        )
 
     def c_statement_call(self, stmt: CStatementCall) -> LExpression:
         arguments = self.accept_all(stmt.constraint.arguments)
@@ -51,11 +57,14 @@ class ConstraintVisitor(Visitor):
         target_scope = Scope.from_call(stmt.constraint, target.parameters, arguments)
         target_visitor = ConstraintVisitor(self.file, target_scope)
 
-        return LExpression(LFunction.WITH, [
-            target.kind.value,
-            self._predicate(stmt.predicate),
-            target_visitor.accept(target.block),
-        ])
+        return LExpression(
+            LFunction.WITH,
+            [
+                target.kind.name,
+                self._predicate(stmt.predicate),
+                target_visitor.accept(target.block),
+            ],
+        )
 
     def p_block(self, block: PBlock) -> LExpression:
         return LExpression(LFunction.from_quantifier(block.quantifier), self.accept_all(block.statements))
@@ -64,24 +73,29 @@ class ConstraintVisitor(Visitor):
         return self.p_block(stmt.block)
 
     def p_statement_size(self, stmt: PStatementSize) -> LExpression:
-        return LExpression(LFunction.from_comparison(stmt.comparison), [
-            LExpression(LFunction.LIST_SIZE, []),
-            self.accept(stmt.expression)
-        ])
+        return LExpression(
+            LFunction.from_comparison(stmt.comparison),
+            [LExpression(LFunction.LIST_SIZE, []), self.accept(stmt.expression)],
+        )
 
     def p_statement_aggr(self, stmt: PStatementAggr) -> LExpression:
-        return LExpression(LFunction.from_comparison(stmt.comparison), [
-            LExpression(LFunction.from_aggregator(stmt.aggregator), [stmt.kind.value]),
-            self.accept(stmt.expression),
-        ])
+        return LExpression(
+            LFunction.from_comparison(stmt.comparison),
+            [
+                LExpression(LFunction.from_aggregator(stmt.aggregator), [stmt.kind.name]),
+                self.accept(stmt.expression),
+            ],
+        )
 
     def expression_binary(self, expr: ExpressionBinary) -> LExpression:
-        op = expr.operator.switch({
-            Operator.PLUS: operator.add,
-            Operator.MINUS: operator.sub,
-            Operator.MULTIPLICATION: operator.mul,
-            Operator.DIVISION: operator.truediv,
-        })
+        op = expr.operator.switch(
+            {
+                Operator.PLUS: operator.add,
+                Operator.MINUS: operator.sub,
+                Operator.MULTIPLICATION: operator.mul,
+                Operator.DIVISION: operator.truediv,
+            }
+        )
 
         return op(self.accept(expr.left), self.accept(expr.right))
 

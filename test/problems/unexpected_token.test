@@ -2,6 +2,7 @@
 con main() { all: }
 
 # OUTPUT
+test.col @ line 1
 >> con main() { all: }
 >>         ^
-fatal problem: unexpected token @ line 1
+fatal problem: unexpected token

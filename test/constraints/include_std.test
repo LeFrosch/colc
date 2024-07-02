@@ -1,0 +1,10 @@
+# INPUT
+/include/ "std";
+
+con main { all:
+  min(4) CORE;
+  const(1) MEMORY;
+}
+
+# OUTPUT
+[ALL, [WITH, 'CORE', [ALL, [GREATER_EQUAL, [LIST_SIZE], 4]]], [WITH, 'MEMORY', [ALL, [EQUAL, [LIST_SIZE], 1]]]]

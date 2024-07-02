@@ -1,7 +1,7 @@
 import re
-import lark
 import typeguard
 
+from .text import Location
 from .enums import Quantifier, Operator, Comparison, Aggregator, Type
 
 
@@ -14,7 +14,7 @@ def _to_snake_case(name):
 
 
 class Node:
-    meta: lark.tree.Meta
+    location: Location
 
     def _collect_annotations(self) -> dict[str, type]:
         annotations = {}
@@ -25,7 +25,6 @@ class Node:
 
     def __new__(cls, **kwargs):
         obj = object.__new__(cls)
-        obj.name = cls.__name__
         obj.rule = _to_snake_case(cls.__name__)
 
         return obj
@@ -40,12 +39,20 @@ class Node:
                 raise TypeError(f'Filed {name} is of type {t}, but got: {value}')
 
     def __repr__(self):
-        attributes = ', '.join(f'{k}={getattr(self, k)!r}' for k in list(self._collect_annotations()) if k != 'meta')
-        return f'{self.name}[{self.meta.start_pos}:{self.meta.end_pos}]({attributes})'
+        attrs = ', '.join(f'{k}={getattr(self, k)!r}' for k in list(self._collect_annotations()) if k != 'location')
+        return f'{self.__class__.__name__}[{self.location.start}:{self.location.end}]({attrs})'
+
+
+class Identifier(Node):
+    name: str
+
+
+class String(Node):
+    value: str
 
 
 class Parameter(Node):
-    identifier: str
+    identifier: Identifier
     type: Type
 
 
@@ -70,11 +77,11 @@ class ExpressionLiteral(Expression):
 
 
 class ExpressionRef(Expression):
-    identifier: lark.Token
+    identifier: Identifier
 
 
 class Call(Node):
-    identifier: lark.Token
+    identifier: Identifier
     arguments: list[Expression]
 
 
@@ -92,7 +99,7 @@ class CStatementBlock(CStatement):
 
 
 class CStatementAttr(CStatement):
-    identifier: lark.Token
+    identifier: Identifier
     comparison: Comparison
     expression: Expression
 
@@ -104,7 +111,7 @@ class CStatementCall(CStatement):
 
 class CStatementWith(CStatement):
     predicate: Call
-    kind: lark.Token
+    kind: Identifier
     block: CBlock | None
 
 
@@ -128,17 +135,17 @@ class PStatementSize(PStatement):
 
 class PStatementAggr(PStatement):
     aggregator: Aggregator
-    kind: lark.Token
+    kind: Identifier
     comparison: Comparison
     expression: Expression
 
 
 class Definition(Node):
-    identifier: lark.Token
+    identifier: Identifier
 
 
 class CDefinitionType(Definition):
-    kind: lark.Token
+    kind: Identifier
     parameters: list[Parameter]
     block: CBlock
 
@@ -165,7 +172,7 @@ class FStatementBlock(FStatement):
 
 
 class FStatementAssign(FStatement):
-    identifier: lark.Token
+    identifier: Identifier
     expression: Expression
 
 
@@ -174,6 +181,10 @@ class FStatementReturn(FStatement):
 
 
 class FDefinition(Definition):
-    identifier: lark.Token
+    identifier: Identifier
     parameters: list[Parameter]
     block: FBlock
+
+
+class Include(Node):
+    path: String

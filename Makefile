@@ -6,7 +6,7 @@
 	.venv/bin/pip3 install hatch hatch-requirements-txt
 
 test: .venv/bin/activate
-	.venv/bin/python3 -m unittest discover -s test -v
+	.venv/bin/python3 -m unittest discover -v
 
 install: .venv/bin/hatch
 	.venv/bin/pip3 install .

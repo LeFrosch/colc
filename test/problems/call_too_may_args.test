@@ -8,6 +8,7 @@ con main { all:
 }
 
 # OUTPUT
+test.col @ line 6
 >>     const(1, 2, 3) MACHINE;
 >>     ^^^^^
-fatal problem: too many arguments @ line 6
+fatal problem: too many arguments

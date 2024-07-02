@@ -1,7 +1,7 @@
-import lark
+import typing
 
 from colc import problems
-from colc.frontend import Node, CDefinitionType, CDefinitionMain, PDefinition, Definition
+from colc.frontend import CDefinitionType, CDefinitionMain, PDefinition, Definition, TextFile, Identifier
 
 
 class Pool:
@@ -20,37 +20,52 @@ class Pool:
 
 
 class File:
-    def __init__(self, definitions: list[Node]):
+    def __init__(self, source: TextFile, includes: list['File'], definitions: list[Definition]):
+        self.source = source
+        self.includes = includes
         self.definitions = definitions
-        self.constants_pool = Pool()
 
-    def _report_problems(self, identifier: lark.Token, definitions: list[Definition]):
-        if len(definitions) == 0:
-            problems.fatal('undefined identifier', at_token=identifier)
-        if len(definitions) > 1:
-            problems.fatal('already defined', at_token=definitions[1].identifier)
+    def _resolve[T](self, predicate: typing.Callable[[T], bool]) -> typing.Optional[T]:
+        frontier = [self]
 
-    def constraint_type(self, identifier: lark.Token) -> CDefinitionType:
-        constraints = [it for it in self.definitions if isinstance(it, CDefinitionType) and it.identifier == identifier]
-        self._report_problems(identifier, constraints)
+        while len(frontier) > 0:
+            file = frontier.pop()
+            frontier.extend(file.includes)
 
-        return constraints[0]
+            for definition in file.definitions:
+                if predicate(definition):
+                    return definition
+
+        return None
+
+    def constraint_type(self, identifier: Identifier) -> CDefinitionType:
+        definition = self._resolve(
+            lambda it: isinstance(it, CDefinitionType) and it.identifier.name == identifier.name
+        )
+
+        if definition is None:
+            problems.fatal('undefined identifier', identifier)
+
+        return definition
 
     def constraint_main(self) -> CDefinitionMain:
-        constraints = [it for it in self.definitions if isinstance(it, CDefinitionMain)]
+        definition = self._resolve(lambda it: isinstance(it, CDefinitionMain))
 
-        if len(constraints) == 0:
-            problems.fatal('main constraint is undefined')
-        elif len(constraints) > 1:
-            problems.fatal('already defined', at_token=constraints[1].identifier)
+        if definition is None:
+            problems.fatal('undefined main constraint')
 
-        return constraints[0]
+        return definition
 
-    def predicate(self, identifier: lark.Token) -> PDefinition:
-        constraints = [it for it in self.definitions if isinstance(it, PDefinition) and it.identifier == identifier]
-        self._report_problems(identifier, constraints)
+    def predicate(self, identifier: Identifier) -> PDefinition:
+        definition = self._resolve(
+            lambda it: isinstance(it, PDefinition) and it.identifier.name == identifier.name
+        )
 
-        return constraints[0]
+        if definition is None:
+            problems.fatal('undefined identifier', identifier)
+
+        return definition
 
     def intern_constant(self, constant: int | str) -> int:
-        return self.constants_pool.intern(constant)
+        return 0
+

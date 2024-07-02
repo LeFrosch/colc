@@ -28,33 +28,39 @@ class LFunction(enum.Enum):
 
     @staticmethod
     def from_quantifier(quantifier: Quantifier) -> 'LFunction':
-        return quantifier.switch({
-            Quantifier.ALL: LFunction.ALL,
-            Quantifier.ANY: LFunction.ANY,
-            Quantifier.ONE: LFunction.ONE,
-        })
+        return quantifier.switch(
+            {
+                Quantifier.ALL: LFunction.ALL,
+                Quantifier.ANY: LFunction.ANY,
+                Quantifier.ONE: LFunction.ONE,
+            }
+        )
 
     @staticmethod
     def from_comparison(comparison: Comparison) -> 'LFunction':
-        return comparison.switch({
-            Comparison.EQUAL: LFunction.EQUAL,
-            Comparison.NOT_EQUAL: LFunction.NOT_EQUAL,
-            Comparison.LESS: LFunction.LESS,
-            Comparison.LESS_EQUAL: LFunction.LESS_EQUAL,
-            Comparison.GREATER: LFunction.GREATER,
-            Comparison.GREATER_EQUAL: LFunction.GREATER_EQUAL,
-            Comparison.MULTIPLE: LFunction.MULTIPLE,
-            Comparison.POWER: LFunction.POWER,
-        })
+        return comparison.switch(
+            {
+                Comparison.EQUAL: LFunction.EQUAL,
+                Comparison.NOT_EQUAL: LFunction.NOT_EQUAL,
+                Comparison.LESS: LFunction.LESS,
+                Comparison.LESS_EQUAL: LFunction.LESS_EQUAL,
+                Comparison.GREATER: LFunction.GREATER,
+                Comparison.GREATER_EQUAL: LFunction.GREATER_EQUAL,
+                Comparison.MULTIPLE: LFunction.MULTIPLE,
+                Comparison.POWER: LFunction.POWER,
+            }
+        )
 
     @staticmethod
     def from_aggregator(aggregator: Aggregator) -> 'LFunction':
-        return aggregator.switch({
-            Aggregator.MIN: LFunction.LIST_MIN,
-            Aggregator.MAX: LFunction.LIST_MAX,
-            Aggregator.SUM: LFunction.LIST_SUM,
-            Aggregator.AVG: LFunction.LIST_AVG,
-        })
+        return aggregator.switch(
+            {
+                Aggregator.MIN: LFunction.LIST_MIN,
+                Aggregator.MAX: LFunction.LIST_MAX,
+                Aggregator.SUM: LFunction.LIST_SUM,
+                Aggregator.AVG: LFunction.LIST_AVG,
+            }
+        )
 
 
 class LExpression:

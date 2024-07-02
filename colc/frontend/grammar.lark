@@ -64,4 +64,6 @@ f_block: "{" f_statement* "}"
   | "con" IDENTIFIER "(" "list" _c_list{parameter}? ")" p_block    -> p_definition
   | "fun" IDENTIFIER "(" _list{parameter} ")" f_block              -> f_definition
 
-start: definition*
+include: "/include/" STRING ";"
+
+start: (include | definition)*

@@ -1,6 +1,6 @@
-from colc.__about__ import __version__
+from .__about__ import __version__
 
-from .lexpression import LExpression
+from colc.backend import LExpression
 
 
 class Object:

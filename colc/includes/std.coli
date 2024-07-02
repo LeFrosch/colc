@@ -1,0 +1,16 @@
+con min(list, n: int) { all:
+  size >= n;
+}
+
+con max(list, n: int) { all:
+  size <= n;
+}
+
+con range(list, a: int, b: int) { all:
+  size >= a;
+  size <= b;
+}
+
+con const(list, n: int) { all:
+  size == n;
+}

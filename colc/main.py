@@ -1,10 +1,13 @@
 import argparse
 import sys
+import pickle
 
 from colc.frontend import parse
+from colc.backend import process
 from colc.problems import InternalProblem, FatalProblem
 
 from .__about__ import __version__, __description__
+
 
 
 class Args(argparse.Namespace):
@@ -17,7 +20,7 @@ def parse_arguments() -> Args:
 
     parser.add_argument(
         '--version',
-        type=bool,
+        action='store_true',
         help='print version and exit',
     )
 
@@ -26,6 +29,7 @@ def parse_arguments() -> Args:
         type=str,
         help='path to the input file',
         dest='input_file',
+        required=True,
     )
 
     parser.add_argument(
@@ -33,6 +37,7 @@ def parse_arguments() -> Args:
         type=str,
         help='path to the output file',
         dest='output_file',
+        required=True,
     )
 
     return parser.parse_args(namespace=Args())
@@ -50,8 +55,14 @@ def main():
         text = f.read()
 
     try:
-        parse(text)
+        obj = process(parse(text))
     except InternalProblem as e:
         print(e.render(), file=sys.stderr)
+        return
     except FatalProblem as e:
         print(e.render(text), file=sys.stderr)
+        return
+
+    # TODO: add error handling for writing
+    with open(args.output_file, 'wb') as f:
+        pickle.dump(obj, f)

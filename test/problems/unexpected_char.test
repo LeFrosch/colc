@@ -2,6 +2,7 @@
 con mäin { all: }
 
 # OUTPUT
+test.col @ line 1
 >> con mäin { all: }
 >>      ^
-fatal problem: unexpected character @ line 1
+fatal problem: unexpected character
