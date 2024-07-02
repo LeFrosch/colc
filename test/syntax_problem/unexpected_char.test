@@ -4,4 +4,4 @@ con mäin { all: }
 # OUTPUT
 >> con mäin { all: }
 >>      ^
-fatal problem: unexpected character
+fatal problem: unexpected character @ line 1

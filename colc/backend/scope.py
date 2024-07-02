@@ -1,4 +1,4 @@
-from frontend.ast import Parameter
+from colc.frontend.ast import Parameter
 
 
 class Scope:

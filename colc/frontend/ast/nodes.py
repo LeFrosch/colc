@@ -71,11 +71,11 @@ class ExpressionLiteral(Expression):
 
 
 class ExpressionRef(Expression):
-    identifier: str
+    identifier: lark.Token
 
 
 class Call(ASTNode):
-    identifier: str
+    identifier: lark.Token
     arguments: list[Expression]
 
 
@@ -93,7 +93,7 @@ class CStatementBlock(CStatement):
 
 
 class CStatementAttr(CStatement):
-    identifier: str
+    identifier: lark.Token
     comparison: Comparison
     expression: Expression
 
@@ -105,7 +105,7 @@ class CStatementCall(CStatement):
 
 class CStatementWith(CStatement):
     predicate: Call
-    kind: str
+    kind: lark.Token
     block: CBlock | None
 
 
@@ -129,18 +129,17 @@ class PStatementSize(PStatement):
 
 class PStatementAggr(PStatement):
     aggregator: Aggregator
-    kind: str
+    kind: lark.Token
     comparison: Comparison
     expression: Expression
 
 
 class Definition(ASTNode):
-    pass
+    identifier: lark.Token
 
 
 class CDefinitionType(Definition):
-    identifier: str
-    kind: str
+    kind: lark.Token
     parameters: list[Parameter]
     block: CBlock
 
@@ -150,7 +149,6 @@ class CDefinitionMain(Definition):
 
 
 class PDefinition(Definition):
-    identifier: str
     parameters: list[Parameter]
     block: PBlock
 
@@ -168,7 +166,7 @@ class FStatementBlock(FStatement):
 
 
 class FStatementAssign(FStatement):
-    identifier: str
+    identifier: lark.Token
     expression: Expression
 
 
@@ -177,6 +175,6 @@ class FStatementReturn(FStatement):
 
 
 class FDefinition(Definition):
-    identifier: str
+    identifier: lark.Token
     parameters: list[Parameter]
     block: FBlock

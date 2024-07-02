@@ -26,5 +26,5 @@ class InternalProblem(Exception):
         return sb.build()
 
 
-def report_internal(message: str, cause: Exception | None = None) -> typing.NoReturn:
+def internal_problem(message: str, cause: Exception | None = None) -> typing.NoReturn:
     raise InternalProblem(message, cause)

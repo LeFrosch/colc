@@ -4,4 +4,4 @@ con main() { all: }
 # OUTPUT
 >> con main() { all: }
 >>         ^
-fatal problem: unexpected token
+fatal problem: unexpected token @ line 1

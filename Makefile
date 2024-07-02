@@ -5,13 +5,16 @@ OUTPUT='/dev/stdout'
 	python3 -m venv .venv
 	.venv/bin/pip3 install -r requirements.txt
 
-run: .venv/bin/activate
-	.venv/bin/python3 main/main.py --input $(INPUT) --output $(OUTPUT)
+.venv/bin/hatch: .venv/bin/activate
+	.venv/bin/pip3 install hatch hatch-requirements-txt
 
 test: .venv/bin/activate
-	PYTHONPATH=main .venv/bin/python3 -m unittest discover -s test -v
+	.venv/bin/python3 -m unittest discover -s test -v
+
+install: .venv/bin/hatch
+	.venv/bin/pip3 install .
 
 clean:
 	find . -name .venv -prune -o -name __pycache__ | xargs rm -rf
 
-.PHONY: run clean test
+.PHONY: clean test install

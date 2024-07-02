@@ -2,7 +2,7 @@ import enum
 import typing
 import lark
 
-import problems
+from colc.problems import internal_problem
 
 
 class ASTEnum(enum.Enum):
@@ -15,7 +15,7 @@ class ASTEnum(enum.Enum):
             if element.value == token:
                 return element
 
-        problems.report_internal(f'unknown element in {cls.__name__}: {token}')
+        internal_problem(f'unknown element in {cls.__name__}: {token}')
 
 
 class Comparison(ASTEnum):

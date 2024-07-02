@@ -11,15 +11,15 @@ class ASTTransformer(lark.Transformer):
     def parameter(self, meta, children):
         return Parameter(
             meta=meta,
-            identifier=str(children[0]),
+            identifier=children[0],
             type=Type.from_token(children[1]),
         )
 
     def c_definition_type(self, meta, children):
         return CDefinitionType(
             meta=meta,
-            identifier=str(children[0]),
-            kind=str(children[1]),
+            identifier=children[0],
+            kind=children[1],
             parameters=children[2:-1],
             block=children[-1],
         )
@@ -27,7 +27,8 @@ class ASTTransformer(lark.Transformer):
     def c_definition_main(self, meta, children):
         return CDefinitionMain(
             meta=meta,
-            block=children[0],
+            identifier=children[0],
+            block=children[1],
         )
 
     def c_block(self, meta, children):
@@ -46,7 +47,7 @@ class ASTTransformer(lark.Transformer):
     def c_statement_attr(self, meta, children):
         return CStatementAttr(
             meta=meta,
-            identifier=str(children[0]),
+            identifier=children[0],
             comparison=Comparison.from_token(children[1]),
             expression=children[2]
         )
@@ -62,14 +63,14 @@ class ASTTransformer(lark.Transformer):
         return CStatementWith(
             meta=meta,
             predicate=children[0],
-            kind=str(children[1]),
+            kind=children[1],
             block=children[2]
         )
 
     def p_definition(self, meta, children):
         return PDefinition(
             meta=meta,
-            identifier=str(children[0]),
+            identifier=children[0],
             parameters=children[1:-1],
             block=children[-1],
         )
@@ -98,7 +99,7 @@ class ASTTransformer(lark.Transformer):
         return PStatementAggr(
             meta=meta,
             aggregator=Aggregator.from_token(children[0]),
-            kind=str(children[1]),
+            kind=children[1],
             comparison=Comparison.from_token(children[2]),
             expression=children[3],
         )
@@ -120,7 +121,7 @@ class ASTTransformer(lark.Transformer):
     def expression_ref(self, meta, children):
         return ExpressionRef(
             meta=meta,
-            identifier=str(children[0]),
+            identifier=children[0],
         )
 
     def expression_mul(self, meta, children):
@@ -134,6 +135,6 @@ class ASTTransformer(lark.Transformer):
     def call(self, meta, children):
         return Call(
             meta=meta,
-            identifier=str(children[0]),
+            identifier=children[0],
             arguments=children[1:],
         )

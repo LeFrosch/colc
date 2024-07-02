@@ -22,5 +22,8 @@ jobs:
     - name: Setup venv
       run: make .venv/bin/activate
 
-    - name: Run tests
+    - name: Make test
       run: make test
+
+    - name: Make install
+      run: make install

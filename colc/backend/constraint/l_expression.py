@@ -1,6 +1,6 @@
 import enum
 
-from frontend.ast import Quantifier, Comparison, Aggregator
+from colc.frontend.ast import Quantifier, Comparison, Aggregator
 
 
 class LFunction(enum.Enum):
@@ -61,5 +61,19 @@ class LExpression:
     def __init__(self, name: LFunction, args: list):
         self.elements = [name, *filter(lambda x: x is not None, args)]
 
+    @property
+    def function(self) -> LFunction:
+        return self.elements[0]
+
+    @property
+    def arguments(self) -> list:
+        return self.elements[1:]
+
     def __repr__(self):
         return f'[{', '.join(repr(e) for e in self.elements)}]'
+
+    def __getstate__(self):
+        return self.elements
+
+    def __setstate__(self, state):
+        self.elements = state

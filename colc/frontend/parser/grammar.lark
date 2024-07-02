@@ -10,6 +10,7 @@ LETTER_UPPER_CASE: "A".."Z"
 LETTER_LOWER_CASE: "a".."z"
 LETTER: LETTER_UPPER_CASE | LETTER_LOWER_CASE | DIGIT
 
+MAIN: "main"
 TYPE: "str" | "int" | "bool"
 NODE_KIND: LETTER_UPPER_CASE LETTER*
 IDENTIFIER: LETTER_LOWER_CASE LETTER*
@@ -58,7 +59,7 @@ c_block: "{" QUANTIFIER c_statement* "}"
 p_block: "{" QUANTIFIER p_statement* "}"
 f_block: "{" f_statement* "}"
 
-?definition: "con" "main" c_block                                  -> c_definition_main
+?definition: "con" MAIN c_block                                    -> c_definition_main
   | "con" IDENTIFIER "(" NODE_KIND _c_list{parameter}? ")" c_block -> c_definition_type
   | "con" IDENTIFIER "(" "list" _c_list{parameter}? ")" p_block    -> p_definition
   | "fun" IDENTIFIER "(" _list{parameter} ")" f_block              -> f_definition

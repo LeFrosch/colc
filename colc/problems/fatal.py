@@ -13,22 +13,6 @@ class SourceLocation:
     length: int
 
 
-def location_from_token(token: lark.Token) -> SourceLocation:
-    return SourceLocation(
-        line=token.line,
-        column=token.column,
-        length=len(str(token))
-    )
-
-
-def location_from_pos(line: int, column: int) -> SourceLocation:
-    return SourceLocation(
-        line=line,
-        column=column,
-        length=1,
-    )
-
-
 class FatalProblem(Exception):
     """
     Raised in case of fatal problem. Should only be raised in the case of unrecoverable input error.
@@ -50,7 +34,10 @@ class FatalProblem(Exception):
         if self.location.column < 0 or self.location.column > len(line):
             return
         column = self.location.column - 1
-        length = min(len(line) - column, max(1, self.location.length))
+        length = len(line) - column
+
+        if self.location.length > 0:
+            length = min(len(line) - column, self.location.length)
 
         marker = ' ' * column + '^' * length
 
@@ -60,11 +47,37 @@ class FatalProblem(Exception):
     def render(self, text: str) -> str:
         sb = StringBuilder()
 
+        line = ''
+        if self.location is not None:
+            line = f' @ line {self.location.line}'
+
         self._render_marker(sb, text)
-        sb.write_line(f'fatal problem: {str(self)}')
+        sb.write_line(f'fatal problem: {str(self)}{line}')
 
         return sb.build()
 
 
-def report_fatal(message: str, location: SourceLocation | None = None) -> typing.NoReturn:
+def fatal_problem(
+        message: str,
+        at_token: typing.Optional[lark.Token] = None,
+        at_pos: typing.Optional[typing.Tuple[int, int]] = None,
+) -> typing.NoReturn:
+    location = None
+
+    if at_token is not None:
+        assert at_token.line == at_token.end_line
+
+        location = SourceLocation(
+            line=at_token.line,
+            column=at_token.column,
+            length=len(str(at_token))
+        )
+
+    if at_pos is not None:
+        location = SourceLocation(
+            line=at_pos[0],
+            column=at_pos[1],
+            length=1,
+        )
+
     raise FatalProblem(message, location)

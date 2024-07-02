@@ -1,17 +1,15 @@
 import operator
 
-from frontend.ast import *
+from colc.frontend.ast import *
+from colc.backend.scope import Scope
+from colc.backend.file import File
 
-from ..scope import Scope
-from ..file import File
 from .l_expression import LExpression, LFunction
 
 
-def encode_main_constraint(file: File) -> LExpression:
+def process_constraint(file: File) -> LExpression:
     constraint = file.constraint_main()
-    visitor = LVisitor(file, Scope())
-
-    return visitor.accept(constraint.block)
+    return LVisitor(file, Scope()).accept(constraint.block)
 
 
 class LVisitor(Visitor):
@@ -27,7 +25,7 @@ class LVisitor(Visitor):
 
     def c_statement_attr(self, stmt: CStatementAttr) -> LExpression:
         return LExpression(LFunction.from_comparison(stmt.comparison), [
-            LExpression(LFunction.ATTR, [stmt.identifier]),
+            LExpression(LFunction.ATTR, [stmt.identifier.value]),
             self.accept(stmt.expression),
         ])
 
@@ -41,7 +39,7 @@ class LVisitor(Visitor):
 
     def c_statement_with(self, stmt: CStatementWith) -> LExpression:
         return LExpression(LFunction.WITH, [
-            stmt.kind,
+            stmt.kind.value,
             self._predicate(stmt.predicate),
             self.accept(stmt.block),
         ])
@@ -54,7 +52,7 @@ class LVisitor(Visitor):
         target_visitor = LVisitor(self.file, target_scope)
 
         return LExpression(LFunction.WITH, [
-            target.kind,
+            target.kind.value,
             self._predicate(stmt.predicate),
             target_visitor.accept(target.block),
         ])
@@ -73,7 +71,7 @@ class LVisitor(Visitor):
 
     def p_statement_aggr(self, stmt: PStatementAggr) -> LExpression:
         return LExpression(LFunction.from_comparison(stmt.comparison), [
-            LExpression(LFunction.from_aggregator(stmt.aggregator), [stmt.kind]),
+            LExpression(LFunction.from_aggregator(stmt.aggregator), [stmt.kind.value]),
             self.accept(stmt.expression),
         ])
 
