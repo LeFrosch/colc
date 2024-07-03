@@ -1,7 +1,9 @@
 import lark
 
-from .text import TextFile
-from .ast import *
+from colc.common import TextFile, Location
+
+from . import _ast as ast
+from ._enums import Type, Quantifier, Comparison, Aggregator, Operator
 
 
 @lark.v_args(meta=True)
@@ -23,37 +25,36 @@ class Transformer(lark.Transformer):
             end=token.end_pos,
         )
 
-    def identifier_from_token(self, token: lark.Token) -> Identifier:
-        return Identifier(
+    def identifier_from_token(self, token: lark.Token) -> ast.Identifier:
+        return ast.Identifier(
             location=self.location_from_token(token),
             name=token.value,
         )
 
-    def string_from_token(self, token: lark.Token) -> String:
-        return String(
+    def string_from_token(self, token: lark.Token) -> ast.String:
+        return ast.String(
             location=self.location_from_token(token),
             value=token.value[1:-1],
         )
-
 
     def start(self, meta, children):
         return children
 
     def include(self, meta, children):
-        return Include(
+        return ast.Include(
             location=self.location_from_meta(meta),
             path=self.string_from_token(children[0]),
         )
 
     def parameter(self, meta, children):
-        return Parameter(
+        return ast.Parameter(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
             type=Type.from_token(children[1]),
         )
 
     def c_definition_type(self, meta, children):
-        return CDefinitionType(
+        return ast.CDefinitionType(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
             kind=self.identifier_from_token(children[1]),
@@ -62,27 +63,27 @@ class Transformer(lark.Transformer):
         )
 
     def c_definition_main(self, meta, children):
-        return CDefinitionMain(
+        return ast.CDefinitionMain(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
             block=children[1],
         )
 
     def c_block(self, meta, children):
-        return CBlock(
+        return ast.CBlock(
             location=self.location_from_meta(meta),
             quantifier=Quantifier.from_token(children[0]),
             statements=children[1:],
         )
 
     def c_statement_block(self, meta, children):
-        return CStatementBlock(
+        return ast.CStatementBlock(
             location=self.location_from_meta(meta),
             block=children[0],
         )
 
     def c_statement_attr(self, meta, children):
-        return CStatementAttr(
+        return ast.CStatementAttr(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
             comparison=Comparison.from_token(children[1]),
@@ -90,14 +91,14 @@ class Transformer(lark.Transformer):
         )
 
     def c_statement_call(self, meta, children):
-        return CStatementCall(
+        return ast.CStatementCall(
             location=self.location_from_meta(meta),
             predicate=children[0],
             constraint=children[1],
         )
 
     def c_statement_with(self, meta, children):
-        return CStatementWith(
+        return ast.CStatementWith(
             location=self.location_from_meta(meta),
             predicate=children[0],
             kind=self.identifier_from_token(children[1]),
@@ -105,7 +106,7 @@ class Transformer(lark.Transformer):
         )
 
     def p_definition(self, meta, children):
-        return PDefinition(
+        return ast.PDefinition(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
             parameters=children[1:-1],
@@ -113,27 +114,27 @@ class Transformer(lark.Transformer):
         )
 
     def p_block(self, meta, children):
-        return PBlock(
+        return ast.PBlock(
             location=self.location_from_meta(meta),
             quantifier=Quantifier.from_token(children[0]),
             statements=children[1:],
         )
 
     def p_statement_block(self, meta, children):
-        return PStatementBlock(
+        return ast.PStatementBlock(
             location=self.location_from_meta(meta),
             block=children[0],
         )
 
     def p_statement_size(self, meta, children):
-        return PStatementSize(
+        return ast.PStatementSize(
             location=self.location_from_meta(meta),
             comparison=Comparison.from_token(children[0]),
             expression=children[1],
         )
 
     def p_statement_aggr(self, meta, children):
-        return PStatementAggr(
+        return ast.PStatementAggr(
             location=self.location_from_meta(meta),
             aggregator=Aggregator.from_token(children[0]),
             kind=children[1],
@@ -142,27 +143,27 @@ class Transformer(lark.Transformer):
         )
 
     def expression_int(self, meta, children):
-        return ExpressionLiteral(
+        return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
             type=Type.INTEGER,
             literal=int(children[0]),
         )
 
     def expression_str(self, meta, children):
-        return ExpressionLiteral(
+        return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
             type=Type.STRING,
             literal=str(children[0][1:-1]),
         )
 
     def expression_ref(self, meta, children):
-        return ExpressionRef(
+        return ast.ExpressionRef(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
         )
 
     def expression_mul(self, meta, children):
-        return ExpressionBinary(
+        return ast.ExpressionBinary(
             location=self.location_from_meta(meta),
             operator=Operator.MULTIPLICATION,
             left=children[0],
@@ -170,7 +171,7 @@ class Transformer(lark.Transformer):
         )
 
     def call(self, meta, children):
-        return Call(
+        return ast.Call(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
             arguments=children[1:],
@@ -186,5 +187,5 @@ _parser = lark.Lark.open(
 )
 
 
-def parse(file: TextFile) -> list[Node]:
+def parse(file: TextFile) -> list[ast.Node]:
     return Transformer(file).transform(_parser.parse(file.text))

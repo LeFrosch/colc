@@ -1,1 +1,1 @@
-from .file_test import FileTestMeta
+from .file_test import FileTestMeta as FileTestMeta

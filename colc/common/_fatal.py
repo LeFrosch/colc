@@ -1,9 +1,8 @@
 import dataclasses
 import typing
 
-from colc.frontend.text import Location
-
-from .string_builder import StringBuilder
+from ._text import Location
+from ._string_builder import StringBuilder
 
 
 @dataclasses.dataclass
@@ -50,6 +49,6 @@ class FatalProblem(Exception):
         return sb.build()
 
 
-def fatal(message: str, *args) -> typing.NoReturn:
+def fatal_problem(message: str, *args) -> typing.NoReturn:
     locations = [it if isinstance(it, Location) else it.location for it in args]
     raise FatalProblem(message, locations)

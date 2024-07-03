@@ -6,24 +6,49 @@ on:
   pull_request:
     branches: [ "main" ]
 
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: Setup venv
-      run: make .venv/bin/activate
+      - name: Make test
+        run: make test
 
-    - name: Make test
-      run: make test
+  check:
+    runs-on: ubuntu-latest
 
-    - name: Make install
-      run: make install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Make check
+        run: make check
+
+  install:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Make install
+        run: make install

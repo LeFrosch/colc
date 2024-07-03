@@ -1,5 +1,5 @@
-from .frontend import TextFile
-from .problems import FatalProblem, InternalProblem
+from ._compile import compile_file as compile_file
 
-from .compile import compile_file
-from .object import Object
+from .common import TextFile as TextFile
+from .common import InternalProblem as InternalProblem
+from .common import FatalProblem as FatalProblem

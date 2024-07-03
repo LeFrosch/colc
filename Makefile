@@ -5,11 +5,18 @@
 .venv/bin/hatch: .venv/bin/activate
 	.venv/bin/pip3 install hatch hatch-requirements-txt
 
+.venv/bin/ruff: .venv/bin/activate
+	.venv/bin/pip3 install ruff
+
 test: .venv/bin/activate
 	.venv/bin/python3 -m unittest discover -v
 
 install: .venv/bin/hatch
 	.venv/bin/pip3 install .
+
+check: .venv/bin/ruff
+	.venv/bin/ruff check
+	.venv/bin/ruff format --check
 
 clean:
 	find . -name .venv -prune -o -name __pycache__ | xargs rm -rf

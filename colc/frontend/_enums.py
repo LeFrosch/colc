@@ -2,7 +2,7 @@ import enum
 import typing
 import lark
 
-from colc import problems
+from colc.common import internal_problem
 
 
 class Enum(enum.Enum):
@@ -15,7 +15,7 @@ class Enum(enum.Enum):
             if element.value == token:
                 return element
 
-        problems.internal(f'unknown element in {cls.__name__}: {token}')
+        internal_problem(f'unknown element in {cls.__name__}: {token}')
 
 
 class Comparison(Enum):

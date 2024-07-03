@@ -1,28 +1,28 @@
-from colc import problems
-from colc.frontend import Parameter, Call, Identifier
+from colc import common
+from colc.frontend import ast
 
 
 class Scope:
     def __init__(self):
         self._declarations = {}
 
-    def declare(self, identifier: Identifier, value):
+    def declare(self, identifier: ast.Identifier, value):
         self._declarations[identifier.name] = value
 
-    def lookup(self, identifier: Identifier):
+    def lookup(self, identifier: ast.Identifier):
         result = self._declarations.get(identifier.name, None)
 
         if result is None:
-            problems.fatal('undeclared identifier', identifier)
+            common.fatal_problem('undeclared identifier', identifier)
 
         return result
 
     @staticmethod
-    def from_call(call: Call, parameters: list[Parameter], arguments: list) -> 'Scope':
+    def from_call(call: ast.Call, parameters: list[ast.Parameter], arguments: list) -> 'Scope':
         if len(arguments) < len(parameters):
-            problems.fatal('not enough arguments', call.identifier)
+            common.fatal_problem('not enough arguments', call.identifier)
         if len(arguments) > len(parameters):
-            problems.fatal('too many arguments', call.identifier)
+            common.fatal_problem('too many arguments', call.identifier)
 
         # TODO: add type checking
 

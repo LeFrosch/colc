@@ -1,15 +1,14 @@
 import pathlib
 import unittest
-import colc
 
+from colc import FatalProblem, TextFile, compile_file
 from test.utils import FileTestMeta
-
 
 
 class ProblemTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
     def do_test(self, input: str, output: str):
         try:
-            colc.compile_file(colc.TextFile(pathlib.Path('test.col'), input))
+            compile_file(TextFile(pathlib.Path('test.col'), input))
             self.fail('should throw a fatal problem')
-        except colc.problems.FatalProblem as e:
+        except FatalProblem as e:
             self.assertEqual(output, e.render())

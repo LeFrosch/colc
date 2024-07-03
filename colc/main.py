@@ -4,10 +4,9 @@ import pickle
 
 from colc.frontend import parse
 from colc.backend import process
-from colc.problems import InternalProblem, FatalProblem
+from colc.common import InternalProblem, FatalProblem
 
 from .__about__ import __version__, __description__
-
 
 
 class Args(argparse.Namespace):

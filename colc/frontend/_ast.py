@@ -1,8 +1,9 @@
 import re
 import typeguard
 
-from .text import Location
-from .enums import Quantifier, Operator, Comparison, Aggregator, Type
+from colc.common import Location
+
+from ._enums import Quantifier, Operator, Comparison, Aggregator, Type
 
 
 def _to_snake_case(name):

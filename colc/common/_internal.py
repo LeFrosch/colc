@@ -1,6 +1,6 @@
 import typing
 
-from .string_builder import StringBuilder
+from ._string_builder import StringBuilder
 
 
 class InternalProblem(Exception):
@@ -26,5 +26,5 @@ class InternalProblem(Exception):
         return sb.build()
 
 
-def internal(message: str, cause: Exception | None = None) -> typing.NoReturn:
+def internal_problem(message: str, cause: Exception | None = None) -> typing.NoReturn:
     raise InternalProblem(message, cause)

@@ -1,7 +1,7 @@
 import typing
 
-from colc import problems
-from colc.frontend import CDefinitionType, CDefinitionMain, PDefinition, Definition, TextFile, Identifier
+from colc.common import TextFile, fatal_problem
+from colc.frontend import ast
 
 
 class Pool:
@@ -20,7 +20,7 @@ class Pool:
 
 
 class File:
-    def __init__(self, source: TextFile, includes: list['File'], definitions: list[Definition]):
+    def __init__(self, source: TextFile, includes: list['File'], definitions: list[ast.Definition]):
         self.source = source
         self.includes = includes
         self.definitions = definitions
@@ -38,34 +38,31 @@ class File:
 
         return None
 
-    def constraint_type(self, identifier: Identifier) -> CDefinitionType:
+    def constraint_type(self, identifier: ast.Identifier) -> ast.CDefinitionType:
         definition = self._resolve(
-            lambda it: isinstance(it, CDefinitionType) and it.identifier.name == identifier.name
+            lambda it: isinstance(it, ast.CDefinitionType) and it.identifier.name == identifier.name
         )
 
         if definition is None:
-            problems.fatal('undefined identifier', identifier)
+            fatal_problem('undefined identifier', identifier)
 
         return definition
 
-    def constraint_main(self) -> CDefinitionMain:
-        definition = self._resolve(lambda it: isinstance(it, CDefinitionMain))
+    def constraint_main(self) -> ast.CDefinitionMain:
+        definition = self._resolve(lambda it: isinstance(it, ast.CDefinitionMain))
 
         if definition is None:
-            problems.fatal('undefined main constraint')
+            fatal_problem('undefined main constraint')
 
         return definition
 
-    def predicate(self, identifier: Identifier) -> PDefinition:
-        definition = self._resolve(
-            lambda it: isinstance(it, PDefinition) and it.identifier.name == identifier.name
-        )
+    def predicate(self, identifier: ast.Identifier) -> ast.PDefinition:
+        definition = self._resolve(lambda it: isinstance(it, ast.PDefinition) and it.identifier.name == identifier.name)
 
         if definition is None:
-            problems.fatal('undefined identifier', identifier)
+            fatal_problem('undefined identifier', identifier)
 
         return definition
 
     def intern_constant(self, constant: int | str) -> int:
         return 0
-
