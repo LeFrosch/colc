@@ -1,11 +1,10 @@
 import pathlib
-import lark
 
-from colc.common import TextFile, fatal_problem
+from colc.common import TextFile, fatal_problem, read_file
 from colc.backend import File, process_constraint
 from colc.frontend import parse, ast
 
-from .object import Object
+from ._object import Object
 
 _includes = pathlib.Path(__file__).parent.joinpath('includes')
 
@@ -29,28 +28,11 @@ def _find_include(include: ast.Include) -> pathlib.Path:
 
 
 def _parse_include(include: ast.Include) -> File:
-    return parse_file(_read_file(_find_include(include)))
-
-
-def _read_file(path: pathlib.Path) -> TextFile:
-    try:
-        return TextFile(path, path.read_text())
-    except IOError:
-        fatal_problem(f'could not read file {path}')
+    return parse_file(read_file(_find_include(include)))
 
 
 def parse_file(file: TextFile) -> File:
-    try:
-        result = parse(file)
-    except lark.UnexpectedToken as e:
-        if e.token.type == '$END':
-            fatal_problem('unexpected end of input')
-        else:
-            fatal_problem('unexpected token', file.location_from_token(e.token))
-    except lark.UnexpectedCharacters as e:
-        fatal_problem('unexpected character', file.location_from_position(e.line - 1, e.column - 1))
-    except lark.UnexpectedEOF:
-        fatal_problem('unexpected end of input')
+    result = parse(file)
 
     includes = [_parse_include(it) for it in result if isinstance(it, ast.Include)]
     definitions = [it for it in result if isinstance(it, ast.Definition)]
@@ -64,3 +46,7 @@ def compile_file(file: TextFile) -> Object:
     constraint = process_constraint(parsed)
 
     return Object(constraint)
+
+
+def compile(path: str) -> Object:
+    return compile_file(read_file(path))

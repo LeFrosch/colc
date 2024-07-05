@@ -1,6 +1,6 @@
 import lark
 
-from colc.common import TextFile, Location
+from colc.common import TextFile, Location, fatal_problem, internal_problem
 
 from . import _ast as ast
 from ._enums import Type, Quantifier, Comparison, Aggregator, Operator
@@ -188,4 +188,16 @@ _parser = lark.Lark.open(
 
 
 def parse(file: TextFile) -> list[ast.Node]:
-    return Transformer(file).transform(_parser.parse(file.text))
+    try:
+        return Transformer(file).transform(_parser.parse(file.text))
+    except lark.UnexpectedToken as e:
+        if e.token.type == '$END':
+            fatal_problem('unexpected end of input')
+        else:
+            fatal_problem('unexpected token', file.location_from_token(e.token))
+    except lark.UnexpectedCharacters as e:
+        fatal_problem('unexpected character', file.location_from_position(e.line - 1, e.column - 1))
+    except lark.UnexpectedEOF:
+        fatal_problem('unexpected end of input')
+    except Exception as e:
+        internal_problem('parser error', e)
