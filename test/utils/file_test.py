@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def _do_file_test(self, file: Path) -> (str, str):
+def _do_file_test(self, file: Path):
     with file.open() as f:
         lines = f.readlines()
 

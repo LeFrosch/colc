@@ -10,5 +10,5 @@ class Visitor:
         else:
             return None
 
-    def accept_all(self, nodes: list[ast.Node | None]) -> list[typing.Any]:
+    def accept_all(self, nodes: typing.Collection[ast.Node | None]) -> list[typing.Any]:
         return [self.accept(it) for it in nodes]

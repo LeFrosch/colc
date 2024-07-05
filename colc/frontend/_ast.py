@@ -1,32 +1,27 @@
-import re
+import typing
 import typeguard
 
-from colc.common import Location
+from colc.common import Location, to_snake_case
 
 from ._enums import Quantifier, Operator, Comparison, Aggregator, Type
 
 
-def _to_snake_case(name):
-    """
-    Converts a name from camelCase to snake_case.
-    Source: https://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-snake-case
-    """
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
-
-
 class Node:
+    rule: str
     location: Location
 
-    def _collect_annotations(self) -> dict[str, type]:
-        annotations = {}
-        for c in self.__class__.__mro__:
-            annotations.update(getattr(c, '__annotations__', {}))
+    @classmethod
+    def _collect_annotations(cls) -> dict[str, type]:
+        annotations: dict[str, type] = {}
+        for c in cls.__mro__:
+            if c != Node:
+                annotations.update(getattr(c, '__annotations__', {}))
 
         return annotations
 
     def __new__(cls, **kwargs):
         obj = object.__new__(cls)
-        obj.rule = _to_snake_case(cls.__name__)
+        obj.rule = to_snake_case(cls.__name__)
 
         return obj
 
@@ -39,8 +34,10 @@ class Node:
             except typeguard.TypeCheckError:
                 raise TypeError(f'Filed {name} is of type {t}, but got: {value}')
 
+        self.location = kwargs['location']
+
     def __repr__(self):
-        attrs = ', '.join(f'{k}={getattr(self, k)!r}' for k in list(self._collect_annotations()) if k != 'location')
+        attrs = ', '.join(f'{k}={getattr(self, k)!r}' for k in list(self._collect_annotations()))
         return f'{self.__class__.__name__}[{self.location.start}:{self.location.end}]({attrs})'
 
 
@@ -113,7 +110,7 @@ class CStatementCall(CStatement):
 class CStatementWith(CStatement):
     predicate: Call
     kind: Identifier
-    block: CBlock | None
+    block: typing.Optional[CBlock]
 
 
 class PStatement(Node):
@@ -178,12 +175,15 @@ class FStatementAssign(FStatement):
 
 
 class FStatementReturn(FStatement):
-    expression: Expression
+    expression: typing.Optional[Expression]
 
 
 class FDefinition(Definition):
-    identifier: Identifier
     parameters: list[Parameter]
+    block: FBlock
+
+
+class MDefinition(Definition):
     block: FBlock
 
 

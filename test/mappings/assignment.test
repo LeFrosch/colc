@@ -1,0 +1,15 @@
+# INPUT
+map main {
+  a = 1 + 3;
+  b = 1 - 2;
+}
+
+# OUTPUT
+000: I_CONST    0
+001: I_CONST    1
+002: I_OP       0
+003: I_STORE    0
+004: I_CONST    0
+005: I_CONST    2
+006: I_OP       1
+007: I_STORE    1

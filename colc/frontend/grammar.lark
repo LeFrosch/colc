@@ -53,7 +53,7 @@ p_statement: p_block ";"                                   -> p_statement_block
 
 f_statement: f_block ";"          -> f_statement_block
   | IDENTIFIER "=" expression ";" -> f_statement_assign
-  | "return" expression ";"       -> f_statement_ret
+  | "return" [expression] ";"     -> f_statement_ret
 
 c_block: "{" QUANTIFIER c_statement* "}"
 p_block: "{" QUANTIFIER p_statement* "}"
@@ -63,6 +63,7 @@ f_block: "{" f_statement* "}"
   | "con" IDENTIFIER "(" NODE_KIND _c_list{parameter}? ")" c_block -> c_definition_type
   | "con" IDENTIFIER "(" "list" _c_list{parameter}? ")" p_block    -> p_definition
   | "fun" IDENTIFIER "(" _list{parameter} ")" f_block              -> f_definition
+  | "map" IDENTIFIER f_block                                       -> m_definition
 
 include: "/include/" STRING ";"
 

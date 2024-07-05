@@ -4,21 +4,22 @@ import lark
 
 from colc.common import internal_problem
 
+T = typing.TypeVar('T')
 
-class Enum(enum.Enum):
-    def switch[T](self, cases: dict[typing.Self, T]) -> T:
+
+class AstEnum(enum.StrEnum):
+    def switch(self, cases: dict[typing.Self, T]) -> T:
         return cases[self]
 
     @classmethod
     def from_token(cls, token: lark.Token) -> typing.Self:
-        for element in cls:
-            if element.value == token:
-                return element
+        try:
+            return cls.__new__(cls, token.value)
+        except ValueError as e:
+            internal_problem(f'unknown element in {cls.__name__}', e)
 
-        internal_problem(f'unknown element in {cls.__name__}: {token}')
 
-
-class Comparison(Enum):
+class Comparison(AstEnum):
     EQUAL = '=='
     NOT_EQUAL = '!='
     LESS = '<'
@@ -29,26 +30,26 @@ class Comparison(Enum):
     POWER = '**='
 
 
-class Operator(Enum):
+class Operator(AstEnum):
     PLUS = '+'
     MINUS = '-'
     MULTIPLICATION = '*'
     DIVISION = '/'
 
 
-class Quantifier(Enum):
+class Quantifier(AstEnum):
     ALL = 'all:'
     ANY = 'any:'
     ONE = 'one:'
 
 
-class Aggregator(Enum):
+class Aggregator(AstEnum):
     MIN = 'min'
     MAX = 'max'
     SUM = 'sum'
     AVG = 'avg'
 
 
-class Type(Enum):
+class Type(AstEnum):
     STRING = 'str'
     INTEGER = 'int'

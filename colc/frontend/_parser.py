@@ -18,22 +18,15 @@ class Transformer(lark.Transformer):
             end=meta.end_pos,
         )
 
-    def location_from_token(self, token: lark.Token) -> Location:
-        return Location(
-            file=self.file,
-            start=token.start_pos,
-            end=token.end_pos,
-        )
-
     def identifier_from_token(self, token: lark.Token) -> ast.Identifier:
         return ast.Identifier(
-            location=self.location_from_token(token),
+            location=self.file.location_from_token(token),
             name=token.value,
         )
 
     def string_from_token(self, token: lark.Token) -> ast.String:
         return ast.String(
-            location=self.location_from_token(token),
+            location=self.file.location_from_token(token),
             value=token.value[1:-1],
         )
 
@@ -142,6 +135,46 @@ class Transformer(lark.Transformer):
             expression=children[3],
         )
 
+    def f_definition(self, meta, children):
+        return ast.FDefinition(
+            location=self.location_from_meta(meta),
+            identifier=self.identifier_from_token(children[0]),
+            parameters=children[1:-1],
+            block=children[-1],
+        )
+
+    def m_definition(self, meta, children):
+        return ast.MDefinition(
+            location=self.location_from_meta(meta),
+            identifier=self.identifier_from_token(children[0]),
+            block=children[1],
+        )
+
+    def f_block(self, meta, children):
+        return ast.FBlock(
+            location=self.location_from_meta(meta),
+            statements=children,
+        )
+
+    def f_statement_block(self, meta, children):
+        return ast.FStatementBlock(
+            location=self.location_from_meta(meta),
+            block=children[0],
+        )
+
+    def f_statement_assign(self, meta, children):
+        return ast.FStatementAssign(
+            location=self.location_from_meta(meta),
+            identifier=self.identifier_from_token(children[0]),
+            expression=children[1],
+        )
+
+    def f_statement_return(self, meta, children):
+        return ast.FStatementReturn(
+            location=self.location_from_meta(meta),
+            expression=children[1],
+        )
+
     def expression_int(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
@@ -162,13 +195,25 @@ class Transformer(lark.Transformer):
             identifier=self.identifier_from_token(children[0]),
         )
 
-    def expression_mul(self, meta, children):
+    def _binary_expression(self, meta, children, operator):
         return ast.ExpressionBinary(
             location=self.location_from_meta(meta),
-            operator=Operator.MULTIPLICATION,
+            operator=operator,
             left=children[0],
             right=children[1],
         )
+
+    def expression_add(self, meta, children):
+        return self._binary_expression(meta, children, Operator.PLUS)
+
+    def expression_sub(self, meta, children):
+        return self._binary_expression(meta, children, Operator.MINUS)
+
+    def expression_mul(self, meta, children):
+        return self._binary_expression(meta, children, Operator.MULTIPLICATION)
+
+    def expression_div(self, meta, children):
+        return self._binary_expression(meta, children, Operator.DIVISION)
 
     def call(self, meta, children):
         return ast.Call(

@@ -10,6 +10,9 @@ class TextFile:
     text: str
 
     def location_from_token(self, token: lark.Token) -> 'Location':
+        assert token.start_pos is not None
+        assert token.end_pos is not None
+
         return Location(
             file=self,
             start=token.start_pos,

@@ -3,7 +3,7 @@ import enum
 from colc.frontend import Quantifier, Comparison, Aggregator
 
 
-class LFunction(enum.Enum):
+class LFunction(enum.IntEnum):
     WITH = 0
     ATTR = 1
     ALL = 2

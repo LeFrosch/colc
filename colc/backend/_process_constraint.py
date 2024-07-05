@@ -9,10 +9,10 @@ from ._lexpression import LExpression, LFunction
 
 def process_constraint(file: File) -> LExpression:
     constraint = file.constraint_main()
-    return ConstraintVisitor(file, Scope()).accept(constraint.block)
+    return VisitorImpl(file, Scope()).accept(constraint.block)
 
 
-class ConstraintVisitor(Visitor):
+class VisitorImpl(Visitor):
     def __init__(self, file: File, scope: Scope):
         self.file = file
         self.scope = scope
@@ -38,7 +38,7 @@ class ConstraintVisitor(Visitor):
         target = self.file.predicate(call.identifier)
         target_scope = Scope.from_call(call, target.parameters, arguments)
 
-        return ConstraintVisitor(self.file, target_scope).accept(target.block)
+        return VisitorImpl(self.file, target_scope).accept(target.block)
 
     def c_statement_with(self, stmt: ast.CStatementWith) -> LExpression:
         return LExpression(
@@ -55,7 +55,7 @@ class ConstraintVisitor(Visitor):
 
         target = self.file.constraint_type(stmt.constraint.identifier)
         target_scope = Scope.from_call(stmt.constraint, target.parameters, arguments)
-        target_visitor = ConstraintVisitor(self.file, target_scope)
+        target_visitor = VisitorImpl(self.file, target_scope)
 
         return LExpression(
             LFunction.WITH,

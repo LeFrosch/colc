@@ -8,17 +8,21 @@
 .venv/bin/ruff: .venv/bin/activate
 	.venv/bin/pip3 install ruff
 
+.venv/bin/mypy: .venv/bin/activate
+	.venv/bin/pip3 install mypy
+
 test: .venv/bin/activate
 	.venv/bin/python3 -m unittest discover -v
 
 install: .venv/bin/hatch
 	.venv/bin/pip3 install .
 
-check: .venv/bin/ruff
+check: .venv/bin/ruff .venv/bin/mypy
 	.venv/bin/ruff check
 	.venv/bin/ruff format --check
+	.venv/bin/mypy colc
 
 clean:
 	find . -name .venv -prune -o -name __pycache__ | xargs rm -rf
 
-.PHONY: clean test install
+.PHONY: clean test check install
