@@ -1,10 +1,12 @@
-import typing
-
-from colc.common import fatal_problem, internal_problem
-from colc.frontend import ast, Visitor, Operator
+from colc.frontend import ast, Operator
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
+from ._scope import VisitorWithScope
+
+
+def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
+    return {it.identifier.name: process_mapping(ctx, it) for it in ctx.file.mappings}
 
 
 def process_mapping(ctx: Context, mapping: ast.MDefinition) -> list[Instruction]:
@@ -14,52 +16,10 @@ def process_mapping(ctx: Context, mapping: ast.MDefinition) -> list[Instruction]
     return visitor.instructions
 
 
-# TODO: can this be merged with the scope which is used for constraint evaluation?
-class Scope:
-    def __init__(self, parent: typing.Optional['Scope'] = None):
-        self._parent = parent
-        self._offset = parent.size if parent else 0
-        self._local_variables: list[str] = []
-
-    @property
-    def size(self) -> int:
-        return len(self._local_variables)
-
-    def declare(self, identifier: ast.Identifier) -> int:
-        name = identifier.name
-
-        if name in self._local_variables:
-            local_index = self._local_variables.index(name)
-        else:
-            self._local_variables.append(name)
-            local_index = len(self._local_variables) - 1
-
-        return self._offset + local_index
-
-    def lookup(self, identifier: ast.Identifier) -> int:
-        name = identifier.name
-
-        if name in self._local_variables:
-            return self._local_variables.index(name) + self._offset
-        if self._parent:
-            return self._parent.lookup(identifier)
-
-        fatal_problem('undefined identifier', identifier)
-
-    def push(self) -> 'Scope':
-        return Scope(parent=self)
-
-    def pop(self) -> 'Scope':
-        if not self._parent:
-            internal_problem('cannot pop root scope')
-
-        return self._parent
-
-
-class VisitorImpl(Visitor):
+class VisitorImpl(VisitorWithScope):
     def __init__(self, ctx: Context):
+        super().__init__()
         self.ctx = ctx
-        self.scope = Scope()
         self.instructions: list[Instruction] = []
 
     def f_block(self, block: ast.FBlock):
@@ -68,8 +28,11 @@ class VisitorImpl(Visitor):
     def f_statement_assign(self, stmt: ast.FStatementAssign):
         self.accept(stmt.expression)
 
-        index = self.scope.declare(stmt.identifier)
-        self.instructions.append(Opcode.I_STORE.new(index))
+        value = self.scope.declare(stmt.identifier)
+        self.instructions.append(Opcode.I_STORE.new(value.index))
+
+    def f_statement_block(self, stmt: ast.FStatementBlock):
+        self.accept_with_scope(self.scope.new_child_scope(), stmt.block)
 
     def expression_binary(self, expr: ast.ExpressionBinary):
         self.accept(expr.left)
@@ -89,3 +52,7 @@ class VisitorImpl(Visitor):
     def expression_literal(self, expr: ast.ExpressionLiteral):
         index = self.ctx.intern_const(expr.literal)
         self.instructions.append(Opcode.I_CONST.new(index))
+
+    def expression_ref(self, expr: ast.ExpressionRef):
+        value = self.scope.lookup(expr.identifier)
+        self.instructions.append(Opcode.I_LOAD.new(value.index))

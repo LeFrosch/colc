@@ -20,7 +20,7 @@ install: .venv/bin/hatch
 check: .venv/bin/ruff .venv/bin/mypy
 	.venv/bin/ruff check
 	.venv/bin/ruff format --check
-	.venv/bin/mypy colc
+	.venv/bin/mypy colc --check-untyped-def
 
 clean:
 	find . -name .venv -prune -o -name __pycache__ | xargs rm -rf

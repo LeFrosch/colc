@@ -1,21 +1,22 @@
 import operator
 
-from colc.frontend import Visitor, Operator, ast
+from colc.frontend import Operator, ast
 
-from ._scope import Scope
+from ._context import Context
 from ._file import File
+from ._scope import Scope, VisitorWithScope
 from ._lexpression import LExpression, LFunction
 
 
-def process_constraint(file: File) -> LExpression:
-    constraint = file.constraint_main()
-    return VisitorImpl(file, Scope()).accept(constraint.block)
+def process_constraint(ctx: Context) -> LExpression:
+    constraint = ctx.file.constraint_main()
+    return VisitorImpl(ctx.file).accept(constraint.block)
 
 
-class VisitorImpl(Visitor):
-    def __init__(self, file: File, scope: Scope):
+class VisitorImpl(VisitorWithScope):
+    def __init__(self, file: File):
+        super().__init__()
         self.file = file
-        self.scope = scope
 
     def c_block(self, block: ast.CBlock) -> LExpression:
         return LExpression(LFunction.from_quantifier(block.quantifier), self.accept_all(block.statements))
@@ -38,7 +39,7 @@ class VisitorImpl(Visitor):
         target = self.file.predicate(call.identifier)
         target_scope = Scope.from_call(call, target.parameters, arguments)
 
-        return VisitorImpl(self.file, target_scope).accept(target.block)
+        return self.accept_with_scope(target_scope, target.block)
 
     def c_statement_with(self, stmt: ast.CStatementWith) -> LExpression:
         return LExpression(
@@ -55,14 +56,13 @@ class VisitorImpl(Visitor):
 
         target = self.file.constraint_type(stmt.constraint.identifier)
         target_scope = Scope.from_call(stmt.constraint, target.parameters, arguments)
-        target_visitor = VisitorImpl(self.file, target_scope)
 
         return LExpression(
             LFunction.WITH,
             [
                 target.kind.name,
                 self._predicate(stmt.predicate),
-                target_visitor.accept(target.block),
+                self.accept_with_scope(target_scope, target.block),
             ],
         )
 
@@ -103,4 +103,4 @@ class VisitorImpl(Visitor):
         return expr.literal
 
     def expression_ref(self, expr: ast.ExpressionRef) -> int | str:
-        return self.scope.lookup(expr.identifier)
+        return self.scope.lookup(expr.identifier).data

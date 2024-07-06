@@ -51,7 +51,7 @@ p_statement: p_block ";"                                   -> p_statement_block
   | "size" COMPARISON expression ";"                       -> p_statement_size
   | AGGREGATOR "(" NODE_KIND ")" COMPARISON expression ";" -> p_statement_aggr
 
-f_statement: f_block ";"          -> f_statement_block
+f_statement: f_block              -> f_statement_block
   | IDENTIFIER "=" expression ";" -> f_statement_assign
   | "return" [expression] ";"     -> f_statement_ret
 

@@ -1,0 +1,16 @@
+# INPUT
+/include/ "std";
+
+con test(MACHINE) { all:
+  id == a;
+}
+
+con main { all:
+    const(1) test();
+}
+
+# OUTPUT
+test.col @ line 4
+>>   id == a;
+>>         ^
+fatal problem: undefined identifier

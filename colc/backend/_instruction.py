@@ -5,7 +5,8 @@ import enum
 class Opcode(enum.IntEnum):
     I_CONST = 0
     I_STORE = 1
-    I_OP = 2
+    I_LOAD = 2
+    I_OP = 3
 
     def new(self, argument: int = 0) -> 'Instruction':
         assert argument >= 0

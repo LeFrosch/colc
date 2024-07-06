@@ -1,0 +1,19 @@
+# INPUT
+/include/ "std";
+
+con test2(CORE, b: int) { all:
+  id == b;
+}
+
+con test1(MACHINE, a: int) { all:
+  id == a;
+
+  const(1) test2(a);
+}
+
+con main { all:
+    const(1) test1(420);
+}
+
+# OUTPUT
+[ALL, [WITH, 'MACHINE', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL, [EQUAL, [ATTR, 'id'], 420], [WITH, 'CORE', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL, [EQUAL, [ATTR, 'id'], 420]]]]]]

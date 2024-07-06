@@ -1,0 +1,16 @@
+# INPUT
+/include/ "std";
+
+con test(MACHINE, a: int, a: int) { all:
+  id == a;
+}
+
+con main { all:
+    const(1) test(1, 2);
+}
+
+# OUTPUT
+test.col @ line 3
+>> con test(MACHINE, a: int, a: int) { all:
+>>                           ^
+fatal problem: identifier is already defined

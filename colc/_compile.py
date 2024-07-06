@@ -1,7 +1,7 @@
 import pathlib
 
 from colc.common import TextFile, fatal_problem, read_file
-from colc.backend import File, process_constraint
+from colc.backend import File, Context, process_constraint, process_mappings
 from colc.frontend import parse, ast
 
 from ._object import Object
@@ -41,11 +41,12 @@ def parse_file(file: TextFile) -> File:
 
 
 def compile_file(file: TextFile) -> Object:
-    parsed = parse_file(file)
+    ctx = Context(parse_file(file))
 
-    constraint = process_constraint(parsed)
-
-    return Object(constraint)
+    return Object(
+        constraint=process_constraint(ctx),
+        mappings=process_mappings(ctx),
+    )
 
 
 def compile(path: str) -> Object:
