@@ -1,10 +1,11 @@
-from colc.common import fatal_problem
-from colc.frontend import ast
+from colc.common import fatal_problem, internal_problem
+from colc.frontend import ast, ComptimeValue
 
 from ._context import Context
 from ._file import File
 from ._scope import Scope, VisitorWithScope
 from ._lexpression import LExpression, LFunction
+from ._process_expression import process_expression
 
 
 def process_constraint(ctx: Context) -> LExpression:
@@ -28,10 +29,18 @@ class VisitorImpl(VisitorWithScope):
 
         scope = Scope()
         for param, arg in zip(parameters, arguments):
-            value = self.accept(arg)
+            value = self.accept_expr(arg)
             scope.define(param, value)
 
         return scope
+
+    def accept_expr(self, expr: ast.Expression) -> ComptimeValue:
+        value = process_expression(self.scope, expr)
+
+        if value is None:
+            internal_problem('non comptime value in constraint')
+
+        return value
 
     def c_block(self, block: ast.CBlock) -> LExpression:
         return LExpression(LFunction.from_quantifier(block.quantifier), self.accept_all(block.statements))
@@ -44,7 +53,7 @@ class VisitorImpl(VisitorWithScope):
             LFunction.from_comparison(stmt.comparison),
             [
                 LExpression(LFunction.ATTR, [stmt.identifier.name]),
-                self.accept(stmt.expression),
+                self.accept_expr(stmt.expression).comptime,
             ],
         )
 
@@ -86,7 +95,10 @@ class VisitorImpl(VisitorWithScope):
     def p_statement_size(self, stmt: ast.PStatementSize) -> LExpression:
         return LExpression(
             LFunction.from_comparison(stmt.comparison),
-            [LExpression(LFunction.LIST_SIZE, []), self.accept(stmt.expression)],
+            [
+                LExpression(LFunction.LIST_SIZE, []),
+                self.accept_expr(stmt.expression).comptime,
+            ],
         )
 
     def p_statement_aggr(self, stmt: ast.PStatementAggr) -> LExpression:
@@ -94,21 +106,6 @@ class VisitorImpl(VisitorWithScope):
             LFunction.from_comparison(stmt.comparison),
             [
                 LExpression(LFunction.from_aggregator(stmt.aggregator), [stmt.kind.name]),
-                self.accept(stmt.expression),
+                self.accept_expr(stmt.expression).comptime,
             ],
         )
-
-    def expression_binary(self, expr: ast.ExpressionBinary) -> int | str:
-        left = self.accept(expr.left)
-        right = self.accept(expr.right)
-
-        return expr.operator.evaluate(left, right)
-
-    def expression_literal(self, expr: ast.ExpressionLiteral) -> int | str:
-        return expr.literal
-
-    def expression_ref(self, expr: ast.ExpressionRef) -> int | str:
-        value = self.scope.lookup(expr.identifier).value
-        assert value is not None
-
-        return value

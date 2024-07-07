@@ -4,6 +4,7 @@ import typeguard
 from colc.common import Location, to_snake_case
 
 from ._enums import Quantifier, Operator, Comparison, Aggregator
+from ._value import ComptimeValue
 
 
 class Node:
@@ -65,7 +66,7 @@ class ExpressionUnary(Expression):
 
 
 class ExpressionLiteral(Expression):
-    literal: int | str  # TODO: introduce compile time value
+    value: ComptimeValue
 
 
 class ExpressionRef(Expression):

@@ -1,0 +1,9 @@
+# INPUT
+map main {
+  a = 1;
+  b = 1 + a;
+}
+
+# CONST POOL
+
+# OUTPUT

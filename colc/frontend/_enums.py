@@ -1,5 +1,4 @@
 import enum
-import operator
 import typing
 import lark
 
@@ -41,19 +40,6 @@ class Operator(AstEnum):
     SUB = '-'
     MUL = '*'
     DIV = '/'
-
-    # TODO: add compile time value type
-    def evaluate(self, left, right):
-        op = self.switch(
-            {
-                Operator.ADD: operator.add,
-                Operator.SUB: operator.sub,
-                Operator.MUL: operator.mul,
-                Operator.DIV: operator.truediv,
-            }
-        )
-
-        return op(left, right)
 
 
 class Quantifier(AstEnum):

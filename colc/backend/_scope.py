@@ -2,16 +2,18 @@ import dataclasses
 from typing import Optional, Any
 
 from colc.common import fatal_problem, internal_problem
-from colc.frontend import ast, Visitor
-
-CompiletimeValue = str | int
+from colc.frontend import ast, Visitor, Value
 
 
 @dataclasses.dataclass
 class Definition:
     index: int
     name: str
-    value: Optional[CompiletimeValue]
+    value: Value
+
+    @property
+    def is_comptime(self):
+        return self.value.is_comptime
 
 
 class Scope:
@@ -27,7 +29,7 @@ class Scope:
     def _find_definition(self, name: str) -> Optional[Definition]:
         return next((it for it in self._definitions if it.name == name), None)
 
-    def define(self, identifier: ast.Identifier, value: Optional[CompiletimeValue] = None) -> Definition:
+    def define(self, identifier: ast.Identifier, value: Value = Value.default()) -> Definition:
         definition = self._find_definition(identifier.name)
 
         if definition is not None:
@@ -38,7 +40,7 @@ class Scope:
 
         return definition
 
-    def define_synthetic(self, name: str, value: Optional[CompiletimeValue] = None) -> Definition:
+    def define_synthetic(self, name: str, value: Value = Value.default()) -> Definition:
         definition = self._find_definition(name)
 
         if definition is not None:

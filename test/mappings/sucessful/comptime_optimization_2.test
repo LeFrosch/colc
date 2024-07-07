@@ -1,0 +1,16 @@
+# INPUT
+map main {
+  a = "abc" + "def" + root.attr;
+}
+
+# CONST POOL
+000: abcdef
+001: attr
+
+# OUTPUT
+000: CONST      0
+001: LOAD       0
+002: CONST      1
+003: ATTR       0
+004: ADD        0
+005: STORE      1
