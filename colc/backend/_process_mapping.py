@@ -1,8 +1,9 @@
-from colc.frontend import ast, Operator
+from colc.frontend import ast, Type
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
 from ._scope import VisitorWithScope
+from ._operation import Operation
 
 
 def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
@@ -26,33 +27,31 @@ class VisitorImpl(VisitorWithScope):
         self.accept_all(block.statements)
 
     def f_statement_assign(self, stmt: ast.FStatementAssign):
-        self.accept(stmt.expression)
+        type = self.accept(stmt.expression)
 
-        value = self.scope.declare(stmt.identifier)
+        value = self.scope.declare(stmt.identifier, type)
         self.instructions.append(Opcode.I_STORE.new(value.index))
 
     def f_statement_block(self, stmt: ast.FStatementBlock):
         self.accept_with_scope(self.scope.new_child_scope(), stmt.block)
 
     def expression_binary(self, expr: ast.ExpressionBinary):
-        self.accept(expr.left)
-        self.accept(expr.right)
+        left = self.accept(expr.left)
+        right = self.accept(expr.right)
 
-        # TODO: add type inference
-        op = expr.operator.switch(
-            {
-                Operator.PLUS: 0,
-                Operator.MINUS: 1,
-                Operator.MULTIPLICATION: 2,
-                Operator.DIVISION: 3,
-            }
-        )
-        self.instructions.append(Opcode.I_OP.new(op))
+        operation = Operation.from_binary_operator(expr.operator, left, right)
+        self.instructions.append(operation.opcode.new(0))
 
-    def expression_literal(self, expr: ast.ExpressionLiteral):
+        return operation.type
+
+    def expression_literal(self, expr: ast.ExpressionLiteral) -> Type:
         index = self.ctx.intern_const(expr.literal)
         self.instructions.append(Opcode.I_CONST.new(index))
 
-    def expression_ref(self, expr: ast.ExpressionRef):
+        return expr.type
+
+    def expression_ref(self, expr: ast.ExpressionRef) -> Type:
         value = self.scope.lookup(expr.identifier)
-        self.instructions.append(Opcode.I_LOAD.new(value.index))
+        self.instructions.append(Opcode.LOAD.new(value.index))
+
+        return value.type

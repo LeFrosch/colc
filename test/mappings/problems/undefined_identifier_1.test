@@ -1,0 +1,11 @@
+# INPUT
+map main {
+  { b = 3; }
+  a = b;
+}
+
+# OUTPUT
+test.col @ line 3
+>>   a = b;
+>>       ^
+fatal problem: undefined identifier

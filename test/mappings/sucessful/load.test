@@ -1,0 +1,13 @@
+# INPUT
+map main {
+  a = 1;
+  b = 1 + a;
+}
+
+# OUTPUT
+000: I_CONST    0
+001: I_STORE    0
+002: I_CONST    0
+003: LOAD       0
+004: I_ADD      0
+005: I_STORE    1

@@ -2,13 +2,14 @@ import dataclasses
 import typing
 
 from colc.common import fatal_problem
-from colc.frontend import ast, Visitor
+from colc.frontend import ast, Visitor, Type
 
 
 @dataclasses.dataclass
 class Value:
     index: int
     identifier: ast.Identifier
+    type: Type
     data: typing.Any
 
 
@@ -22,13 +23,13 @@ class Scope:
         else:
             self._offset = parent._offset + len(parent._values)
 
-    def declare(self, identifier: ast.Identifier, data: typing.Any = None) -> Value:
+    def declare(self, identifier: ast.Identifier, type: Type, data: typing.Any = None) -> Value:
         value = next(filter(lambda it: it.identifier.name == identifier.name, self._values), None)
 
         if value is not None:
             fatal_problem('identifier is already defined', identifier)
 
-        value = Value(self._offset + len(self._values), identifier, data)
+        value = Value(self._offset + len(self._values), identifier, type, data)
         self._values.append(value)
 
         return value
@@ -57,7 +58,7 @@ class Scope:
 
         scope = Scope()
         for param, arg in zip(parameters, arguments):
-            scope.declare(param.identifier, arg)
+            scope.declare(param.identifier, param.type, arg)
 
         return scope
 

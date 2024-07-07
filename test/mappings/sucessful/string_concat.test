@@ -1,0 +1,10 @@
+# INPUT
+map main {
+  a = "abc" + "cde";
+}
+
+# OUTPUT
+000: I_CONST    0
+001: I_CONST    1
+002: S_CONCAT   0
+003: I_STORE    0

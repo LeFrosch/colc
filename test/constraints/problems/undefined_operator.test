@@ -1,0 +1,10 @@
+# INPUT
+con main { all:
+  size == "a" + 3;
+}
+
+# OUTPUT
+test.col @ line 2
+>>   size == "a" + 3;
+>>               ^
+fatal problem: undefined operator <str> + <int>

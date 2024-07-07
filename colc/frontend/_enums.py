@@ -2,21 +2,26 @@ import enum
 import typing
 import lark
 
-from colc.common import internal_problem
+from colc.common import internal_problem, TextFile, Location
 
 T = typing.TypeVar('T')
 
 
 class AstEnum(enum.StrEnum):
+    location: Location
+
     def switch(self, cases: dict[typing.Self, T]) -> T:
         return cases[self]
 
     @classmethod
-    def from_token(cls, token: lark.Token) -> typing.Self:
+    def from_token(cls, file: TextFile, token: lark.Token) -> typing.Self:
         try:
-            return cls.__new__(cls, token.value)
+            value = cls.__new__(cls, token.value)
         except ValueError as e:
             internal_problem(f'unknown element in {cls.__name__}', e)
+
+        value.location = file.location_from_token(token)
+        return value
 
 
 class Comparison(AstEnum):
@@ -31,10 +36,10 @@ class Comparison(AstEnum):
 
 
 class Operator(AstEnum):
-    PLUS = '+'
-    MINUS = '-'
-    MULTIPLICATION = '*'
-    DIVISION = '/'
+    ADD = '+'
+    SUB = '-'
+    MUL = '*'
+    DIV = '/'
 
 
 class Quantifier(AstEnum):

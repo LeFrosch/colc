@@ -1,13 +1,10 @@
 # INPUT
-con main { all: }
-
 map main {
-  { b = 3; }
   a = b;
 }
 
 # OUTPUT
-test.col @ line 5
+test.col @ line 2
 >>   a = b;
 >>       ^
 fatal problem: undefined identifier

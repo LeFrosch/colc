@@ -3,6 +3,8 @@ from ._main import main as main
 from ._compile import compile_file as compile_file
 from ._compile import parse_file as parse_file
 
+from ._object import Object as Object
+
 from .backend import LExpression as LExpression
 from .backend import LFunction as LFunction
 from .backend import Opcode as Opcode

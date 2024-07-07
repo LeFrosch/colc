@@ -1,0 +1,7 @@
+# INPUT
+con main { all:
+  id == "abc" + "def";
+}
+
+# OUTPUT
+[ALL, [EQUAL, [ATTR, 'id'], 'abcdef']]

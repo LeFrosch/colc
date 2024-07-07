@@ -1,11 +1,10 @@
-import operator
-
-from colc.frontend import Operator, ast
+from colc.frontend import ast
 
 from ._context import Context
 from ._file import File
 from ._scope import Scope, VisitorWithScope
 from ._lexpression import LExpression, LFunction
+from ._operation import Operation
 
 
 def process_constraint(ctx: Context) -> LExpression:
@@ -88,16 +87,11 @@ class VisitorImpl(VisitorWithScope):
         )
 
     def expression_binary(self, expr: ast.ExpressionBinary) -> LExpression:
-        op = expr.operator.switch(
-            {
-                Operator.PLUS: operator.add,
-                Operator.MINUS: operator.sub,
-                Operator.MULTIPLICATION: operator.mul,
-                Operator.DIVISION: operator.truediv,
-            }
-        )
+        left = self.accept(expr.left)
+        right = self.accept(expr.right)
 
-        return op(self.accept(expr.left), self.accept(expr.right))
+        operation = Operation.from_binary_operator(expr.operator, left, right)
+        return operation.evaluate(left, right)
 
     def expression_literal(self, expr: ast.ExpressionLiteral) -> int | str:
         return expr.literal
