@@ -194,6 +194,13 @@ class Transformer(lark.Transformer):
             identifier=self.identifier_from_token(children[0]),
         )
 
+    def expression_attr(self, meta, children):
+        return ast.ExpressionAttr(
+            location=self.location_from_meta(meta),
+            identifier=self.identifier_from_token(children[0]),
+            attribute=self.identifier_from_token(children[2]),
+        )
+
     def expression_binary(self, meta, children):
         return ast.ExpressionBinary(
             location=self.location_from_meta(meta),

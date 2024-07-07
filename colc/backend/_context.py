@@ -4,7 +4,7 @@ from ._file import File
 class Context:
     def __init__(self, file: File):
         self.file = file
-        self.const_pool: list[str | int] = []
+        self.const_pool: list[str | int] = []  # TODO: add compile time type
 
     def intern_const(self, value: str | int) -> int:
         if value in self.const_pool:

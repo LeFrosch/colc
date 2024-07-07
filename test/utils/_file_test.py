@@ -5,25 +5,27 @@ def _do_file_test(self, file: Path):
     with file.open() as f:
         lines = f.readlines()
 
-    input_lines = []
-    output_lines = []
-
+    inputs = {}
     current = None
 
+    # add every line to the right input field
     for line in lines:
         line = line.rstrip('\n')
 
-        if line == '# INPUT':
-            current = input_lines
-        elif line == '# OUTPUT':
-            current = output_lines
-        elif current is not None:
+        if line.startswith('#'):
+            name = line[1:].strip().lower().replace(' ', '_')
+
+            current = inputs.get(name, [])
+            inputs[name] = current
+        else:
             current.append(line)
 
-    self.assertTrue(len(input_lines) > 0, 'no input found')
-    self.assertTrue(len(output_lines) > 0, 'no output found')
+    # remove trailing empty lines
+    for value in inputs.values():
+        while len(value) > 0 and value[-1] == '':
+            value.pop()
 
-    self.do_test('\n'.join(input_lines), '\n'.join(output_lines))
+    self.do_test(**{name: '\n'.join(value) for name, value in inputs.items()})
 
 
 class FileTestMeta(type):

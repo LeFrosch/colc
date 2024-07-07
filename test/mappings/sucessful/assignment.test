@@ -4,6 +4,11 @@ map main {
   b = 1 - 2;
 }
 
+# CONST POOL
+000: 1
+001: 3
+002: 2
+
 # OUTPUT
 000: CONST      0
 001: CONST      1

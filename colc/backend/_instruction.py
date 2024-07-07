@@ -13,6 +13,7 @@ class Opcode(enum.IntEnum):
     MUL = 5
     DIV = 6
     NEG = 7
+    ATTR = 8
 
     def new(self, argument: int = 0) -> 'Instruction':
         assert argument >= 0

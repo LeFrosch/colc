@@ -74,6 +74,7 @@ class ExpressionRef(Expression):
 
 class ExpressionAttr(Expression):
     identifier: Identifier
+    attribute: Identifier
 
 
 class Call(Node):

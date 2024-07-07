@@ -49,3 +49,12 @@ class VisitorImpl(VisitorWithScope):
     def expression_ref(self, expr: ast.ExpressionRef):
         value = self.scope.lookup(expr.identifier)
         self.instructions.append(Opcode.LOAD.new(value.index))
+
+    def expression_attr(self, expr: ast.ExpressionAttr):
+        value = self.scope.lookup(expr.identifier)
+        self.instructions.append(Opcode.LOAD.new(value.index))
+
+        index = self.ctx.intern_const(expr.attribute.name)
+        self.instructions.append(Opcode.CONST.new(index))
+
+        self.instructions.append(Opcode.ATTR.new(0))
