@@ -1,0 +1,14 @@
+# INPUT
+con const(list, n: str) { all:
+  size == n;
+}
+
+con main { all:
+    const(1 + 3) MACHINE;
+}
+
+# OUTPUT
+test.col @ line 6
+>>     const(1 + 3) MACHINE;
+>>           ^^^^^
+fatal problem: cannot assign <int> to <str>

@@ -1,7 +1,7 @@
 import dataclasses
 import typing
 
-from ._text import Location
+from ._text import Location, Position
 from ._string_builder import StringBuilder
 
 
@@ -27,10 +27,13 @@ class FatalProblem(Exception):
         start = range.start_position
         end = range.end_position
 
-        # TODO: support multi-line ranges
-        assert start.line == end.line
-
         line = text.splitlines()[start.line]
+
+        # the range covers multiple lines
+        if start.line != end.line:
+            end = Position(start.line, len(line))
+            line += '...'
+
         length = max(1, end.column - start.column)
         marker = ' ' * start.column + '^' * length
 

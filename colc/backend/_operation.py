@@ -2,9 +2,10 @@ import dataclasses
 import operator
 import typing
 
-from colc.common import internal_problem, fatal_problem
+from colc.common import fatal_problem
 from colc.frontend import Operator, Type
 
+from ._typing import type_from_value
 from ._instruction import Opcode
 
 
@@ -17,8 +18,8 @@ class Operation:
 
     @staticmethod
     def from_binary_operator(op: Operator, left: typing.Any, right: typing.Any) -> 'Operation':
-        type = _type_from_value(left)
-        type_other = _type_from_value(right)
+        type = type_from_value(left)
+        type_other = type_from_value(right)
 
         if type != type_other:
             _undefined_binary_operator(op, type, type_other)
@@ -42,17 +43,6 @@ _binary_operations = [
 _unary_operations = [
     Operation(Type.INTEGER, Operator.SUB, Opcode.I_NEG, operator.neg),
 ]
-
-
-def _type_from_value(value: typing.Any) -> Type:
-    if isinstance(value, Type):
-        return value
-    if isinstance(value, str):
-        return Type.STRING
-    if isinstance(value, int):
-        return Type.INTEGER
-
-    internal_problem(f'cannot determine type of {value}')
 
 
 def _undefined_binary_operator(op: Operator, left: Type, right: Type) -> typing.NoReturn:

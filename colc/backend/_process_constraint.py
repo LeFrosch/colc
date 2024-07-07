@@ -1,3 +1,4 @@
+from colc.common import fatal_problem
 from colc.frontend import ast
 
 from ._context import Context
@@ -5,6 +6,7 @@ from ._file import File
 from ._scope import Scope, VisitorWithScope
 from ._lexpression import LExpression, LFunction
 from ._operation import Operation
+from ._typing import CompiletimeValue, assignable_to, type_from_value
 
 
 def process_constraint(ctx: Context) -> LExpression:
@@ -16,6 +18,26 @@ class VisitorImpl(VisitorWithScope):
     def __init__(self, file: File):
         super().__init__()
         self.file = file
+
+    def scope_from_call(self, call: ast.Call, target) -> Scope:
+        arguments = call.arguments
+        parameters = target.parameters
+
+        if len(arguments) < len(parameters):
+            fatal_problem('not enough arguments', call.identifier)
+        if len(arguments) > len(parameters):
+            fatal_problem('too many arguments', call.identifier)
+
+        scope = Scope()
+        for param, arg in zip(parameters, arguments):
+            value = self.accept(arg)
+
+            if not assignable_to(param.type, value):
+                fatal_problem(f'cannot assign <{type_from_value(value)}> to <{param.type}>', arg)
+
+            scope.define(param.identifier, param.type, value)
+
+        return scope
 
     def c_block(self, block: ast.CBlock) -> LExpression:
         return LExpression(LFunction.from_quantifier(block.quantifier), self.accept_all(block.statements))
@@ -33,12 +55,10 @@ class VisitorImpl(VisitorWithScope):
         )
 
     def _predicate(self, call: ast.Call) -> LExpression:
-        arguments = self.accept_all(call.arguments)
-
         target = self.file.predicate(call.identifier)
-        target_scope = Scope.from_call(call, target.parameters, arguments)
+        scope = self.scope_from_call(call, target)
 
-        return self.accept_with_scope(target_scope, target.block)
+        return self.accept_with_scope(scope, target.block)
 
     def c_statement_with(self, stmt: ast.CStatementWith) -> LExpression:
         return LExpression(
@@ -51,17 +71,15 @@ class VisitorImpl(VisitorWithScope):
         )
 
     def c_statement_call(self, stmt: ast.CStatementCall) -> LExpression:
-        arguments = self.accept_all(stmt.constraint.arguments)
-
-        target = self.file.constraint_type(stmt.constraint.identifier)
-        target_scope = Scope.from_call(stmt.constraint, target.parameters, arguments)
+        constraint = self.file.constraint_type(stmt.constraint.identifier)
+        constraint_scope = self.scope_from_call(stmt.constraint, constraint)
 
         return LExpression(
             LFunction.WITH,
             [
-                target.kind.name,
+                constraint.kind.name,
                 self._predicate(stmt.predicate),
-                self.accept_with_scope(target_scope, target.block),
+                self.accept_with_scope(constraint_scope, constraint.block),
             ],
         )
 
@@ -86,15 +104,18 @@ class VisitorImpl(VisitorWithScope):
             ],
         )
 
-    def expression_binary(self, expr: ast.ExpressionBinary) -> LExpression:
+    def expression_binary(self, expr: ast.ExpressionBinary) -> CompiletimeValue:
         left = self.accept(expr.left)
         right = self.accept(expr.right)
 
         operation = Operation.from_binary_operator(expr.operator, left, right)
         return operation.evaluate(left, right)
 
-    def expression_literal(self, expr: ast.ExpressionLiteral) -> int | str:
+    def expression_literal(self, expr: ast.ExpressionLiteral) -> CompiletimeValue:
         return expr.literal
 
-    def expression_ref(self, expr: ast.ExpressionRef) -> int | str:
-        return self.scope.lookup(expr.identifier).data
+    def expression_ref(self, expr: ast.ExpressionRef) -> CompiletimeValue:
+        value = self.scope.lookup(expr.identifier).value
+        assert value is not None
+
+        return value
