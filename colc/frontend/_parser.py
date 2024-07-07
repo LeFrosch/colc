@@ -3,7 +3,7 @@ import lark
 from colc.common import TextFile, Location, fatal_problem, internal_problem
 
 from . import _ast as ast
-from ._enums import Type, Quantifier, Comparison, Aggregator, Operator
+from ._enums import Quantifier, Comparison, Aggregator, Operator
 
 
 @lark.v_args(meta=True)
@@ -19,19 +19,24 @@ class Transformer(lark.Transformer):
         )
 
     def identifier_from_token(self, token: lark.Token) -> ast.Identifier:
+        # assert token.type == 'IDENTIFIER', node kind is considered an identifier for now
+
         return ast.Identifier(
             location=self.file.location_from_token(token),
             name=token.value,
         )
 
     def string_from_token(self, token: lark.Token) -> ast.String:
+        assert token.type == 'STRING'
+
         return ast.String(
             location=self.file.location_from_token(token),
             value=token.value[1:-1],
         )
 
-    def parameter_from_children(self, tokens: list) -> list[ast.Parameter]:
-        return [it for it in tokens if isinstance(it, ast.Parameter)]
+    def parameter_from_children(self, tokens: list) -> list[ast.Identifier]:
+        identifier = [it for it in tokens if isinstance(it, lark.Token) and it.type == 'IDENTIFIER'][1:]
+        return [self.identifier_from_token(it) for it in identifier]
 
     def start(self, _, children):
         return children
@@ -40,13 +45,6 @@ class Transformer(lark.Transformer):
         return ast.Include(
             location=self.location_from_meta(meta),
             path=self.string_from_token(children[1]),
-        )
-
-    def parameter(self, meta, children):
-        return ast.Parameter(
-            location=self.location_from_meta(meta),
-            identifier=self.identifier_from_token(children[0]),
-            type=Type.from_token(self.file, children[2]),
         )
 
     def c_definition_type(self, meta, children):
@@ -181,14 +179,12 @@ class Transformer(lark.Transformer):
     def expression_int(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
-            type=Type.INTEGER,
             literal=int(children[0]),
         )
 
     def expression_str(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
-            type=Type.STRING,
             literal=str(children[0][1:-1]),
         )
 

@@ -1,47 +1,56 @@
 import dataclasses
 from typing import Optional, Any
 
-from colc.common import fatal_problem
-from colc.frontend import ast, Visitor, Type
+from colc.common import fatal_problem, internal_problem
+from colc.frontend import ast, Visitor
 
-from ._typing import CompiletimeValue, type_from_value
+CompiletimeValue = str | int
 
 
 @dataclasses.dataclass
 class Definition:
     index: int
-    identifier: ast.Identifier
-    type: Type
+    name: str
     value: Optional[CompiletimeValue]
-
-    def __post_init__(self):
-        if self.value is not None:
-            assert self.type == type_from_value(self.value)
 
 
 class Scope:
     def __init__(self, parent: Optional['Scope'] = None):
         self._parent = parent
-        self._declarations: list[Definition] = []
+        self._definitions: list[Definition] = []
 
         if parent is None:
             self._offset = 0
         else:
-            self._offset = parent._offset + len(parent._declarations)
+            self._offset = parent._offset + len(parent._definitions)
 
-    def define(self, identifier: ast.Identifier, type: Type, value: Optional[CompiletimeValue] = None) -> Definition:
-        definition = next(filter(lambda it: it.identifier.name == identifier.name, self._declarations), None)
+    def _find_definition(self, name: str) -> Optional[Definition]:
+        return next((it for it in self._definitions if it.name == name), None)
+
+    def define(self, identifier: ast.Identifier, value: Optional[CompiletimeValue] = None) -> Definition:
+        definition = self._find_definition(identifier.name)
 
         if definition is not None:
             fatal_problem('identifier is already defined', identifier)
 
-        definition = Definition(self._offset + len(self._declarations), identifier, type, value)
-        self._declarations.append(definition)
+        definition = Definition(self._offset + len(self._definitions), identifier.name, value)
+        self._definitions.append(definition)
+
+        return definition
+
+    def define_synthetic(self, name: str, value: Optional[CompiletimeValue] = None) -> Definition:
+        definition = self._find_definition(name)
+
+        if definition is not None:
+            internal_problem(f'synthetic identifier is already defined {name}')
+
+        definition = Definition(self._offset + len(self._definitions), name, value)
+        self._definitions.append(definition)
 
         return definition
 
     def lookup(self, identifier: ast.Identifier) -> Definition:
-        definition = next(filter(lambda it: it.identifier.name == identifier.name, self._declarations), None)
+        definition = self._find_definition(identifier.name)
 
         if definition is not None:
             return definition

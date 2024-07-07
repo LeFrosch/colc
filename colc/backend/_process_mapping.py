@@ -1,9 +1,8 @@
-from colc.frontend import ast, Type
+from colc.frontend import ast
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
 from ._scope import VisitorWithScope
-from ._operation import Operation
 
 
 def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
@@ -23,6 +22,8 @@ class VisitorImpl(VisitorWithScope):
         self.ctx = ctx
         self.instructions: list[Instruction] = []
 
+        self.scope.define_synthetic('root')
+
     def f_block(self, block: ast.FBlock):
         self.accept_all(block.statements)
 
@@ -30,28 +31,21 @@ class VisitorImpl(VisitorWithScope):
         type = self.accept(stmt.expression)
 
         value = self.scope.define(stmt.identifier, type)
-        self.instructions.append(Opcode.I_STORE.new(value.index))
+        self.instructions.append(Opcode.STORE.new(value.index))
 
     def f_statement_block(self, stmt: ast.FStatementBlock):
         self.accept_with_scope(self.scope.new_child_scope(), stmt.block)
 
     def expression_binary(self, expr: ast.ExpressionBinary):
-        left = self.accept(expr.left)
-        right = self.accept(expr.right)
+        self.accept(expr.left)
+        self.accept(expr.right)
 
-        operation = Operation.from_binary_operator(expr.operator, left, right)
-        self.instructions.append(operation.opcode.new(0))
+        self.instructions.append(Opcode.from_operator(expr.operator).new(0))
 
-        return operation.type
-
-    def expression_literal(self, expr: ast.ExpressionLiteral) -> Type:
+    def expression_literal(self, expr: ast.ExpressionLiteral):
         index = self.ctx.intern_const(expr.literal)
-        self.instructions.append(Opcode.I_CONST.new(index))
+        self.instructions.append(Opcode.CONST.new(index))
 
-        return expr.type
-
-    def expression_ref(self, expr: ast.ExpressionRef) -> Type:
+    def expression_ref(self, expr: ast.ExpressionRef):
         value = self.scope.lookup(expr.identifier)
         self.instructions.append(Opcode.LOAD.new(value.index))
-
-        return value.type

@@ -3,7 +3,7 @@ import typeguard
 
 from colc.common import Location, to_snake_case
 
-from ._enums import Quantifier, Operator, Comparison, Aggregator, Type
+from ._enums import Quantifier, Operator, Comparison, Aggregator
 
 
 class Node:
@@ -49,11 +49,6 @@ class String(Node):
     value: str
 
 
-class Parameter(Node):
-    identifier: Identifier
-    type: Type
-
-
 class Expression(Node):
     pass
 
@@ -70,11 +65,14 @@ class ExpressionUnary(Expression):
 
 
 class ExpressionLiteral(Expression):
-    literal: int | str
-    type: Type
+    literal: int | str  # TODO: introduce compile time value
 
 
 class ExpressionRef(Expression):
+    identifier: Identifier
+
+
+class ExpressionAttr(Expression):
     identifier: Identifier
 
 
@@ -144,7 +142,7 @@ class Definition(Node):
 
 class CDefinitionType(Definition):
     kind: Identifier
-    parameters: list[Parameter]
+    parameters: list[Identifier]
     block: CBlock
 
 
@@ -153,7 +151,7 @@ class CDefinitionMain(Definition):
 
 
 class PDefinition(Definition):
-    parameters: list[Parameter]
+    parameters: list[Identifier]
     block: PBlock
 
 
@@ -179,7 +177,7 @@ class FStatementReturn(FStatement):
 
 
 class FDefinition(Definition):
-    parameters: list[Parameter]
+    parameters: list[Identifier]
     block: FBlock
 
 

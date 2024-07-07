@@ -4,7 +4,7 @@ map main {
 }
 
 # OUTPUT
-000: I_CONST    0
-001: I_CONST    1
-002: S_CONCAT   0
-003: I_STORE    0
+000: CONST      0
+001: CONST      1
+002: ADD        0
+003: STORE      1

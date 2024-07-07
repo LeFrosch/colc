@@ -1,9 +1,9 @@
 # INPUT
-con min(list, n: int) { all:
+con min(list, n) { all:
   size >= n;
 }
 
-con const(list, n: int) { all:
+con const(list, n) { all:
   size == n;
 }
 

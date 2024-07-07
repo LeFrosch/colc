@@ -5,8 +5,6 @@ from ._context import Context
 from ._file import File
 from ._scope import Scope, VisitorWithScope
 from ._lexpression import LExpression, LFunction
-from ._operation import Operation
-from ._typing import CompiletimeValue, assignable_to, type_from_value
 
 
 def process_constraint(ctx: Context) -> LExpression:
@@ -31,11 +29,7 @@ class VisitorImpl(VisitorWithScope):
         scope = Scope()
         for param, arg in zip(parameters, arguments):
             value = self.accept(arg)
-
-            if not assignable_to(param.type, value):
-                fatal_problem(f'cannot assign <{type_from_value(value)}> to <{param.type}>', arg)
-
-            scope.define(param.identifier, param.type, value)
+            scope.define(param, value)
 
         return scope
 
@@ -104,17 +98,16 @@ class VisitorImpl(VisitorWithScope):
             ],
         )
 
-    def expression_binary(self, expr: ast.ExpressionBinary) -> CompiletimeValue:
+    def expression_binary(self, expr: ast.ExpressionBinary) -> int | str:
         left = self.accept(expr.left)
         right = self.accept(expr.right)
 
-        operation = Operation.from_binary_operator(expr.operator, left, right)
-        return operation.evaluate(left, right)
+        return expr.operator.evaluate(left, right)
 
-    def expression_literal(self, expr: ast.ExpressionLiteral) -> CompiletimeValue:
+    def expression_literal(self, expr: ast.ExpressionLiteral) -> int | str:
         return expr.literal
 
-    def expression_ref(self, expr: ast.ExpressionRef) -> CompiletimeValue:
+    def expression_ref(self, expr: ast.ExpressionRef) -> int | str:
         value = self.scope.lookup(expr.identifier).value
         assert value is not None
 

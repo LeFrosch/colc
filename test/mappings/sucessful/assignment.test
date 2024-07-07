@@ -5,11 +5,11 @@ map main {
 }
 
 # OUTPUT
-000: I_CONST    0
-001: I_CONST    1
-002: I_ADD      0
-003: I_STORE    0
-004: I_CONST    0
-005: I_CONST    2
-006: I_SUB      0
-007: I_STORE    1
+000: CONST      0
+001: CONST      1
+002: ADD        0
+003: STORE      1
+004: CONST      0
+005: CONST      2
+006: SUB        0
+007: STORE      2

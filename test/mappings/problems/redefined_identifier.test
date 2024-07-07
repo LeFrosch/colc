@@ -1,0 +1,10 @@
+# INPUT
+map main {
+  root = 3;
+}
+
+# OUTPUT
+test.col @ line 2
+>>   root = 3;
+>>   ^^^^
+fatal problem: identifier is already defined

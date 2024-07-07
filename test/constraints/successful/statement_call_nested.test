@@ -1,11 +1,11 @@
 # INPUT
 /include/ "std";
 
-con test2(CORE, b: int) { all:
+con test2(CORE, b) { all:
   id == b;
 }
 
-con test1(MACHINE, a: int) { all:
+con test1(MACHINE, a) { all:
   id == a;
 
   const(1) test2(a);

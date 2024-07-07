@@ -1,7 +1,7 @@
 # INPUT
 /include/ "std";
 
-con test(MACHINE, a: int, a: int) { all:
+con test(MACHINE, a, a) { all:
   id == a;
 }
 
@@ -11,6 +11,6 @@ con main { all:
 
 # OUTPUT
 test.col @ line 3
->> con test(MACHINE, a: int, a: int) { all:
->>                           ^
+>> con test(MACHINE, a, a) { all:
+>>                      ^
 fatal problem: identifier is already defined

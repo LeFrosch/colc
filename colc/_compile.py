@@ -44,6 +44,7 @@ def compile_file(file: TextFile) -> Object:
     ctx = Context(parse_file(file))
 
     return Object(
+        ctx=ctx,
         constraint=process_constraint(ctx),
         mappings=process_mappings(ctx),
     )

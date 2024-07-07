@@ -1,23 +1,35 @@
 import dataclasses
 import enum
 
+from colc.frontend import Operator
+
 
 class Opcode(enum.IntEnum):
-    I_CONST = 0
-    I_STORE = 1
+    CONST = 0
+    STORE = 1
     LOAD = 2
-    I_ADD = 3
-    I_SUB = 4
-    I_MUL = 5
-    I_DIV = 6
-    I_NEG = 7
-    S_CONCAT = 8
+    ADD = 3
+    SUB = 4
+    MUL = 5
+    DIV = 6
+    NEG = 7
 
     def new(self, argument: int = 0) -> 'Instruction':
         assert argument >= 0
         assert argument <= 255
 
         return Instruction(self, argument)
+
+    @staticmethod
+    def from_operator(op: Operator) -> 'Opcode':
+        return op.switch(
+            {
+                Operator.ADD: Opcode.ADD,
+                Operator.SUB: Opcode.SUB,
+                Operator.MUL: Opcode.MUL,
+                Operator.DIV: Opcode.DIV,
+            }
+        )
 
 
 @dataclasses.dataclass

@@ -1,7 +1,5 @@
 # INPUT
-con const(list, n: int) { all:
-  size == n;
-}
+/include/ "std";
 
 con name(MACHINE) { all:
   os == "linux";

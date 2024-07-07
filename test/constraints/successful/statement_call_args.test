@@ -1,9 +1,7 @@
 # INPUT
-con const(list, n: int) { all:
-  size == n;
-}
+/include/ "std";
 
-con name(MACHINE, os: str, memory: int) { all:
+con name(MACHINE, os, memory) { all:
   os == os;
 
   const(1) MEMORY { all:

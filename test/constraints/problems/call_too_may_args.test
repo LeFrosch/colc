@@ -1,14 +1,12 @@
 # INPUT
-con const(list, n: int) { all:
-  size == n;
-}
+/include/ "std";
 
 con main { all:
     const(1, 2, 3) MACHINE;
 }
 
 # OUTPUT
-test.col @ line 6
+test.col @ line 4
 >>     const(1, 2, 3) MACHINE;
 >>     ^^^^^
 fatal problem: too many arguments
