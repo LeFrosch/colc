@@ -10,3 +10,4 @@ from ._process_mapping import process_mappings as process_mappings
 from ._file import File as File
 
 from ._context import Context as Context
+from ._config import Config as Config

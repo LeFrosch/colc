@@ -1,0 +1,21 @@
+# INPUT
+map main {
+  a = root.attr + 1;
+  b = a + 3;
+}
+
+# CONST POOL
+000: attr
+001: 1
+002: 3
+
+# OUTPUT
+000: LOAD       0
+001: ATTR       0
+002: CONST      1
+003: ADD        0
+004: STORE      1
+005: LOAD       1
+006: CONST      2
+007: ADD        0
+008: STORE      2

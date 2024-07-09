@@ -1,7 +1,8 @@
 import operator
+from typing import Optional
 
 from colc.common import fatal_problem
-from colc.frontend import Operator, Value, ComptimeValue, Type
+from colc.frontend import Operator, Value, RuntimeValue, ComptimeValue, Type
 
 _definitions = {
     Operator.ADD: [Type.INTEGER, Type.STRING],
@@ -9,6 +10,17 @@ _definitions = {
     Operator.MUL: [Type.INTEGER],
     Operator.DIV: [Type.INTEGER],
 }
+
+
+# TODO: move this some where else
+def type_check(value: Value, expected: Optional[Type]) -> bool:
+    actual = value.type_hint
+
+    # if a type is not known default to true
+    if actual is None or expected is None:
+        return True
+
+    return actual == expected
 
 
 def op_type_check(op: Operator, left: Value, right: Value) -> bool:
@@ -47,8 +59,5 @@ def op_evaluate(op: Operator, left: Value, right: Value) -> Value:
     if not op_type_check(op, left, right):
         _undefined_operator_problem(op, left, right)
 
-    if isinstance(left, ComptimeValue) and isinstance(right, ComptimeValue):
-        return op_comptime_evaluate(op, left, right)
-
     # for now the return type for all operators is equal to the input types
-    return Value(left.type_hint or right.type_hint)
+    return RuntimeValue(left.type_hint or right.type_hint)

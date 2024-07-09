@@ -1,4 +1,5 @@
 import enum
+import abc
 from typing import Optional
 
 from colc.common import internal_problem
@@ -10,28 +11,35 @@ class Type(enum.StrEnum):
     NODE = 'node'
 
 
-class Value:
-    _default = None
-
+class Value(abc.ABC):
     type_hint: Optional[Type]
 
-    def __init__(self, hint: Optional[Type] = None):
-        self.type_hint = hint
+    @property
+    @abc.abstractmethod
+    def is_comptime(self) -> bool:
+        pass
+
+    @property
+    @abc.abstractmethod
+    def is_runtime(self) -> bool:
+        pass
+
+
+class RuntimeValue(Value):
+    def __init__(self, type_hint: Optional[Type] = None):
+        self.type_hint = type_hint
 
     @property
     def is_comptime(self) -> bool:
         return False
 
-    @classmethod
-    def default(cls):
-        if cls._default is None:
-            cls._default = object.__new__(cls)
-            cls._default.type_hint = None
-
-        return cls._default
+    @property
+    def is_runtime(self) -> bool:
+        return True
 
 
 class ComptimeValue(Value):
+    type_hint: Type
     comptime: str | int
 
     def __init__(self, value: str | int):
@@ -48,11 +56,9 @@ class ComptimeValue(Value):
     def is_comptime(self) -> bool:
         return True
 
-    def __repr__(self):
-        return self.comptime.__repr__()
+    @property
+    def is_runtime(self) -> bool:
+        return False
 
-    def __eq__(self, other):
-        if isinstance(other, ComptimeValue):
-            return self.comptime == other.comptime
-        else:
-            return False
+
+DefaultValue = RuntimeValue()

@@ -9,6 +9,7 @@ from .backend import LExpression as LExpression
 from .backend import LFunction as LFunction
 from .backend import Opcode as Opcode
 from .backend import Instruction as Instruction
+from .backend import Config as Config
 
 from .common import TextFile as TextFile
 from .common import InternalProblem as InternalProblem

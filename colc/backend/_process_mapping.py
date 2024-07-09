@@ -1,10 +1,11 @@
-from colc.frontend import ast, Value, Type
+from colc.frontend import ast, Value, DefaultValue, RuntimeValue, Type
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
-from ._scope import VisitorWithScope
+from ._scope import VisitorWithScope, RuntimeDefinition
 from ._operator import op_evaluate
 from ._process_expression import process_expression
+from ._config import Optimization
 
 
 def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
@@ -24,18 +25,21 @@ class VisitorImpl(VisitorWithScope):
         self.ctx = ctx
         self.instructions: list[Instruction] = []
 
-        self.scope.define_synthetic('root', Value(Type.NODE))
+        self.scope.define_synthetic('root', RuntimeValue(Type.NODE))
 
     def accept_expr(self, expr: ast.Expression, load: bool = False) -> Value:
-        # this is backtracking search, not very fast but works great
-        value = process_expression(self.scope, expr)
+        if self.ctx.config.enabled(Optimization.COMPTIME_EVALUATION):
+            # this is backtracking search, not very fast but works great
+            value = process_expression(self.scope, expr)
+        else:
+            value = None
 
         # if value could not be determined at compile time, generate instructions
         if value is None:
-            return self.accept(expr)
+            value = self.accept(expr)
 
         # if value was determined at compile time, load value onto stack
-        if load:
+        if load and value.is_comptime:
             index = self.ctx.intern_const(value.comptime)
             self.instructions.append(Opcode.CONST.new(index))
 
@@ -48,7 +52,7 @@ class VisitorImpl(VisitorWithScope):
         value = self.accept_expr(stmt.expression)
         definition = self.scope.define(stmt.identifier, value)
 
-        if not value.is_comptime:
+        if isinstance(definition, RuntimeDefinition):
             self.instructions.append(Opcode.STORE.new(definition.index))
 
     def f_statement_block(self, stmt: ast.FStatementBlock):
@@ -68,19 +72,17 @@ class VisitorImpl(VisitorWithScope):
     def expression_ref(self, expr: ast.ExpressionRef) -> Value:
         definition = self.scope.lookup(expr.identifier)
 
-        if not definition.is_comptime:
+        if isinstance(definition, RuntimeDefinition):
             self.instructions.append(Opcode.LOAD.new(definition.index))
 
         return definition.value
 
     def expression_attr(self, expr: ast.ExpressionAttr):
-        definition = self.scope.lookup(expr.identifier)
+        definition = self.scope.lookup_runtime(expr.identifier, expected_type=Type.NODE)
         self.instructions.append(Opcode.LOAD.new(definition.index))
 
         index = self.ctx.intern_const(expr.attribute.name)
-        self.instructions.append(Opcode.CONST.new(index))
-
-        self.instructions.append(Opcode.ATTR.new(0))
+        self.instructions.append(Opcode.ATTR.new(index))
 
         # the type of a node property is not known
-        return Value.default()
+        return DefaultValue

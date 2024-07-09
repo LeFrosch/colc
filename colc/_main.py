@@ -12,6 +12,7 @@ class Args(argparse.Namespace):
     input_file: str
     output_file: str
     compression: Compression
+    optimization: list[str]
 
 
 def parse_arguments() -> Args:
@@ -45,6 +46,15 @@ def parse_arguments() -> Args:
         help='compression to apply to the object',
         dest='compression',
         default=Compression.NONE,
+    )
+
+    parser.add_argument(
+        '-O',
+        '--optimization',
+        type=str,
+        nargs='+',
+        help='enable or disable specific optimizations',
+        dest='optimization',
     )
 
     return parser.parse_args(namespace=Args())

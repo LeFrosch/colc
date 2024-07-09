@@ -1,0 +1,11 @@
+# INPUT
+map main {
+  a = 3;
+  b = a.attr;
+}
+
+# OUTPUT
+test.col @ line 3
+>>   b = a.attr;
+>>       ^
+fatal problem: expected identifier of type node

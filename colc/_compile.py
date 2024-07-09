@@ -1,7 +1,8 @@
 import pathlib
+from typing import Optional
 
 from colc.common import TextFile, fatal_problem, read_file
-from colc.backend import File, Context, process_constraint, process_mappings
+from colc.backend import File, Context, Config, process_constraint, process_mappings
 from colc.frontend import parse, ast
 
 from ._object import Object
@@ -40,8 +41,8 @@ def parse_file(file: TextFile) -> File:
     return File(file, includes, definitions)
 
 
-def compile_file(file: TextFile) -> Object:
-    ctx = Context(parse_file(file))
+def compile_file(file: TextFile, config: Optional[Config] = None) -> Object:
+    ctx = Context(config or Config(), parse_file(file))
 
     return Object(
         ctx=ctx,
@@ -50,5 +51,5 @@ def compile_file(file: TextFile) -> Object:
     )
 
 
-def compile(path: str) -> Object:
-    return compile_file(read_file(path))
+def compile(path: str, config: Optional[Config] = None) -> Object:
+    return compile_file(read_file(path), config)

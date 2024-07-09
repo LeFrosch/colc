@@ -8,6 +8,5 @@ map main {
 
 # OUTPUT
 000: LOAD       0
-001: CONST      0
-002: ATTR       0
-003: STORE      1
+001: ATTR       0
+002: STORE      1

@@ -1,31 +1,27 @@
 import pathlib
-from typing import Tuple
+from typing import Tuple, Optional
 
 from colc import TextFile, parse_file, LExpression, Instruction, Object
-from colc.backend import Context, process_constraint, process_mappings
+from colc.backend import Context, Config, process_constraint, process_mappings
 
 
-def create_test_file(text: str) -> TextFile:
-    return TextFile(pathlib.Path('test.col'), text)
+def create_test_context(text: str, config: Optional[Config]) -> Context:
+    file = TextFile(pathlib.Path('test.col'), text)
+    return Context(config or Config(), parse_file(file))
 
 
-def compile_constraint(text: str) -> Tuple[Context, LExpression]:
-    file = create_test_file(text)
-    ctx = Context(parse_file(file))
-
+def compile_constraint(text: str, config: Optional[Config] = None) -> Tuple[Context, LExpression]:
+    ctx = create_test_context(text, config)
     return ctx, process_constraint(ctx)
 
 
-def compile_mappings(text: str) -> Tuple[Context, dict[str, list[Instruction]]]:
-    file = create_test_file(text)
-    ctx = Context(parse_file(file))
-
+def compile_mappings(text: str, config: Optional[Config] = None) -> Tuple[Context, dict[str, list[Instruction]]]:
+    ctx = create_test_context(text, config)
     return ctx, process_mappings(ctx)
 
 
-def compile_object(text: str) -> Tuple[Context, Object]:
-    file = create_test_file(text)
-    ctx = Context(parse_file(file))
+def compile_object(text: str, config: Optional[Config] = None) -> Tuple[Context, Object]:
+    ctx = create_test_context(text, config)
 
     return ctx, Object(
         ctx=ctx,

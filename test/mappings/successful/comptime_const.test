@@ -12,8 +12,7 @@ map main {
 
 # OUTPUT
 000: LOAD       0
-001: CONST      0
-002: ATTR       0
-003: CONST      1
-004: ADD        0
-005: STORE      3
+001: ATTR       0
+002: CONST      1
+003: ADD        0
+004: STORE      1

@@ -1,10 +1,12 @@
 from colc.frontend import ComptimeValue
 
 from ._file import File
+from ._config import Config
 
 
 class Context:
-    def __init__(self, file: File):
+    def __init__(self, config: Config, file: File):
+        self.config = config
         self.file = file
         self.const_pool: list[int | str] = []
 

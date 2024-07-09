@@ -1,6 +1,6 @@
 import unittest
 
-from colc import Instruction
+from colc import Instruction, Config
 from test.utils import FileTestMeta, compile_mappings
 
 
@@ -18,8 +18,9 @@ def _format_instruction(index: int, instruction: Instruction):
 
 
 class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
-    def do_test(self, input, output, const_pool=None):
-        ctx, mappings = compile_mappings(input)
+    def do_test(self, input, output, const_pool=None, optimizations=''):
+        config = Config(optimizations=optimizations.split('\n'))
+        ctx, mappings = compile_mappings(input, config)
         self.assertGreater(len(mappings), 0)
 
         mapping = next(iter(mappings.values()))

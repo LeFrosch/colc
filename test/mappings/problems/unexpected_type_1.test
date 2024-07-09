@@ -1,0 +1,11 @@
+# INPUT
+map main {
+  a = 3;
+  b = a + "str";
+}
+
+# OUTPUT
+test.col @ line 3
+>>   b = a + "str";
+>>         ^
+fatal problem: undefined operator <int> + <str>
