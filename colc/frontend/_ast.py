@@ -87,6 +87,10 @@ class Call(Node):
     arguments: list[Expression]
 
 
+class ExpressionCall(Expression):
+    call: Call
+
+
 class CStatement(Node):
     pass
 

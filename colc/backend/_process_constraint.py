@@ -1,12 +1,12 @@
 from typing import Collection
 
-from colc.common import fatal_problem, internal_problem
+from colc.common import internal_problem
 from colc.frontend import ast, ComptimeValue, Quantifier
 
 from ._context import Context
-from ._scope import Scope, VisitorWithScope
+from ._scope import VisitorWithScope
 from ._lexpression import LExpression, LFunction
-from ._process_expression import process_expression
+from ._process_expression import process_expression, scope_from_call
 from ._config import Optimization
 
 
@@ -20,24 +20,8 @@ class VisitorImpl(VisitorWithScope):
         super().__init__()
         self.ctx = ctx
 
-    def scope_from_call(self, call: ast.Call, target) -> Scope:
-        arguments = call.arguments
-        parameters = target.parameters
-
-        if len(arguments) < len(parameters):
-            fatal_problem('not enough arguments', call.identifier)
-        if len(arguments) > len(parameters):
-            fatal_problem('too many arguments', call.identifier)
-
-        scope = Scope()
-        for param, arg in zip(parameters, arguments):
-            value = self.accept_expr(arg)
-            scope.define(param, value)
-
-        return scope
-
     def accept_expr(self, expr: ast.Expression) -> ComptimeValue:
-        value = process_expression(self.scope, expr)
+        value = process_expression(self.ctx, self.scope, expr)
 
         if value is None:
             internal_problem('non comptime value in constraint')
@@ -54,7 +38,7 @@ class VisitorImpl(VisitorWithScope):
 
     def accept_predicate(self, call: ast.Call) -> LExpression:
         target = self.ctx.file.predicate(call.identifier)
-        scope = self.scope_from_call(call, target)
+        scope = scope_from_call(call, target, self.accept_expr)
 
         return self.accept_with_scope(scope, target.block)
 
@@ -85,7 +69,7 @@ class VisitorImpl(VisitorWithScope):
 
     def c_statement_call(self, stmt: ast.CStatementCall) -> LExpression:
         constraint = self.ctx.file.constraint_type(stmt.constraint.identifier)
-        constraint_scope = self.scope_from_call(stmt.constraint, constraint)
+        constraint_scope = scope_from_call(stmt.constraint, constraint, self.accept_expr)
 
         return LExpression(
             LFunction.WITH,

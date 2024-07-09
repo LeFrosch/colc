@@ -1,0 +1,14 @@
+# INPUT
+fun test() {
+  return;
+}
+
+map main {
+  a = root.attr + test();
+}
+
+# OUTPUT
+test.col @ line 6
+>>   a = root.attr + test();
+>>                   ^^^^^^
+fatal problem: none in expression

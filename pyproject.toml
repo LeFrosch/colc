@@ -28,8 +28,5 @@ packages = ["colc"]
 [tool.ruff]
 line-length = 120
 
-[tool.ruff.lint]
-ignore = []
-
 [tool.ruff.format]
 quote-style = "single"

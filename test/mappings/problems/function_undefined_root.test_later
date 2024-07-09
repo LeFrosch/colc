@@ -1,0 +1,14 @@
+# INPUT
+fun test() {
+  return root.attr;
+}
+
+map main {
+  a = test();
+}
+
+# OUTPUT
+test.col @ line 2
+>>   root = 3;
+>>   ^^^^
+fatal problem: identifier is already defined

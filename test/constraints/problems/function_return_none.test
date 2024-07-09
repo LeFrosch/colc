@@ -1,0 +1,14 @@
+# INPUT
+fun test() {
+  return;
+}
+
+con main { all:
+  size >= test();
+}
+
+# OUTPUT
+test.col @ line 6
+>>   size >= test();
+>>           ^^^^^^
+fatal problem: none in expression

@@ -179,7 +179,7 @@ class Transformer(lark.Transformer):
             expression=children[2],
         )
 
-    def f_statement_return(self, meta, children):
+    def f_statement_ret(self, meta, children):
         return ast.FStatementReturn(
             location=self.location_from_meta(meta),
             expression=children[1],
@@ -208,6 +208,12 @@ class Transformer(lark.Transformer):
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
             attribute=self.identifier_from_token(children[2]),
+        )
+
+    def expression_call(self, meta, children):
+        return ast.ExpressionCall(
+            location=self.location_from_meta(meta),
+            call=children[0],
         )
 
     def expression_binary(self, meta, children):

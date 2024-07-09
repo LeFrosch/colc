@@ -105,9 +105,9 @@ class Scope:
 
 
 class VisitorWithScope(Visitor):
-    def __init__(self):
+    def __init__(self, scope: Optional[Scope] = None):
         super().__init__()
-        self.scope = Scope()
+        self.scope = scope or Scope()
 
     def accept_with_scope(self, scope: Scope, node: Optional[ast.Node]) -> Any:
         current_scope = self.scope

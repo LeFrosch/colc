@@ -1,0 +1,14 @@
+# INPUT
+fun test() {
+  return;
+}
+
+map main {
+  a = test();
+}
+
+# OUTPUT
+test.col @ line 6
+>>   a = test();
+>>       ^^^^^^
+fatal problem: none in expression

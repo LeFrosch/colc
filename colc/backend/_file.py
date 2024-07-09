@@ -50,3 +50,11 @@ class File:
             fatal_problem('undefined identifier', identifier)
 
         return typing.cast(ast.PDefinition, definition)
+
+    def function(self, identifier: ast.Identifier) -> ast.FDefinition:
+        definition = self._resolve(ast.FDefinition, identifier.name)
+
+        if definition is None:
+            fatal_problem('undefined identifier', identifier)
+
+        return typing.cast(ast.FDefinition, definition)

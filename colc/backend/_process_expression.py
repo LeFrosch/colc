@@ -1,38 +1,90 @@
 from typing import Optional
 
-from colc.frontend import ast, Visitor, ComptimeValue
+from colc.common import fatal_problem
+from colc.frontend import ast, ComptimeValue
 
-from ._scope import Scope
+from ._scope import Scope, VisitorWithScope
 from ._operator import op_comptime_evaluate
+from ._context import Context
 
 
-def process_expression(scope: Scope, expr: ast.Expression) -> Optional[ComptimeValue]:
-    return ComptimeVisitorImpl(scope).accept(expr)
+class CannotProcessAtComptime(Exception):
+    pass
 
 
-class ComptimeVisitorImpl(Visitor):
-    def __init__(self, scope: Scope):
-        self.scope = scope
+def process_expression(ctx: Context, scope: Scope, expr: ast.Expression) -> Optional[ComptimeValue]:
+    try:
+        return ComptimeVisitorImpl(ctx, scope).accept(expr)
+    except CannotProcessAtComptime:
+        return None
 
-    def expression_binary(self, expr: ast.ExpressionBinary) -> Optional[ComptimeValue]:
+
+def scope_from_call(call: ast.Call, target, accept_expr) -> Scope:
+    arguments = call.arguments
+    parameters = target.parameters
+
+    if len(arguments) < len(parameters):
+        fatal_problem('not enough arguments', call.identifier)
+    if len(arguments) > len(parameters):
+        fatal_problem('too many arguments', call.identifier)
+
+    scope = Scope()
+    for param, arg in zip(parameters, arguments):
+        value = accept_expr(arg)
+        scope.define(param, value)
+
+    return scope
+
+
+class ComptimeVisitorImpl(VisitorWithScope):
+    def __init__(self, ctx: Context, scope: Scope):
+        super().__init__(scope)
+        self.ctx = ctx
+
+    def expression_binary(self, expr: ast.ExpressionBinary) -> ComptimeValue:
         left = self.accept(expr.left)
         right = self.accept(expr.right)
 
-        if left is None or right is None:
-            return None
-
         return op_comptime_evaluate(expr.operator, left, right)
 
-    def expression_literal(self, expr: ast.ExpressionLiteral) -> Optional[ComptimeValue]:
+    def expression_literal(self, expr: ast.ExpressionLiteral) -> ComptimeValue:
         return expr.value
 
-    def expression_ref(self, expr: ast.ExpressionRef) -> Optional[ComptimeValue]:
+    def expression_ref(self, expr: ast.ExpressionRef) -> ComptimeValue:
         value = self.scope.lookup(expr.identifier).value
 
         if isinstance(value, ComptimeValue):
             return value
         else:
-            return None
+            raise CannotProcessAtComptime()
 
-    def expression_attr(self, expr: ast.ExpressionAttr) -> Optional[ComptimeValue]:
+    def expression_attr(self, _: ast.ExpressionAttr) -> ComptimeValue:
+        raise CannotProcessAtComptime()
+
+    def expression_call(self, expr: ast.ExpressionCall) -> ComptimeValue:
+        call = expr.call
+        func = self.ctx.file.function(call.identifier)
+
+        value = self.accept_with_scope(scope_from_call(call, func, self.accept), func.block)
+        if value is None:
+            fatal_problem('none in expression', call)
+
+        return value
+
+    def f_block(self, expr: ast.FBlock) -> Optional[ComptimeValue]:
+        for stmt in expr.statements:
+            if isinstance(stmt, ast.FStatementReturn):
+                return self.accept(stmt)
+
+            self.accept(stmt)
+
         return None
+
+    def f_statement_return(self, stmt: ast.FStatementReturn) -> Optional[ComptimeValue]:
+        if stmt.expression is None:
+            return None
+        else:
+            return self.accept(stmt.expression)
+
+    def f_statement_assign(self, stmt: ast.FStatementAssign):
+        self.scope.define(stmt.identifier, self.accept(stmt.expression))

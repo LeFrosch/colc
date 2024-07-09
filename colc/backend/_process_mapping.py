@@ -30,7 +30,7 @@ class VisitorImpl(VisitorWithScope):
     def accept_expr(self, expr: ast.Expression, load: bool = False) -> Value:
         if self.ctx.config.enabled(Optimization.COMPTIME_EVALUATION):
             # this is backtracking search, not very fast but works great
-            value = process_expression(self.scope, expr)
+            value = process_expression(self.ctx, self.scope, expr)
         else:
             value = None
 
