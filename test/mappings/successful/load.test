@@ -12,9 +12,9 @@ no-comptime-evaluation
 001: 1
 
 # OUTPUT
-000: CONST      0
-001: CONST      1
+000: CONST      0 = (3)
+001: CONST      1 = (1)
 002: ADD        0
-003: STORE      1
-004: LOAD       1
-005: STORE      2
+003: STORE      1 = (a)
+004: LOAD       1 = (a)
+005: STORE      2 = (b)

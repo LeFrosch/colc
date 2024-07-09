@@ -5,8 +5,14 @@ from colc.backend import LExpression, Instruction, Context
 
 class Object:
     version: str
+
+    # main constraint
     constraint: LExpression
+
+    # shared pool of constant definitions
     const_pool: list[str | int]
+
+    # map from mapping name to bytecode instructions
     mappings: dict[str, list[Instruction]]
 
     def __init__(self, ctx: Context, constraint: LExpression, mappings: dict[str, list[Instruction]]):

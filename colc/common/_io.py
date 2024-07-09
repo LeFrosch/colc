@@ -19,7 +19,6 @@ def write_file(path: pathlib.Path | str, data: bytes):
         path = pathlib.Path(path)
 
     try:
-        print(f'data size: {len(data)}')
         path.write_bytes(data)
     except IOError:
         fatal_problem(f'could not write file {path}')

@@ -10,12 +10,12 @@ map main {
 002: 3
 
 # OUTPUT
-000: LOAD       0
-001: ATTR       0
-002: CONST      1
+000: LOAD       0 = (root)
+001: ATTR       0 = (attr)
+002: CONST      1 = (1)
 003: ADD        0
-004: STORE      1
-005: LOAD       1
-006: CONST      2
+004: STORE      1 = (a)
+005: LOAD       1 = (a)
+006: CONST      2 = (3)
 007: ADD        0
-008: STORE      2
+008: STORE      2 = (b)

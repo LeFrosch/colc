@@ -1,5 +1,6 @@
 import dataclasses
 import enum
+from typing import Optional
 
 from colc.frontend import Operator
 
@@ -15,11 +16,11 @@ class Opcode(enum.IntEnum):
     NEG = 7
     ATTR = 8
 
-    def new(self, argument: int = 0) -> 'Instruction':
+    def new(self, argument: int = 0, debug: Optional[str] = None) -> 'Instruction':
         assert argument >= 0
         assert argument <= 255
 
-        return Instruction(self, argument)
+        return Instruction(self, argument, debug)
 
     @staticmethod
     def from_operator(op: Operator) -> 'Opcode':
@@ -37,6 +38,7 @@ class Opcode(enum.IntEnum):
 class Instruction:
     opcode: Opcode
     argument: int
+    debug: Optional[str]
 
     def __getstate__(self):
         return self.opcode << 8 | self.argument
@@ -44,3 +46,4 @@ class Instruction:
     def __setstate__(self, state):
         self.opcode = Opcode(state >> 8)
         self.argument = state & 0xFF
+        self.debug = None

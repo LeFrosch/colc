@@ -1,10 +1,12 @@
 import argparse
 import sys
 
+from colc.backend import Config
 from colc.common import InternalProblem, FatalProblem, write_file
 
 from ._compile import compile
 from ._encode import encode, Compression
+from ._debug import print_debug_info
 from .__about__ import __version__, __description__
 
 
@@ -57,6 +59,14 @@ def parse_arguments() -> Args:
         dest='optimization',
     )
 
+    parser.add_argument(
+        '--dbg',
+        action='store_true',
+        default=False,
+        help='prints debug information of the object',
+        dest='debug',
+    )
+
     return parser.parse_args(namespace=Args())
 
 
@@ -64,9 +74,12 @@ def main():
     args = parse_arguments()
 
     try:
-        obj = compile(args.input_file)
-        raw = encode(obj, compression=args.compression)
+        obj = compile(args.input_file, Config(optimizations=args.optimization))
 
+        if args.debug:
+            print_debug_info(obj)
+
+        raw = encode(obj, compression=args.compression)
         write_file(args.output_file, raw)
     except (InternalProblem, FatalProblem) as e:
         print(e.render(), file=sys.stderr)

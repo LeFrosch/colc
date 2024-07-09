@@ -41,7 +41,7 @@ class VisitorImpl(VisitorWithScope):
         # if value was determined at compile time, load value onto stack
         if load and value.is_comptime:
             index = self.ctx.intern_const(value.comptime)
-            self.instructions.append(Opcode.CONST.new(index))
+            self.instructions.append(Opcode.CONST.new(index, repr(value.comptime)))
 
         return value
 
@@ -53,7 +53,7 @@ class VisitorImpl(VisitorWithScope):
         definition = self.scope.define(stmt.identifier, value)
 
         if isinstance(definition, RuntimeDefinition):
-            self.instructions.append(Opcode.STORE.new(definition.index))
+            self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
 
     def f_statement_block(self, stmt: ast.FStatementBlock):
         self.accept_with_scope(self.scope.new_child_scope(), stmt.block)
@@ -73,16 +73,16 @@ class VisitorImpl(VisitorWithScope):
         definition = self.scope.lookup(expr.identifier)
 
         if isinstance(definition, RuntimeDefinition):
-            self.instructions.append(Opcode.LOAD.new(definition.index))
+            self.instructions.append(Opcode.LOAD.new(definition.index, expr.identifier.name))
 
         return definition.value
 
     def expression_attr(self, expr: ast.ExpressionAttr):
         definition = self.scope.lookup_runtime(expr.identifier, expected_type=Type.NODE)
-        self.instructions.append(Opcode.LOAD.new(definition.index))
+        self.instructions.append(Opcode.LOAD.new(definition.index, expr.identifier.name))
 
         index = self.ctx.intern_const(expr.attribute.name)
-        self.instructions.append(Opcode.ATTR.new(index))
+        self.instructions.append(Opcode.ATTR.new(index, expr.attribute.name))
 
         # the type of a node property is not known
         return DefaultValue
