@@ -46,6 +46,10 @@ class Identifier(Node):
     name: str
 
 
+class Kind(Node):
+    name: str
+
+
 class String(Node):
     value: str
 
@@ -109,7 +113,7 @@ class CStatementCall(CStatement):
 
 class CStatementWith(CStatement):
     predicate: Call
-    kind: Identifier
+    kind: Kind
     block: typing.Optional[CBlock]
 
 
@@ -133,7 +137,7 @@ class PStatementSize(PStatement):
 
 class PStatementAggr(PStatement):
     aggregator: Aggregator
-    kind: Identifier
+    kind: Kind
     comparison: Comparison
     expression: Expression
 
@@ -143,7 +147,7 @@ class Definition(Node):
 
 
 class CDefinitionType(Definition):
-    kind: Identifier
+    kind: Kind
     parameters: list[Identifier]
     block: CBlock
 

@@ -1,0 +1,12 @@
+# INPUT
+con test(list) { all:
+  size >= 2;
+  sum(CORE) **= 2;
+}
+
+con main { all:
+  test() MACHINE;
+}
+
+# OUTPUT
+[WITH, 'MACHINE', [ALL, [GREATER_EQUAL, [LIST_SIZE], 2], [POWER, [LIST_SUM, 'CORE'], 2]]]

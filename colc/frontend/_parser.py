@@ -20,9 +20,17 @@ class Transformer(lark.Transformer):
         )
 
     def identifier_from_token(self, token: lark.Token) -> ast.Identifier:
-        # assert token.type == 'IDENTIFIER', node kind is considered an identifier for now
+        assert token.type in ['IDENTIFIER', 'MAIN']
 
         return ast.Identifier(
+            location=self.file.location_from_token(token),
+            name=token.value,
+        )
+
+    def kind_from_token(self, token: lark.Token) -> ast.Kind:
+        assert token.type == 'NODE_KIND'
+
+        return ast.Kind(
             location=self.file.location_from_token(token),
             name=token.value,
         )
@@ -52,7 +60,7 @@ class Transformer(lark.Transformer):
         return ast.CDefinitionType(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[1]),
-            kind=self.identifier_from_token(children[3]),
+            kind=self.kind_from_token(children[3]),
             parameters=self.parameter_from_children(children),
             block=children[-1],
         )
@@ -96,7 +104,7 @@ class Transformer(lark.Transformer):
         return ast.CStatementWith(
             location=self.location_from_meta(meta),
             predicate=children[0],
-            kind=self.identifier_from_token(children[1]),
+            kind=self.kind_from_token(children[1]),
             block=children[2],
         )
 
@@ -132,7 +140,7 @@ class Transformer(lark.Transformer):
         return ast.PStatementAggr(
             location=self.location_from_meta(meta),
             aggregator=Aggregator.from_token(self.file, children[0]),
-            kind=children[2],
+            kind=self.kind_from_token(children[2]),
             comparison=Comparison.from_token(self.file, children[4]),
             expression=children[5],
         )
@@ -240,5 +248,5 @@ def parse(file: TextFile) -> list[ast.Node]:
         fatal_problem('unexpected character', file.location_from_position(e.line - 1, e.column - 1))
     except lark.UnexpectedEOF:
         fatal_problem('unexpected end of input')
-    except Exception as e:
-        internal_problem('parser error', e)
+    except lark.exceptions.VisitError as e:
+        internal_problem('visit error', e.orig_exc)

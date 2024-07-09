@@ -83,3 +83,5 @@ def main():
         write_file(args.output_file, raw)
     except (InternalProblem, FatalProblem) as e:
         print(e.render(), file=sys.stderr)
+    except AssertionError as e:
+        print(InternalProblem('assertion failed', e).render(), file=sys.stderr)
