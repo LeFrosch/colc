@@ -16,4 +16,4 @@ con main { all:
 }
 
 # OUTPUT
-[ALL, [WITH, 'MACHINE', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL, [EQUAL, [ATTR, 'id'], 420], [WITH, 'CORE', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL, [EQUAL, [ATTR, 'id'], 420]]]]]]
+[WITH, 'MACHINE', [EQUAL, [LIST_SIZE], 1], [ALL, [EQUAL, [ATTR, 'id'], 420], [WITH, 'CORE', [EQUAL, [LIST_SIZE], 1], [EQUAL, [ATTR, 'id'], 420]]]]

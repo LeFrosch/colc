@@ -7,4 +7,4 @@ con main { any:
 }
 
 # OUTPUT
-[ANY, [WITH, 'CORE', [ALL, [EQUAL, [LIST_SIZE], 2]]], [WITH, 'SOCKET', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL]]]
+[ANY, [WITH, 'CORE', [EQUAL, [LIST_SIZE], 2]], [WITH, 'SOCKET', [EQUAL, [LIST_SIZE], 1], [ALL]]]

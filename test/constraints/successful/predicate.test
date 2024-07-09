@@ -13,4 +13,4 @@ con main { all:
 }
 
 # OUTPUT
-[ALL, [WITH, 'CORE', [ALL, [GREATER_EQUAL, [LIST_SIZE], 4]]], [WITH, 'MEMORY', [ALL, [EQUAL, [LIST_SIZE], 1]]]]
+[ALL, [WITH, 'CORE', [GREATER_EQUAL, [LIST_SIZE], 4]], [WITH, 'MEMORY', [EQUAL, [LIST_SIZE], 1]]]

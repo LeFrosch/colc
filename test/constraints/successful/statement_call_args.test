@@ -14,4 +14,4 @@ con main { any:
 }
 
 # OUTPUT
-[ANY, [WITH, 'MACHINE', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL, [EQUAL, [ATTR, 'os'], 'windows'], [WITH, 'MEMORY', [ALL, [EQUAL, [LIST_SIZE], 1]], [ALL, [EQUAL, [ATTR, 'size'], 4096]]]]]]
+[WITH, 'MACHINE', [EQUAL, [LIST_SIZE], 1], [ALL, [EQUAL, [ATTR, 'os'], 'windows'], [WITH, 'MEMORY', [EQUAL, [LIST_SIZE], 1], [EQUAL, [ATTR, 'size'], 4096]]]]

@@ -10,4 +10,4 @@ con main { any:
 }
 
 # OUTPUT
-[ANY, [WITH, 'MACHINE', [ALL, [EQUAL, [LIST_SIZE], 3]], [ALL, [EQUAL, [ATTR, 'os'], 'linux']]]]
+[WITH, 'MACHINE', [EQUAL, [LIST_SIZE], 3], [EQUAL, [ATTR, 'os'], 'linux']]

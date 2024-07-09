@@ -8,5 +8,8 @@ con main { all:
   { any: };
 }
 
+# OPTIMIZATIONS
+no-redundant-quantifier
+
 # OUTPUT
 [ALL, [ONE, [ALL]], [ANY]]

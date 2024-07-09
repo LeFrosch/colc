@@ -4,4 +4,4 @@ con main { all:
 }
 
 # OUTPUT
-[ALL, [EQUAL, [ATTR, 'id'], 'abcdef']]
+[EQUAL, [ATTR, 'id'], 'abcdef']
