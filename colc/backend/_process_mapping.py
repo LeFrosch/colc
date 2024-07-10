@@ -1,4 +1,5 @@
-from colc.frontend import ast, Value, DefaultValue, RuntimeValue, ComptimeValue, Type
+from colc.common import fatal_problem
+from colc.frontend import ast, Value, AnyValue, RuntimeValue, ComptimeValue, Type
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
@@ -72,6 +73,19 @@ class VisitorImpl(VisitorWithScope):
     def f_statement_block(self, stmt: ast.FStatementBlock):
         self.accept_with_scope(self.scope.new_child_scope(), stmt.block)
 
+    def f_statement_if(self, stmt: ast.FStatementIf):
+        value = self.accept_expr(stmt.condition)
+
+        if not value.assignable_to(Type.BOOLEAN):
+            fatal_problem('expected <bool>', stmt.condition)
+
+        if isinstance(value, ComptimeValue):
+            if value.comptime:
+                self.accept(stmt.if_block)
+            else:
+                self.accept(stmt.else_block)
+            return
+
     def expression_binary(self, expr: ast.ExpressionBinary) -> Value:
         left = self.accept_expr(expr.left, load=True)
         right = self.accept_expr(expr.right, load=True)
@@ -99,4 +113,4 @@ class VisitorImpl(VisitorWithScope):
         self.instructions.append(Opcode.ATTR.new(index, expr.attribute.name))
 
         # the type of a node property is not known
-        return DefaultValue
+        return AnyValue

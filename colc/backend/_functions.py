@@ -1,8 +1,8 @@
 import dataclasses
-from typing import Protocol, Any
+from typing import Protocol, Any, cast
 
 from colc.common import fatal_problem, internal_problem
-from colc.frontend import Operator, Value, RuntimeValue, ComptimeValue, Type
+from colc.frontend import Operator, Value, RuntimeValue, ComptimeValue, Type, Comparison
 
 
 class EvaluateCallable(Protocol):
@@ -55,14 +55,18 @@ def operator_infer(op: Operator, left: Value, right: Value) -> RuntimeValue:
     return RuntimeValue(set(return_types))
 
 
+def comparison_infer(comp: Comparison, left: Value, right: Value) -> RuntimeValue:
+    return operator_infer(cast(Operator, comp), left, right)
+
+
 def operator_evaluate(op: Operator, left: ComptimeValue, right: ComptimeValue) -> ComptimeValue:
     candidates = [
         it
         for it in _functions
         if it.name == op
         and len(it.parameter) == 2
-        and it.parameter[0] == left.concrete_type
-        and it.parameter[1] == right.concrete_type
+        and it.parameter[0] in left.possible_types
+        and it.parameter[1] in right.possible_types
     ]
 
     if len(candidates) == 0:

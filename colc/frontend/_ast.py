@@ -1,5 +1,5 @@
-import typing
 import typeguard
+from typing import Optional
 
 from colc.common import Location, to_snake_case
 
@@ -118,7 +118,7 @@ class CStatementCall(CStatement):
 class CStatementWith(CStatement):
     predicate: Call
     kind: Kind
-    block: typing.Optional[CBlock]
+    block: Optional[CBlock]
 
 
 class PStatement(Node):
@@ -183,7 +183,13 @@ class FStatementAssign(FStatement):
 
 
 class FStatementReturn(FStatement):
-    expression: typing.Optional[Expression]
+    expression: Optional[Expression]
+
+
+class FStatementIf(FStatement):
+    condition: Expression
+    if_block: FBlock
+    else_block: Optional[FBlock]
 
 
 class FDefinition(Definition):

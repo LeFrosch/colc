@@ -10,5 +10,5 @@ map main {
 # OUTPUT
 test.col @ line 6
 >>   a = root.attr + test();
->>                   ^^^^^^
-fatal problem: none in expression
+>>                 ^
+fatal problem: undefined operator <any> + <none>

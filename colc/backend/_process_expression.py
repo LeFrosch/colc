@@ -1,7 +1,7 @@
 from typing import Optional
 
 from colc.common import fatal_problem
-from colc.frontend import ast, ComptimeValue
+from colc.frontend import ast, ComptimeValue, NoneValue
 
 from ._scope import Scope, VisitorWithScope
 from ._context import Context
@@ -12,11 +12,18 @@ class CannotProcessAtComptime(Exception):
     pass
 
 
+class ReturnAtComptime(Exception):
+    def __init__(self, value: ComptimeValue):
+        self.value = value
+
+
 def process_expression(ctx: Context, scope: Scope, expr: ast.Expression) -> Optional[ComptimeValue]:
     try:
         return ComptimeVisitorImpl(ctx, scope).accept(expr)
     except CannotProcessAtComptime:
         return None
+    except ReturnAtComptime as e:
+        return e.value
 
 
 def scope_from_call(call: ast.Call, target, accept_expr) -> Scope:
@@ -31,7 +38,7 @@ def scope_from_call(call: ast.Call, target, accept_expr) -> Scope:
     scope = Scope()
     for param, arg in zip(parameters, arguments):
         value = accept_expr(arg)
-        scope.define(param, value)
+        scope.define(param, value, final=True)
 
     return scope
 
@@ -65,26 +72,25 @@ class ComptimeVisitorImpl(VisitorWithScope):
         call = expr.call
         func = self.ctx.file.function(call.identifier)
 
-        value = self.accept_with_scope(scope_from_call(call, func, self.accept), func.block)
-        if value is None:
-            fatal_problem('none in expression', call)
+        return self.accept_with_scope(scope_from_call(call, func, self.accept), func.block)
 
-        return value
-
-    def f_block(self, expr: ast.FBlock) -> Optional[ComptimeValue]:
+    def f_block(self, expr: ast.FBlock):
         for stmt in expr.statements:
-            if isinstance(stmt, ast.FStatementReturn):
-                return self.accept(stmt)
-
             self.accept(stmt)
 
-        return None
-
-    def f_statement_return(self, stmt: ast.FStatementReturn) -> Optional[ComptimeValue]:
+    def f_statement_return(self, stmt: ast.FStatementReturn):
         if stmt.expression is None:
-            return None
+            raise ReturnAtComptime(NoneValue)
         else:
-            return self.accept(stmt.expression)
+            raise ReturnAtComptime(self.accept(stmt.expression))
 
     def f_statement_assign(self, stmt: ast.FStatementAssign):
         self.scope.define(stmt.identifier, self.accept(stmt.expression))
+
+    def f_statement_if(self, stmt: ast.FStatementIf):
+        value = self.accept(stmt.condition)
+
+        if value.comptime:
+            self.accept(stmt.if_block)
+        elif stmt.else_block is not None:
+            self.accept(stmt.else_block)

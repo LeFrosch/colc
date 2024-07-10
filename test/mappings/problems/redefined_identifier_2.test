@@ -1,0 +1,14 @@
+# INPUT
+fun test(a) {
+  a = 3;
+}
+
+map main {
+  b = test(4);
+}
+
+# OUTPUT
+test.col @ line 2
+>>   a = 3;
+>>   ^
+fatal problem: final identifier is already defined

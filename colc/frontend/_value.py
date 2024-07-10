@@ -35,13 +35,24 @@ class Value(abc.ABC):
     def is_runtime(self) -> bool:
         pass
 
-    def assignable_to(self, other: Type) -> bool:
-        return other in self.possible_types
+    @property
+    def is_none(self) -> bool:
+        return len(self.possible_types) == 0
+
+    @property
+    def is_any(self) -> bool:
+        return len(self.possible_types) == len(Type)
+
+    def assignable_to(self, types: Type | set[Type]) -> bool:
+        if isinstance(types, set):
+            return len(types & self.possible_types) > 0
+        else:
+            return types in self.possible_types
 
     def __repr__(self):
-        if len(self.possible_types) == 0:
+        if self.is_none:
             return '<none>'
-        if len(self.possible_types) == len(Type):
+        if self.is_any:
             return '<any>'
 
         # sort for testing
@@ -64,14 +75,19 @@ class RuntimeValue(Value):
         return True
 
 
-class ComptimeValue(Value):
-    concrete_type: Type
-    comptime: str | int | bool
+ComptimeValueType = str | int | bool | None
 
-    def __init__(self, value: str | int | bool):
+
+class ComptimeValue(Value):
+    comptime: ComptimeValueType
+
+    def __init__(self, value: ComptimeValueType):
         self.comptime = value
-        self.concrete_type = Type.from_python(type(value))
-        self.possible_types = {self.concrete_type}
+
+        if value is None:
+            self.possible_types = set()
+        else:
+            self.possible_types = {Type.from_python(type(value))}
 
     @property
     def is_comptime(self) -> bool:
@@ -88,4 +104,5 @@ class ComptimeValue(Value):
         return '%s: %s' % (self.comptime, super().__repr__())
 
 
-DefaultValue = RuntimeValue(set(Type))
+AnyValue = RuntimeValue(set(Type))
+NoneValue = ComptimeValue(None)

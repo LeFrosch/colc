@@ -179,10 +179,18 @@ class Transformer(lark.Transformer):
             expression=children[2],
         )
 
-    def f_statement_ret(self, meta, children):
+    def f_statement_return(self, meta, children):
         return ast.FStatementReturn(
             location=self.location_from_meta(meta),
             expression=children[1],
+        )
+
+    def f_statement_if(self, meta, children):
+        return ast.FStatementIf(
+            location=self.location_from_meta(meta),
+            condition=children[1],
+            if_block=children[2],
+            else_block=children[4],
         )
 
     def expression_int(self, meta, children):

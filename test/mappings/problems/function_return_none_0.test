@@ -10,5 +10,5 @@ map main {
 # OUTPUT
 test.col @ line 6
 >>   a = test();
->>       ^^^^^^
-fatal problem: none in expression
+>>   ^
+fatal problem: cannot assign <none>

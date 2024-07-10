@@ -1,13 +1,14 @@
-from typing import Collection
+from typing import Collection, Any
 
 from colc.common import internal_problem
-from colc.frontend import ast, ComptimeValue, Quantifier
+from colc.frontend import ast, ComptimeValue, Quantifier, Comparison, AnyValue
 
 from ._context import Context
 from ._scope import VisitorWithScope
 from ._lexpression import LExpression, LFunction
 from ._process_expression import process_expression, scope_from_call
 from ._config import Optimization
+from ._functions import comparison_infer
 
 
 def process_constraint(ctx: Context) -> LExpression:
@@ -42,6 +43,12 @@ class VisitorImpl(VisitorWithScope):
 
         return self.accept_with_scope(scope, target.block)
 
+    def accept_comparison(self, comparison: Comparison, expr: ast.Expression) -> Any:
+        value = self.accept_expr(expr)
+        comparison_infer(comparison, AnyValue, value)
+
+        return value.comptime
+
     def c_block(self, block: ast.CBlock) -> LExpression:
         return self.accept_block(block.quantifier, block.statements)
 
@@ -53,7 +60,7 @@ class VisitorImpl(VisitorWithScope):
             LFunction.from_comparison(stmt.comparison),
             [
                 LExpression(LFunction.ATTR, [stmt.identifier.name]),
-                self.accept_expr(stmt.expression).comptime,
+                self.accept_comparison(stmt.comparison, stmt.expression),
             ],
         )
 
@@ -91,7 +98,7 @@ class VisitorImpl(VisitorWithScope):
             LFunction.from_comparison(stmt.comparison),
             [
                 LExpression(LFunction.LIST_SIZE, []),
-                self.accept_expr(stmt.expression).comptime,
+                self.accept_comparison(stmt.comparison, stmt.expression),
             ],
         )
 
@@ -100,6 +107,6 @@ class VisitorImpl(VisitorWithScope):
             LFunction.from_comparison(stmt.comparison),
             [
                 LExpression(LFunction.from_aggregator(stmt.aggregator), [stmt.kind.name]),
-                self.accept_expr(stmt.expression).comptime,
+                self.accept_comparison(stmt.comparison, stmt.expression),
             ],
         )

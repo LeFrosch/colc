@@ -14,4 +14,4 @@ class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
         self.assertEqual(output, debug.format_instructions(mapping))
 
         if const_pool:
-            self.assertEqual(const_pool, debug.format_pool(ctx.const_pool))
+            self.assertEqual(const_pool, debug.format_pool(ctx._const_pool))

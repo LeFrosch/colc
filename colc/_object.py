@@ -19,4 +19,4 @@ class Object:
         self.version = __version__
         self.constraint = constraint
         self.mappings = mappings
-        self.const_pool = ctx.const_pool
+        self.const_pool = ctx.get_const_pool()

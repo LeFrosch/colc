@@ -1,0 +1,11 @@
+# INPUT
+map main {
+  a = 3;
+  a = "str";
+}
+
+# OUTPUT
+test.col @ line 3
+>>   a = "str";
+>>   ^
+fatal problem: cannot assign <str> to <int>

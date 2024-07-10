@@ -4,13 +4,14 @@ import itertools
 from typing import Optional, Any
 
 from colc.common import fatal_problem, internal_problem
-from colc.frontend import ast, Visitor, Value, RuntimeValue, ComptimeValue, DefaultValue, Type
+from colc.frontend import ast, Visitor, Value, RuntimeValue, ComptimeValue, AnyValue, Type
 
 
 @dataclasses.dataclass
 class Definition(abc.ABC):
     name: str
     value: Value
+    is_final: bool
 
     @property
     def is_comptime(self) -> bool:
@@ -44,36 +45,54 @@ class Scope:
             self._offset = parent._offset + len(parent._runtime_definitions)
 
     def _find_definition(self, name: str) -> Optional[Definition]:
+        # check runtime values first, comptime definition might have been demoted to runtime
         definitions = itertools.chain(self._runtime_definitions, self._comptime_definitions)
         return next((it for it in definitions if it.name == name), None)
 
-    def _define(self, name: str, value: Value) -> Definition:
+    def _define(self, name: str, value: Value, final: bool) -> Definition:
         if isinstance(value, RuntimeValue):
-            runtime = RuntimeDefinition(name, value, self._offset + len(self._runtime_definitions))
+            runtime = RuntimeDefinition(name, value, final, self._offset + len(self._runtime_definitions))
             self._runtime_definitions.append(runtime)
             return runtime
         elif isinstance(value, ComptimeValue):
-            comptime = ComptimeDefinition(name, value)
+            comptime = ComptimeDefinition(name, value, final)
             self._comptime_definitions.append(comptime)
             return comptime
         else:
             internal_problem(f'unknown value {value}')
 
-    def define(self, identifier: ast.Identifier, value: Value = DefaultValue) -> Definition:
+    def define(self, identifier: ast.Identifier, value: Value = AnyValue, final: bool = False) -> Definition:
+        if value.is_none:
+            fatal_problem('cannot assign <none>', identifier)
+
         definition = self._find_definition(identifier.name)
+        if definition is None:
+            return self._define(identifier.name, value, final)
 
-        if definition is not None:
-            fatal_problem('identifier is already defined', identifier)
+        if definition.is_final:
+            fatal_problem('final identifier is already defined', identifier)
 
-        return self._define(identifier.name, value)
+        if not value.assignable_to(definition.value.possible_types):
+            fatal_problem(f'cannot assign {value} to {definition.value}', identifier)
+
+        # if the definition was comptime we need to update its value or demote it to runtime
+        if isinstance(definition, ComptimeDefinition):
+            if isinstance(value, ComptimeValue):
+                definition.value.comptime = value.comptime
+            else:
+                definition = self._define(identifier.name, value, final)
+
+        return definition
 
     def define_synthetic(self, name: str, value: Value) -> Definition:
-        definition = self._find_definition(name)
+        if value.is_none:
+            internal_problem(f'synthetic value is none {name}')
 
+        definition = self._find_definition(name)
         if definition is not None:
             internal_problem(f'synthetic identifier is already defined {name}')
 
-        return self._define(name, value)
+        return self._define(name, value, final=True)
 
     def lookup(self, identifier: ast.Identifier) -> Definition:
         definition = self._find_definition(identifier.name)

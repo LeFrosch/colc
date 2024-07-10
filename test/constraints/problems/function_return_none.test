@@ -10,5 +10,5 @@ con main { all:
 # OUTPUT
 test.col @ line 6
 >>   size >= test();
->>           ^^^^^^
-fatal problem: none in expression
+>>        ^^
+fatal problem: undefined operator <any> >= <none>

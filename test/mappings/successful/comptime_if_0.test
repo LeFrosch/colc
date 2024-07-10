@@ -1,0 +1,22 @@
+# INPUT
+map main {
+  a = 0;
+
+  if true {
+    a = 2;
+  } else {
+    a = 4;
+  }
+
+  b = root.attr + a;
+}
+
+# CONST POOL
+000: attr
+
+# OUTPUT
+000: LOAD       0 = (root)
+001: ATTR       0 = (attr)
+002: INT        2
+003: ADD        0
+004: STORE      1 = (b)
