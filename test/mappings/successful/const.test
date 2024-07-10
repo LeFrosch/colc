@@ -2,17 +2,21 @@
 map main {
   a = 1;
   b = 2 + a;
+  c = 256 + 1;
 }
 
 # OPTIMIZATIONS
 no-comptime-evaluation
 
 # CONST POOL
-000: 2
-001: 1
+000: 256
 
 # OUTPUT
-000: CONST      0 = (2)
-001: CONST      1 = (1)
+000: INT        2
+001: INT        1
 002: ADD        0
 003: STORE      1 = (b)
+004: CONST      0 = (256)
+005: INT        1
+006: ADD        0
+007: STORE      2 = (c)

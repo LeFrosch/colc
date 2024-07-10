@@ -1,0 +1,7 @@
+# INPUT
+3 >= 4 -> False: <bool>
+"str" + "str" == "strstr" -> True: <bool>
+8 / 2 + 4 * 15 -> 64: <int>
+8 *= 4 -> True: <bool>
+8 **= 4 -> False: <bool>
+16 **= 4 -> True: <bool>

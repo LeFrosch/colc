@@ -5,7 +5,7 @@ from colc import TextFile, parse_file, LExpression, Instruction, Object
 from colc.backend import Context, Config, process_constraint, process_mappings
 
 
-def create_test_context(text: str, config: Optional[Config]) -> Context:
+def create_test_context(text: str, config: Optional[Config] = None) -> Context:
     file = TextFile(pathlib.Path('test.col'), text)
     return Context(config or Config(), parse_file(file))
 

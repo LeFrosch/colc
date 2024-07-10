@@ -1,7 +1,7 @@
 # INPUT
 map main {
-  a = 3;
-  b = root.attr + a;
+  b = 256 >= 4;
+  c = root.attr && b;
 }
 
 # CONST POOL
@@ -10,6 +10,6 @@ map main {
 # OUTPUT
 000: LOAD       0 = (root)
 001: ATTR       0 = (attr)
-002: INT        3
-003: ADD        0
-004: STORE      1 = (b)
+002: TRUE       0
+003: AND        0
+004: STORE      1 = (c)

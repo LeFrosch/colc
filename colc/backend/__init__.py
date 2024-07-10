@@ -11,3 +11,6 @@ from ._file import File as File
 
 from ._context import Context as Context
 from ._config import Config as Config
+
+# ensure implementations are loaded
+from . import _functions_impl as _functions_impl

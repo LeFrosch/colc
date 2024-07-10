@@ -1,0 +1,20 @@
+# INPUT
+map main {
+  a = 4 <= 5 + 8;
+  b = a && true;
+}
+
+# OPTIMIZATIONS
+no-comptime-evaluation
+
+# OUTPUT
+000: INT        4
+001: INT        5
+002: INT        8
+003: ADD        0
+004: LEQ        0
+005: STORE      1 = (a)
+006: LOAD       1 = (a)
+007: TRUE       0
+008: AND        0
+009: STORE      2 = (b)

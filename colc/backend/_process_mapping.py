@@ -1,11 +1,11 @@
-from colc.frontend import ast, Value, DefaultValue, RuntimeValue, Type
+from colc.frontend import ast, Value, DefaultValue, RuntimeValue, ComptimeValue, Type
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
 from ._scope import VisitorWithScope, RuntimeDefinition
-from ._operator import op_evaluate
 from ._process_expression import process_expression
 from ._config import Optimization
+from ._functions import operator_infer
 
 
 def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
@@ -25,7 +25,22 @@ class VisitorImpl(VisitorWithScope):
         self.ctx = ctx
         self.instructions: list[Instruction] = []
 
-        self.scope.define_synthetic('root', RuntimeValue(Type.NODE))
+        self.scope.define_synthetic('root', RuntimeValue({Type.NODE}))
+
+    def instruction_for_const(self, value: ComptimeValue):
+        comptime = value.comptime
+
+        if comptime is True:
+            instruction = Opcode.TRUE.new(0)
+        elif comptime is False:
+            instruction = Opcode.FALSE.new(0)
+        elif isinstance(comptime, int) and 0 <= comptime <= 255:
+            instruction = Opcode.INT.new(comptime)
+        else:
+            index = self.ctx.intern_const(comptime)
+            instruction = Opcode.CONST.new(index, repr(comptime))
+
+        self.instructions.append(instruction)
 
     def accept_expr(self, expr: ast.Expression, load: bool = False) -> Value:
         if self.ctx.config.enabled(Optimization.COMPTIME_EVALUATION):
@@ -40,8 +55,7 @@ class VisitorImpl(VisitorWithScope):
 
         # if value was determined at compile time, load value onto stack
         if load and value.is_comptime:
-            index = self.ctx.intern_const(value.comptime)
-            self.instructions.append(Opcode.CONST.new(index, repr(value.comptime)))
+            self.instruction_for_const(value)
 
         return value
 
@@ -58,13 +72,13 @@ class VisitorImpl(VisitorWithScope):
     def f_statement_block(self, stmt: ast.FStatementBlock):
         self.accept_with_scope(self.scope.new_child_scope(), stmt.block)
 
-    def expression_binary(self, expr: ast.ExpressionBinary):
+    def expression_binary(self, expr: ast.ExpressionBinary) -> Value:
         left = self.accept_expr(expr.left, load=True)
         right = self.accept_expr(expr.right, load=True)
 
         self.instructions.append(Opcode.from_operator(expr.operator).new(0))
 
-        return op_evaluate(expr.operator, left, right)
+        return operator_infer(expr.operator, left, right)
 
     def expression_literal(self, expr: ast.ExpressionLiteral) -> Value:
         return expr.value
@@ -78,7 +92,7 @@ class VisitorImpl(VisitorWithScope):
         return definition.value
 
     def expression_attr(self, expr: ast.ExpressionAttr):
-        definition = self.scope.lookup_runtime(expr.identifier, expected_type=Type.NODE)
+        definition = self.scope.lookup_runtime(expr.identifier, expected=Type.NODE)
         self.instructions.append(Opcode.LOAD.new(definition.index, expr.identifier.name))
 
         index = self.ctx.intern_const(expr.attribute.name)

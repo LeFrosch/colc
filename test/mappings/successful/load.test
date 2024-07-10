@@ -1,6 +1,6 @@
 # INPUT
 map main {
-  a = 3 + 1;
+  a = 301 + 500;
   b = a;
 }
 
@@ -8,12 +8,12 @@ map main {
 no-comptime-evaluation
 
 # CONST POOL
-000: 3
-001: 1
+000: 301
+001: 500
 
 # OUTPUT
-000: CONST      0 = (3)
-001: CONST      1 = (1)
+000: CONST      0 = (301)
+001: CONST      1 = (500)
 002: ADD        0
 003: STORE      1 = (a)
 004: LOAD       1 = (a)

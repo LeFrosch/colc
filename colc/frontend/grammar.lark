@@ -17,7 +17,14 @@ COMPARISON: "==" | "!=" | "<=" | ">=" | "<" | ">" | "*=" | "**="
 QUANTIFIER: "all:" | "any:" | "one:"
 AGGREGATOR: "min" | "max" | "sum" | "avg"
 
-?expression: expression_sum
+?expression: expression_bool
+
+?expression_bool: expression_comp
+  | expression_comp "&&" expression_comp -> expression_binary
+  | expression_comp "||" expression_comp -> expression_binary
+
+?expression_comp: expression_sum
+  | expression_sum COMPARISON expression_sum -> expression_binary
 
 ?expression_sum: expression_prod
   | expression_sum "+" expression_prod -> expression_binary
@@ -29,11 +36,14 @@ AGGREGATOR: "min" | "max" | "sum" | "avg"
 
 ?expression_atom: INTEGER     -> expression_int
   | STRING                    -> expression_str
+  | "true"                    -> expression_true
+  | "false"                   -> expression_false
   | "-" expression_atom       -> expression_neg
+  | "!" expression_atom       -> expression_not
   | IDENTIFIER                -> expression_ref
   | call                      -> expression_call
   | IDENTIFIER "." IDENTIFIER -> expression_attr
-  | "(" expression_sum ")"
+  | "(" expression ")"
 
 _list{item}: | item ("," item)*
 _c_list{item}: "," _list{item}

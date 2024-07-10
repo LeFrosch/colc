@@ -40,14 +40,14 @@ class LFunction(enum.IntEnum):
     def from_comparison(comparison: Comparison) -> 'LFunction':
         return comparison.switch(
             {
-                Comparison.EQUAL: LFunction.EQUAL,
-                Comparison.NOT_EQUAL: LFunction.NOT_EQUAL,
-                Comparison.LESS: LFunction.LESS,
-                Comparison.LESS_EQUAL: LFunction.LESS_EQUAL,
-                Comparison.GREATER: LFunction.GREATER,
-                Comparison.GREATER_EQUAL: LFunction.GREATER_EQUAL,
-                Comparison.MULTIPLE: LFunction.MULTIPLE,
-                Comparison.POWER: LFunction.POWER,
+                Comparison.EQL: LFunction.EQUAL,
+                Comparison.NEQ: LFunction.NOT_EQUAL,
+                Comparison.LES: LFunction.LESS,
+                Comparison.LEQ: LFunction.LESS_EQUAL,
+                Comparison.GRE: LFunction.GREATER,
+                Comparison.GEQ: LFunction.GREATER_EQUAL,
+                Comparison.MUT: LFunction.MULTIPLE,
+                Comparison.POW: LFunction.POWER,
             }
         )
 

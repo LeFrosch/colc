@@ -6,16 +6,14 @@ map main {
 
 # CONST POOL
 000: attr
-001: 1
-002: 3
 
 # OUTPUT
 000: LOAD       0 = (root)
 001: ATTR       0 = (attr)
-002: CONST      1 = (1)
+002: INT        1
 003: ADD        0
 004: STORE      1 = (a)
 005: LOAD       1 = (a)
-006: CONST      2 = (3)
+006: INT        3
 007: ADD        0
 008: STORE      2 = (b)

@@ -197,6 +197,18 @@ class Transformer(lark.Transformer):
             value=ComptimeValue(str(children[0])[1:-1]),
         )
 
+    def expression_true(self, meta, _):
+        return ast.ExpressionLiteral(
+            location=self.location_from_meta(meta),
+            value=ComptimeValue(True),
+        )
+
+    def expression_false(self, meta, _):
+        return ast.ExpressionLiteral(
+            location=self.location_from_meta(meta),
+            value=ComptimeValue(False),
+        )
+
     def expression_ref(self, meta, children):
         return ast.ExpressionRef(
             location=self.location_from_meta(meta),

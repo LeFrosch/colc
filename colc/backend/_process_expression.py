@@ -4,8 +4,8 @@ from colc.common import fatal_problem
 from colc.frontend import ast, ComptimeValue
 
 from ._scope import Scope, VisitorWithScope
-from ._operator import op_comptime_evaluate
 from ._context import Context
+from ._functions import operator_evaluate
 
 
 class CannotProcessAtComptime(Exception):
@@ -45,7 +45,7 @@ class ComptimeVisitorImpl(VisitorWithScope):
         left = self.accept(expr.left)
         right = self.accept(expr.right)
 
-        return op_comptime_evaluate(expr.operator, left, right)
+        return operator_evaluate(expr.operator, left, right)
 
     def expression_literal(self, expr: ast.ExpressionLiteral) -> ComptimeValue:
         return expr.value

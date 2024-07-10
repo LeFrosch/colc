@@ -6,8 +6,6 @@ from typing import Optional, Any
 from colc.common import fatal_problem, internal_problem
 from colc.frontend import ast, Visitor, Value, RuntimeValue, ComptimeValue, DefaultValue, Type
 
-from ._operator import type_check
-
 
 @dataclasses.dataclass
 class Definition(abc.ABC):
@@ -87,12 +85,12 @@ class Scope:
 
         fatal_problem('undefined identifier', identifier)
 
-    def lookup_runtime(self, identifier: ast.Identifier, expected_type: Optional[Type] = None) -> RuntimeDefinition:
+    def lookup_runtime(self, identifier: ast.Identifier, expected: Type) -> RuntimeDefinition:
         definition = self.lookup(identifier)
 
         # do type check first, because this error is easier to understand
-        if not type_check(definition.value, expected_type):
-            fatal_problem(f'expected identifier of type {expected_type}', identifier)
+        if not definition.value.assignable_to(expected):
+            fatal_problem(f'expected identifier of type {expected}', identifier)
 
         # not sure if this actually is an internal problem or if there are cases where this is just fatal
         if not isinstance(definition, RuntimeDefinition):

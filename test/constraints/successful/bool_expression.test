@@ -1,0 +1,8 @@
+# INPUT
+con main { all:
+  value1 == true && false;
+  value2 == true || false;
+}
+
+# OUTPUT
+[ALL, [EQUAL, [ATTR, 'value1'], False], [EQUAL, [ATTR, 'value2'], True]]

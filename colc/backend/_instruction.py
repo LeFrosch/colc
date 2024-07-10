@@ -6,15 +6,34 @@ from colc.frontend import Operator
 
 
 class Opcode(enum.IntEnum):
-    CONST = 0
-    STORE = 1
-    LOAD = 2
-    ADD = 3
-    SUB = 4
-    MUL = 5
-    DIV = 6
-    NEG = 7
-    ATTR = 8
+    # basic instructions
+    CONST = 0x00
+    STORE = 0x01
+    LOAD = 0x02
+    ATTR = 0x03
+
+    # operators
+    ADD = 0x10
+    SUB = 0x11
+    MUL = 0x12
+    DIV = 0x13
+    AND = 0x14
+    OR = 0x15
+    NEG = 0x16
+    NOT = 0x17
+    EQL = 0x18
+    NEQ = 0x19
+    LES = 0x1A
+    LEQ = 0x1B
+    GRE = 0x1C
+    GEQ = 0x1D
+    MUT = 0x1E
+    POW = 0x1F
+
+    # const values
+    TRUE = 0x20
+    FALSE = 0x21
+    INT = 0x22
 
     def new(self, argument: int = 0, debug: Optional[str] = None) -> 'Instruction':
         assert argument >= 0
@@ -30,6 +49,16 @@ class Opcode(enum.IntEnum):
                 Operator.SUB: Opcode.SUB,
                 Operator.MUL: Opcode.MUL,
                 Operator.DIV: Opcode.DIV,
+                Operator.AND: Opcode.AND,
+                Operator.OR: Opcode.OR,
+                Operator.EQL: Opcode.EQL,
+                Operator.NEQ: Opcode.NEQ,
+                Operator.LES: Opcode.LES,
+                Operator.LEQ: Opcode.LEQ,
+                Operator.GRE: Opcode.GRE,
+                Operator.GEQ: Opcode.GEQ,
+                Operator.MUT: Opcode.MUT,
+                Operator.POW: Opcode.POW,
             }
         )
 

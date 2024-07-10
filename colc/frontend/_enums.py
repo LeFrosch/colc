@@ -1,20 +1,23 @@
 import enum
-import typing
 import lark
+from typing import Self, Optional, TypeVar
 
 from colc.common import internal_problem, TextFile, Location
 
-T = typing.TypeVar('T')
+T = TypeVar('T')
 
 
 class AstEnum(enum.StrEnum):
     location: Location
 
-    def switch(self, cases: dict[typing.Self, T]) -> T:
-        return cases[self]
+    def switch(self, cases: dict[Self, T], orelse: Optional[T] = None) -> T:
+        if orelse is None:
+            return cases[self]
+        else:
+            return cases.get(self, orelse)
 
     @classmethod
-    def from_token(cls, file: TextFile, token: lark.Token) -> typing.Self:
+    def from_token(cls, file: TextFile, token: lark.Token) -> Self:
         try:
             value = cls.__new__(cls, token.value)
         except ValueError as e:
@@ -25,14 +28,14 @@ class AstEnum(enum.StrEnum):
 
 
 class Comparison(AstEnum):
-    EQUAL = '=='
-    NOT_EQUAL = '!='
-    LESS = '<'
-    LESS_EQUAL = '<='
-    GREATER = '>'
-    GREATER_EQUAL = '>='
-    MULTIPLE = '*='
-    POWER = '**='
+    EQL = '=='
+    NEQ = '!='
+    LES = '<'
+    LEQ = '<='
+    GRE = '>'
+    GEQ = '>='
+    MUT = '*='
+    POW = '**='
 
 
 class Operator(AstEnum):
@@ -40,6 +43,32 @@ class Operator(AstEnum):
     SUB = '-'
     MUL = '*'
     DIV = '/'
+    AND = '&&'
+    OR = '||'
+    EQL = '=='
+    NEQ = '!='
+    LES = '<'
+    LEQ = '<='
+    GRE = '>'
+    GEQ = '>='
+    MUT = '*='
+    POW = '**='
+    NOT = '!'
+
+    def is_comparison(self) -> bool:
+        return self.switch(
+            {
+                Operator.EQL: True,
+                Operator.NEQ: True,
+                Operator.LES: True,
+                Operator.LEQ: True,
+                Operator.GRE: True,
+                Operator.GEQ: True,
+                Operator.MUT: True,
+                Operator.POW: True,
+            },
+            orelse=False,
+        )
 
 
 class Quantifier(AstEnum):
