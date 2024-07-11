@@ -1,6 +1,6 @@
 from typing import Optional
 
-from colc.common import fatal_problem
+from colc.common import fatal_problem, internal_problem
 from colc.frontend import ast, ComptimeValue, NoneValue
 
 from ._scope import Scope, VisitorWithScope
@@ -22,8 +22,8 @@ def process_expression(ctx: Context, scope: Scope, expr: ast.Expression) -> Opti
         return ComptimeVisitorImpl(ctx, scope).accept(expr)
     except CannotProcessAtComptime:
         return None
-    except ReturnAtComptime as e:
-        return e.value
+    except ReturnAtComptime:
+        internal_problem('leaked return exception')
 
 
 def scope_from_call(call: ast.Call, target, accept_expr) -> Scope:
@@ -72,7 +72,11 @@ class ComptimeVisitorImpl(VisitorWithScope):
         call = expr.call
         func = self.ctx.file.function(call.identifier)
 
-        return self.accept_with_scope(scope_from_call(call, func, self.accept), func.block)
+        try:
+            self.accept_with_scope(scope_from_call(call, func, self.accept), func.block)
+            return NoneValue
+        except ReturnAtComptime as e:
+            return e.value
 
     def f_block(self, expr: ast.FBlock):
         for stmt in expr.statements:
@@ -85,7 +89,8 @@ class ComptimeVisitorImpl(VisitorWithScope):
             raise ReturnAtComptime(self.accept(stmt.expression))
 
     def f_statement_assign(self, stmt: ast.FStatementAssign):
-        self.scope.define(stmt.identifier, self.accept(stmt.expression))
+        value = self.accept(stmt.expression)  # this might temporarily change the current scope
+        self.scope.define(stmt.identifier, value)
 
     def f_statement_if(self, stmt: ast.FStatementIf):
         value = self.accept(stmt.condition)

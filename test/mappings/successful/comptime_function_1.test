@@ -1,0 +1,23 @@
+# INPUT
+fun test0() {
+  return 1;
+}
+
+fun test1() {
+  a = test0();
+  return a + 5;
+}
+
+map main {
+  a = root.attr + test1();
+}
+
+# CONST POOL
+000: attr
+
+# OUTPUT
+000: LOAD       0 = (root)
+001: ATTR       0 = (attr)
+002: INT        6
+003: ADD        0
+004: STORE      1 = (a)
