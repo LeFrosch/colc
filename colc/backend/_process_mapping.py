@@ -1,11 +1,10 @@
 from colc.common import fatal_problem
-from colc.frontend import ast, Value, AnyValue, RuntimeValue, ComptimeValue, Type
+from colc.frontend import ast, Value, AnyValue, ComptimeValue, Type, Qualifier
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
 from ._scope import VisitorWithScope, RuntimeDefinition
 from ._process_expression import process_expression
-from ._config import Optimization
 from ._functions import operator_infer
 
 
@@ -20,13 +19,29 @@ def process_mapping(ctx: Context, mapping: ast.MDefinition) -> list[Instruction]
     return visitor.instructions
 
 
+class JmpAnchor:
+    def __init__(self, instructions: list[Instruction], opcode: Opcode):
+        self._instructions = instructions
+        self._instruction = opcode.new(0)
+
+        instructions.append(self._instruction)
+        self._address = len(instructions)
+
+    def set_address(self):
+        offset = len(self._instructions) - self._address
+        assert 0 < offset < 265
+
+        self._instruction.argument = offset
+        self._instruction.debug = str(len(self._instructions))
+
+
 class VisitorImpl(VisitorWithScope):
     def __init__(self, ctx: Context):
         super().__init__()
         self.ctx = ctx
         self.instructions: list[Instruction] = []
 
-        self.scope.define_synthetic('root', RuntimeValue({Type.NODE}))
+        self.scope.define_synthetic('root', Type.NODE)
 
     def instruction_for_const(self, value: ComptimeValue):
         comptime = value.comptime
@@ -44,11 +59,8 @@ class VisitorImpl(VisitorWithScope):
         self.instructions.append(instruction)
 
     def accept_expr(self, expr: ast.Expression, load: bool = False) -> Value:
-        if self.ctx.config.enabled(Optimization.COMPTIME_EVALUATION):
-            # this is backtracking search, not very fast but works great
-            value = process_expression(self.ctx, self.scope, expr)
-        else:
-            value = None
+        # this is backtracking search, not very fast but works great
+        value = process_expression(self.ctx, self.scope, expr)
 
         # if value could not be determined at compile time, generate instructions
         if value is None:
@@ -63,28 +75,40 @@ class VisitorImpl(VisitorWithScope):
     def f_block(self, block: ast.FBlock):
         self.accept_all(block.statements)
 
-    def f_statement_assign(self, stmt: ast.FStatementAssign):
-        value = self.accept_expr(stmt.expression)
-        definition = self.scope.define(stmt.identifier, value)
+    def f_statement_define(self, stmt: ast.FStatementDefine):
+        value = self.accept_expr(stmt.expression, load=stmt.qualifier != Qualifier.CONST)
+        definition = self.scope.define(stmt.identifier, value, stmt.qualifier)
 
         if isinstance(definition, RuntimeDefinition):
             self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
+
+    def f_statement_assign(self, stmt: ast.FStatementAssign):
+        value = self.accept_expr(stmt.expression, load=True)
+
+        definition = self.scope.assign(stmt.identifier, value)
+        self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
 
     def f_statement_block(self, stmt: ast.FStatementBlock):
         self.accept_with_scope(self.scope.new_child_scope(), stmt.block)
 
     def f_statement_if(self, stmt: ast.FStatementIf):
-        value = self.accept_expr(stmt.condition)
+        value = self.accept_expr(stmt.condition, load=True)
 
         if not value.assignable_to(Type.BOOLEAN):
             fatal_problem('expected <bool>', stmt.condition)
 
-        if isinstance(value, ComptimeValue):
-            if value.comptime:
-                self.accept(stmt.if_block)
-            else:
-                self.accept(stmt.else_block)
-            return
+        jmp_end = JmpAnchor(self.instructions, Opcode.JMP_FF)
+        self.accept(stmt.if_block)
+
+        if stmt.else_block is not None:
+            jmp = JmpAnchor(self.instructions, Opcode.JMP_F)
+
+            jmp_end.set_address()
+            jmp_end = jmp
+
+            self.accept(stmt.else_block)
+
+        jmp_end.set_address()
 
     def expression_binary(self, expr: ast.ExpressionBinary) -> Value:
         left = self.accept_expr(expr.left, load=True)
@@ -106,7 +130,9 @@ class VisitorImpl(VisitorWithScope):
         return definition.value
 
     def expression_attr(self, expr: ast.ExpressionAttr):
-        definition = self.scope.lookup_runtime(expr.identifier, expected=Type.NODE)
+        definition = self.scope.lookup(expr.identifier, expected=Type.NODE)
+        assert isinstance(definition, RuntimeDefinition)
+
         self.instructions.append(Opcode.LOAD.new(definition.index, expr.identifier.name))
 
         index = self.ctx.intern_const(expr.attribute.name)

@@ -39,7 +39,7 @@ class VisitorImpl(VisitorWithScope):
 
     def accept_predicate(self, call: ast.Call) -> LExpression:
         target = self.ctx.file.predicate(call.identifier)
-        scope = scope_from_call(call, target, self.accept_expr)
+        scope = scope_from_call(self.scope, call, target, self.accept_expr)
 
         return self.accept_with_scope(scope, target.block)
 
@@ -76,7 +76,7 @@ class VisitorImpl(VisitorWithScope):
 
     def c_statement_call(self, stmt: ast.CStatementCall) -> LExpression:
         constraint = self.ctx.file.constraint_type(stmt.constraint.identifier)
-        constraint_scope = scope_from_call(stmt.constraint, constraint, self.accept_expr)
+        constraint_scope = scope_from_call(self.scope, stmt.constraint, constraint, self.accept_expr)
 
         return LExpression(
             LFunction.WITH,

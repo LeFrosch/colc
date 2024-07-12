@@ -27,13 +27,15 @@ class Value(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def is_comptime(self) -> bool:
-        pass
+    def is_comptime(self) -> bool: ...
 
     @property
     @abc.abstractmethod
-    def is_runtime(self) -> bool:
-        pass
+    def is_runtime(self) -> bool: ...
+
+    @property
+    @abc.abstractmethod
+    def as_runtime(self) -> 'RuntimeValue': ...
 
     @property
     def is_none(self) -> bool:
@@ -74,6 +76,10 @@ class RuntimeValue(Value):
     def is_runtime(self) -> bool:
         return True
 
+    @property
+    def as_runtime(self) -> 'RuntimeValue':
+        return self
+
 
 ComptimeValueType = str | int | bool | None
 
@@ -96,6 +102,10 @@ class ComptimeValue(Value):
     @property
     def is_runtime(self) -> bool:
         return False
+
+    @property
+    def as_runtime(self) -> RuntimeValue:
+        return RuntimeValue(self.possible_types)
 
     def __str__(self):
         return super().__repr__()

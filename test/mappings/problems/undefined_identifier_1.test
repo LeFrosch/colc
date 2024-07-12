@@ -1,11 +1,11 @@
 # INPUT
 map main {
-  { b = 3; }
-  a = b;
+  { var b = 3; }
+  var a = b;
 }
 
 # OUTPUT
 test.col @ line 3
->>   a = b;
->>       ^
+>>   var a = b;
+>>           ^
 fatal problem: undefined identifier

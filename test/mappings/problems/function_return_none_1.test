@@ -4,11 +4,11 @@ fun test() {
 }
 
 map main {
-  a = root.attr + test();
+  var a = root.attr + test();
 }
 
 # OUTPUT
 test.col @ line 6
->>   a = root.attr + test();
->>                 ^
+>>   var a = root.attr + test();
+>>                     ^
 fatal problem: undefined operator <any> + <none>

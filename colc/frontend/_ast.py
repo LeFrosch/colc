@@ -3,7 +3,7 @@ from typing import Optional
 
 from colc.common import Location, to_snake_case
 
-from ._enums import Quantifier, Operator, Comparison, Aggregator
+from ._enums import Quantifier, Operator, Comparison, Aggregator, Qualifier
 from ._value import ComptimeValue
 
 
@@ -175,6 +175,12 @@ class FBlock(Node):
 
 class FStatementBlock(FStatement):
     block: FBlock
+
+
+class FStatementDefine(FStatement):
+    qualifier: Qualifier
+    identifier: Identifier
+    expression: Expression
 
 
 class FStatementAssign(FStatement):

@@ -1,0 +1,9 @@
+# INPUT
+map main {
+  const a = 4 <= 5 + 8;
+  final b = a && true;
+}
+
+# OUTPUT
+000: TRUE       0
+001: STORE      1 = (b)

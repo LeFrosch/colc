@@ -35,6 +35,11 @@ class Opcode(enum.IntEnum):
     FALSE = 0x21
     INT = 0x22
 
+    # control flow
+    JMP_F = 0x30
+    JMP_FF = 0x31
+    JMP_B = 0x32
+
     def new(self, argument: int = 0, debug: Optional[str] = None) -> 'Instruction':
         assert argument >= 0
         assert argument <= 255

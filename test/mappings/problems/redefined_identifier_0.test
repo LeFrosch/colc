@@ -7,4 +7,4 @@ map main {
 test.col @ line 2
 >>   root = 3;
 >>   ^^^^
-fatal problem: final identifier is already defined
+fatal problem: cannot assign to final identifier

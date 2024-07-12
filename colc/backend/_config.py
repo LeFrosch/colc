@@ -5,7 +5,6 @@ from colc.common import fatal_problem
 
 
 class Optimization(enum.StrEnum):
-    COMPTIME_EVALUATION = 'comptime-evaluation'
     REDUNDANT_QUANTIFIER = 'redundant-quantifier'
 
 

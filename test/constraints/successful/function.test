@@ -1,6 +1,6 @@
 # INPUT
 fun test() {
-  a = 4 * 1000;
+  const a = 4 * 1000;
   return a + 444;
 }
 

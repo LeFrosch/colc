@@ -4,11 +4,11 @@ fun test() {
 }
 
 map main {
-  a = test();
+  var a = test();
 }
 
 # OUTPUT
 test.col @ line 6
->>   a = test();
->>   ^
+>>   var a = test();
+>>       ^
 fatal problem: cannot assign <none>

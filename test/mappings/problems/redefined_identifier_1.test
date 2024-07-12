@@ -1,6 +1,6 @@
 # INPUT
 map main {
-  a = 3;
+  final a = 3;
   a = "str";
 }
 
@@ -8,4 +8,4 @@ map main {
 test.col @ line 3
 >>   a = "str";
 >>   ^
-fatal problem: cannot assign <str> to <int>
+fatal problem: cannot assign to final identifier

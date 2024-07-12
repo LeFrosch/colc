@@ -13,4 +13,4 @@ con main { all:
 test.col @ line 3
 >> con test(MACHINE, a, a) { all:
 >>                      ^
-fatal problem: final identifier is already defined
+fatal problem: identifier is already defined

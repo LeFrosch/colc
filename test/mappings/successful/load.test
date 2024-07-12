@@ -1,11 +1,8 @@
 # INPUT
 map main {
-  a = 301 + 500;
-  b = a;
+  final a = 301;
+  final b = a + 500;
 }
-
-# OPTIMIZATIONS
-no-comptime-evaluation
 
 # CONST POOL
 000: 301
@@ -13,8 +10,8 @@ no-comptime-evaluation
 
 # OUTPUT
 000: CONST      0 = (301)
-001: CONST      1 = (500)
-002: ADD        0
-003: STORE      1 = (a)
-004: LOAD       1 = (a)
+001: STORE      1 = (a)
+002: LOAD       1 = (a)
+003: CONST      1 = (500)
+004: ADD        0
 005: STORE      2 = (b)

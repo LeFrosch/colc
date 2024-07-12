@@ -1,6 +1,6 @@
 # INPUT
 map main {
-  a = root.test;
+  final a = root.test;
 }
 
 # CONST POOL

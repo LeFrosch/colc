@@ -82,3 +82,9 @@ class Aggregator(AstEnum):
     MAX = 'max'
     SUM = 'sum'
     AVG = 'avg'
+
+
+class Qualifier(AstEnum):
+    VAR = 'var'
+    FINAL = 'final'
+    CONST = 'const'

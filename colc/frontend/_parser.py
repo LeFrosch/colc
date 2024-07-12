@@ -3,7 +3,7 @@ import lark
 from colc.common import TextFile, Location, fatal_problem, internal_problem
 
 from . import _ast as ast
-from ._enums import Quantifier, Comparison, Aggregator, Operator
+from ._enums import Quantifier, Comparison, Aggregator, Operator, Qualifier
 from ._value import ComptimeValue
 
 
@@ -170,6 +170,14 @@ class Transformer(lark.Transformer):
         return ast.FStatementBlock(
             location=self.location_from_meta(meta),
             block=children[0],
+        )
+
+    def f_statement_define(self, meta, children):
+        return ast.FStatementDefine(
+            location=self.location_from_meta(meta),
+            qualifier=Qualifier.from_token(self.file, children[0]),
+            identifier=self.identifier_from_token(children[1]),
+            expression=children[3],
         )
 
     def f_statement_assign(self, meta, children):

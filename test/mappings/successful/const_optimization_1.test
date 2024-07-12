@@ -1,0 +1,7 @@
+# INPUT
+map main {
+  const a = 1;
+  const b = 1 + a;
+}
+
+# OUTPUT

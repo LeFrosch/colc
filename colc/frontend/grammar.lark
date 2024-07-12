@@ -15,7 +15,8 @@ IDENTIFIER: LETTER_LOWER_CASE LETTER*
 
 COMPARISON: "==" | "!=" | "<=" | ">=" | "<" | ">" | "*=" | "**="
 QUANTIFIER: "all:" | "any:" | "one:"
-AGGREGATOR: "min" | "max" | "sum" | "avg"
+AGGREGATOR.1: "min" | "max" | "sum" | "avg"
+QUALIFIER.1: "final" | "const" | "var"
 
 ?expression: expression_bool
 
@@ -60,6 +61,7 @@ p_statement: p_block ";"                                   -> p_statement_block
   | AGGREGATOR "(" NODE_KIND ")" COMPARISON expression ";" -> p_statement_aggr
 
 f_statement: f_block                         -> f_statement_block
+  | QUALIFIER IDENTIFIER "=" expression ";"  -> f_statement_define
   | IDENTIFIER "=" expression ";"            -> f_statement_assign
   | "return" [expression] ";"                -> f_statement_return
   | "if" expression f_block ["else" f_block] -> f_statement_if

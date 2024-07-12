@@ -4,6 +4,7 @@ from ._enums import Quantifier as Quantifier
 from ._enums import Operator as Operator
 from ._enums import Comparison as Comparison
 from ._enums import Aggregator as Aggregator
+from ._enums import Qualifier as Qualifier
 
 from ._value import Value as Value
 from ._value import RuntimeValue as RuntimeValue

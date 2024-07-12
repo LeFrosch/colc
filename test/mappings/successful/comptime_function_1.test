@@ -4,12 +4,12 @@ fun test0() {
 }
 
 fun test1() {
-  a = test0();
+  const a = test0();
   return a + 5;
 }
 
 map main {
-  a = root.attr + test1();
+  final a = root.attr + test1();
 }
 
 # CONST POOL
