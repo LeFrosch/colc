@@ -1,0 +1,11 @@
+# INPUT
+map main {
+  const a = 8;
+  a = 0;
+}
+
+# OUTPUT
+test.col @ line 3
+>>   a = 0;
+>>   ^
+fatal problem: cannot assign to final identifier

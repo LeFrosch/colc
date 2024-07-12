@@ -88,3 +88,15 @@ class Qualifier(AstEnum):
     VAR = 'var'
     FINAL = 'final'
     CONST = 'const'
+
+    @property
+    def is_var(self):
+        return self == Qualifier.VAR
+
+    @property
+    def is_final(self):
+        return self == Qualifier.FINAL
+
+    @property
+    def is_const(self):
+        return self == Qualifier.CONST

@@ -1,0 +1,12 @@
+# INPUT
+fun test() {
+  final a = 4 * 1000;
+  return a + 444;
+}
+
+con main { all:
+  size >= test();
+}
+
+# OUTPUT
+[GREATER_EQUAL, [ATTR, 'size'], 4444]

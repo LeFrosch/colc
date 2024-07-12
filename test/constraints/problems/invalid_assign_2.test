@@ -1,0 +1,14 @@
+# INPUT
+fun test(a) {
+  a = 0;
+}
+
+con main { all:
+  size >= test(2);
+}
+
+# OUTPUT
+test.col @ line 2
+>>   a = 0;
+>>   ^
+fatal problem: cannot assign to final identifier

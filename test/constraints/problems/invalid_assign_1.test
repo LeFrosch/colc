@@ -1,0 +1,15 @@
+# INPUT
+fun test() {
+  const a = 8;
+  a = 0;
+}
+
+con main { all:
+  size >= test();
+}
+
+# OUTPUT
+test.col @ line 3
+>>   a = 0;
+>>   ^
+fatal problem: cannot assign to final identifier

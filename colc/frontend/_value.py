@@ -30,8 +30,8 @@ class Value(abc.ABC):
     def is_comptime(self) -> bool: ...
 
     @property
-    @abc.abstractmethod
-    def is_runtime(self) -> bool: ...
+    def is_runtime(self) -> bool:
+        return not self.is_comptime
 
     @property
     @abc.abstractmethod
@@ -73,10 +73,6 @@ class RuntimeValue(Value):
         return False
 
     @property
-    def is_runtime(self) -> bool:
-        return True
-
-    @property
     def as_runtime(self) -> 'RuntimeValue':
         return self
 
@@ -98,10 +94,6 @@ class ComptimeValue(Value):
     @property
     def is_comptime(self) -> bool:
         return True
-
-    @property
-    def is_runtime(self) -> bool:
-        return False
 
     @property
     def as_runtime(self) -> RuntimeValue:

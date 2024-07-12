@@ -1,11 +1,12 @@
 from colc.common import fatal_problem
-from colc.frontend import ast, Value, AnyValue, ComptimeValue, Type, Qualifier
+from colc.frontend import ast, Value, AnyValue, ComptimeValue, Type
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
-from ._scope import VisitorWithScope, RuntimeDefinition
+from ._scope import Scope, VisitorWithScope, RuntimeDefinition
 from ._process_expression import process_expression
 from ._functions import operator_infer
+from ._utils import Allocator, JmpAnchor, zip_call_arguments, check_assignment
 
 
 def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
@@ -19,29 +20,14 @@ def process_mapping(ctx: Context, mapping: ast.MDefinition) -> list[Instruction]
     return visitor.instructions
 
 
-class JmpAnchor:
-    def __init__(self, instructions: list[Instruction], opcode: Opcode):
-        self._instructions = instructions
-        self._instruction = opcode.new(0)
-
-        instructions.append(self._instruction)
-        self._address = len(instructions)
-
-    def set_address(self):
-        offset = len(self._instructions) - self._address
-        assert 0 < offset < 265
-
-        self._instruction.argument = offset
-        self._instruction.debug = str(len(self._instructions))
-
-
 class VisitorImpl(VisitorWithScope):
     def __init__(self, ctx: Context):
         super().__init__()
         self.ctx = ctx
+        self.allocator = Allocator()
         self.instructions: list[Instruction] = []
 
-        self.scope.define_synthetic('root', Type.NODE)
+        self.scope.insert_synthetic('root', Type.NODE, self.allocator.alloc())
 
     def instruction_for_const(self, value: ComptimeValue):
         comptime = value.comptime
@@ -72,24 +58,52 @@ class VisitorImpl(VisitorWithScope):
 
         return value
 
+    def new_scope_for_call(self, call: ast.Call, target) -> Scope:
+        scope = self.scope.new_call_scope()
+
+        for arg, param in zip_call_arguments(call, target):
+            value = self.accept_expr(arg)
+
+            if isinstance(value, ComptimeValue):
+                scope.insert_comptime(param, value, final=True)
+            else:
+                scope.insert_runtime(param, value, self.allocator.alloc(), final=True)
+
+        return scope
+
     def f_block(self, block: ast.FBlock):
         self.accept_all(block.statements)
 
     def f_statement_define(self, stmt: ast.FStatementDefine):
-        value = self.accept_expr(stmt.expression, load=stmt.qualifier != Qualifier.CONST)
-        definition = self.scope.define(stmt.identifier, value, stmt.qualifier)
+        value = self.accept_expr(stmt.expression, load=not stmt.qualifier.is_const)
 
-        if isinstance(definition, RuntimeDefinition):
+        if stmt.qualifier.is_const:
+            if not isinstance(value, ComptimeValue):
+                fatal_problem('cannot assign runtime value', stmt.identifier)
+
+            self.scope.insert_comptime(stmt.identifier, value, final=True)
+        else:
+            definition = self.scope.insert_runtime(
+                stmt.identifier,
+                value,
+                self.allocator.alloc(),
+                final=stmt.qualifier.is_final,
+            )
             self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
 
     def f_statement_assign(self, stmt: ast.FStatementAssign):
         value = self.accept_expr(stmt.expression, load=True)
 
-        definition = self.scope.assign(stmt.identifier, value)
+        definition = self.scope.lookup(stmt.identifier)
+        check_assignment(stmt.identifier, definition, value)
+
+        # it is only possible to assign to runtime definitions, comptime should always be final in this case
+        assert isinstance(definition, RuntimeDefinition)
+
         self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
 
     def f_statement_block(self, stmt: ast.FStatementBlock):
-        self.accept_with_scope(self.scope.new_child_scope(), stmt.block)
+        self.accept_with_child_scope(stmt.block)
 
     def f_statement_if(self, stmt: ast.FStatementIf):
         value = self.accept_expr(stmt.condition, load=True)
@@ -98,7 +112,7 @@ class VisitorImpl(VisitorWithScope):
             fatal_problem('expected <bool>', stmt.condition)
 
         jmp_end = JmpAnchor(self.instructions, Opcode.JMP_FF)
-        self.accept(stmt.if_block)
+        self.accept_with_child_scope(stmt.if_block)
 
         if stmt.else_block is not None:
             jmp = JmpAnchor(self.instructions, Opcode.JMP_F)
@@ -106,7 +120,7 @@ class VisitorImpl(VisitorWithScope):
             jmp_end.set_address()
             jmp_end = jmp
 
-            self.accept(stmt.else_block)
+            self.accept_with_child_scope(stmt.else_block)
 
         jmp_end.set_address()
 

@@ -1,11 +1,15 @@
 # INPUT
 map main {
-  { final b = 3; }
+  if true {
+    final b = 3;
+  } else {
+    final b = 3;
+  }
   final a = b;
 }
 
 # OUTPUT
-test.col @ line 3
+test.col @ line 7
 >>   final a = b;
 >>             ^
 fatal problem: undefined identifier

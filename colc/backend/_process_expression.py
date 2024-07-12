@@ -1,15 +1,17 @@
 from typing import Optional
 
-from colc.common import fatal_problem, internal_problem
-from colc.frontend import ast, ComptimeValue, NoneValue, Qualifier
+from colc.common import internal_problem
+from colc.frontend import ast, ComptimeValue, NoneValue
 
-from ._scope import Scope, VisitorWithScope
+from ._scope import Scope, VisitorWithScope, ComptimeDefinition
 from ._context import Context
 from ._functions import operator_evaluate
+from ._utils import zip_call_arguments, check_assignment
 
 
 class CannotProcessAtComptime(Exception):
-    pass
+    def __init__(self, what: ast.Node):
+        self.what = what
 
 
 class ReturnAtComptime(Exception):
@@ -26,31 +28,19 @@ def process_expression(ctx: Context, scope: Scope, expr: ast.Expression) -> Opti
         internal_problem('leaked return exception')
 
 
-def scope_from_call(parent_scope: Scope, call: ast.Call, target, accept_expr) -> Scope:
-    arguments = call.arguments
-    parameters = target.parameters
-
-    if len(arguments) < len(parameters):
-        fatal_problem('not enough arguments', call.identifier)
-    if len(arguments) > len(parameters):
-        fatal_problem('too many arguments', call.identifier)
-
-    scope = parent_scope.new_call_scope()
-    for param, arg in zip(parameters, arguments):
-        value = accept_expr(arg)
-
-        if value.is_comptime:
-            scope.define(param, value, Qualifier.CONST)
-        else:
-            scope.define(param, value, Qualifier.FINAL)
-
-    return scope
-
-
 class ComptimeVisitorImpl(VisitorWithScope):
     def __init__(self, ctx: Context, scope: Scope):
         super().__init__(scope)
         self.ctx = ctx
+
+    def new_scope_for_call(self, call: ast.Call, target) -> Scope:
+        scope = self.scope.new_call_scope()
+
+        for arg, param in zip_call_arguments(call, target):
+            value = self.accept(arg)
+            scope.insert_comptime(param, value, final=True)
+
+        return scope
 
     def expression_binary(self, expr: ast.ExpressionBinary) -> ComptimeValue:
         left = self.accept(expr.left)
@@ -67,17 +57,17 @@ class ComptimeVisitorImpl(VisitorWithScope):
         if isinstance(value, ComptimeValue):
             return value
         else:
-            raise CannotProcessAtComptime()
+            raise CannotProcessAtComptime(expr)
 
-    def expression_attr(self, _: ast.ExpressionAttr) -> ComptimeValue:
-        raise CannotProcessAtComptime()
+    def expression_attr(self, expr: ast.ExpressionAttr) -> ComptimeValue:
+        raise CannotProcessAtComptime(expr)
 
     def expression_call(self, expr: ast.ExpressionCall) -> ComptimeValue:
-        call = expr.call
-        func = self.ctx.file.function(call.identifier)
+        func = self.ctx.file.function(expr.call.identifier)
+        func_scope = self.new_scope_for_call(expr.call, func)
 
         try:
-            self.accept_with_scope(scope_from_call(self.scope, call, func, self.accept), func.block)
+            self.accept_with_scope(func_scope, func.block)
             return NoneValue
         except ReturnAtComptime as e:
             return e.value
@@ -93,16 +83,17 @@ class ComptimeVisitorImpl(VisitorWithScope):
             raise ReturnAtComptime(self.accept(stmt.expression))
 
     def f_statement_define(self, stmt: ast.FStatementDefine):
-        # TODO: can this be relaxed?
-        if stmt.qualifier != Qualifier.CONST:
-            raise CannotProcessAtComptime()
-
-        value = self.accept(stmt.expression)  # this might temporarily change the current scope
-        self.scope.define(stmt.identifier, value, Qualifier.CONST)
+        value = self.accept(stmt.expression)
+        self.scope.insert_comptime(stmt.identifier, value, final=not stmt.qualifier.is_var)
 
     def f_statement_assign(self, stmt: ast.FStatementAssign):
-        value = self.accept(stmt.expression)  # this might temporarily change the current scope
-        self.scope.assign(stmt.identifier, value)
+        value = self.accept(stmt.expression)
+
+        definition = self.scope.lookup(stmt.identifier)
+        check_assignment(stmt.identifier, definition, value)
+        assert isinstance(definition, ComptimeDefinition)
+
+        definition.value.comptime = value.comptime
 
     def f_statement_if(self, stmt: ast.FStatementIf):
         value = self.accept(stmt.condition)

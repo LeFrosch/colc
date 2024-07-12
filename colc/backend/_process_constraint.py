@@ -4,9 +4,9 @@ from colc.common import internal_problem
 from colc.frontend import ast, ComptimeValue, Quantifier, Comparison, AnyValue
 
 from ._context import Context
-from ._scope import VisitorWithScope
+from ._scope import Scope, VisitorWithScope
 from ._lexpression import LExpression, LFunction
-from ._process_expression import process_expression, scope_from_call
+from ._process_expression import process_expression, zip_call_arguments
 from ._config import Optimization
 from ._functions import comparison_infer
 
@@ -37,11 +37,20 @@ class VisitorImpl(VisitorWithScope):
         else:
             return LExpression(LFunction.from_quantifier(quantifier), expressions)
 
+    def new_scope_for_call(self, call: ast.Call, target) -> Scope:
+        scope = self.scope.new_call_scope()
+
+        for arg, param in zip_call_arguments(call, target):
+            value = self.accept_expr(arg)
+            scope.insert_comptime(param, value, final=True)
+
+        return scope
+
     def accept_predicate(self, call: ast.Call) -> LExpression:
         target = self.ctx.file.predicate(call.identifier)
-        scope = scope_from_call(self.scope, call, target, self.accept_expr)
+        target_scope = self.new_scope_for_call(call, target)
 
-        return self.accept_with_scope(scope, target.block)
+        return self.accept_with_scope(target_scope, target.block)
 
     def accept_comparison(self, comparison: Comparison, expr: ast.Expression) -> Any:
         value = self.accept_expr(expr)
@@ -76,7 +85,7 @@ class VisitorImpl(VisitorWithScope):
 
     def c_statement_call(self, stmt: ast.CStatementCall) -> LExpression:
         constraint = self.ctx.file.constraint_type(stmt.constraint.identifier)
-        constraint_scope = scope_from_call(self.scope, stmt.constraint, constraint, self.accept_expr)
+        constraint_scope = self.new_scope_for_call(stmt.constraint, constraint)
 
         return LExpression(
             LFunction.WITH,
