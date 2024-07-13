@@ -44,6 +44,7 @@ class Scope:
     def __init__(self, parent: Optional['Scope']):
         self._parent = parent
         self._definitions: list[Definition] = []
+        self._returns: list[Type] = []
 
     def _insert(self, identifier: ast.Identifier, definition: Definition):
         if any(it for it in self._definitions if it.name == identifier.name):
@@ -74,6 +75,12 @@ class Scope:
 
         return definition
 
+    def insert_return(self, type: Type):
+        if self._parent is not None:
+            self._parent.insert_return(type)
+        else:
+            self._returns.append(type)
+
     def lookup(self, identifier: ast.Identifier, expected: Optional[Type] = None) -> Definition:
         definition = first(it for it in self._definitions if it.name == identifier.name)
 
@@ -86,6 +93,12 @@ class Scope:
             fatal_problem(f'identifier {definition.value.type} not compatible with {expected}', identifier)
 
         return definition
+
+    def returns(self) -> Type:
+        if self._parent is not None:
+            internal_problem('only call scopes collect return types')
+
+        return Type.lup(self._returns)
 
     def new_call_scope(self) -> 'Scope':
         return Scope(None)

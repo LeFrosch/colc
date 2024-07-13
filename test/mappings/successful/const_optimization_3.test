@@ -1,0 +1,24 @@
+# INPUT
+fun test(p1, p2, p3) {
+  return p1 + p2 + p3;
+}
+
+map main {
+  final a = 1;
+  const b = 2;
+  final r = test(a, b, a);
+}
+
+# OUTPUT
+000: INT        1
+001: STORE      1 = (a)
+002: LOAD       1 = (a)
+003: STORE      2 = (p1)
+004: LOAD       1 = (a)
+005: STORE      3 = (p3)
+006: LOAD       2 = (p1)
+007: INT        2
+008: ADD        0
+009: LOAD       3 = (p3)
+010: ADD        0
+011: STORE      4 = (r)

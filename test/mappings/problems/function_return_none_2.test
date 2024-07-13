@@ -1,0 +1,14 @@
+# INPUT
+fun test(a) {
+  return;
+}
+
+map main {
+  final a = test(root);
+}
+
+# OUTPUT
+test.col @ line 6
+>>   final a = test(root);
+>>         ^
+fatal problem: cannot assign <none>

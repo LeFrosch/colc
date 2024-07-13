@@ -1,0 +1,19 @@
+# INPUT
+fun test(p) {
+  return p + 1;
+}
+
+map main {
+  final a = 1;
+  final r = test(a);
+}
+
+# OUTPUT
+000: INT        1
+001: STORE      1 = (a)
+002: LOAD       1 = (a)
+003: STORE      2 = (p)
+004: LOAD       2 = (p)
+005: INT        1
+006: ADD        0
+007: STORE      3 = (r)

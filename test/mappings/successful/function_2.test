@@ -1,0 +1,24 @@
+# INPUT
+fun test1(cp) {
+  return cp + 3;
+}
+
+fun test0(rp) {
+  const ca = 4;
+  return rp + test1(ca);
+}
+
+map main {
+  final ra = 1;
+  final r = test0(ra);
+}
+
+# OUTPUT
+000: INT        1
+001: STORE      1 = (ra)
+002: LOAD       1 = (ra)
+003: STORE      2 = (rp)
+004: LOAD       2 = (rp)
+005: INT        7
+006: ADD        0
+007: STORE      3 = (r)

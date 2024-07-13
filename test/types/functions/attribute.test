@@ -1,0 +1,7 @@
+# INPUT
+fun test(node) {
+  return node.attr;
+}
+
+# TYPE
+<any>

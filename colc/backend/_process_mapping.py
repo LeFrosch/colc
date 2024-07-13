@@ -1,4 +1,4 @@
-from colc.common import fatal_problem, Value, AnyValue, ComptimeValue, types
+from colc.common import fatal_problem, Value, AnyValue, ComptimeValue, types, RuntimeValue
 from colc.frontend import ast
 
 from ._context import Context
@@ -44,7 +44,7 @@ class VisitorImpl(VisitorWithScope):
 
         self.instructions.append(instruction)
 
-    def accept_expr(self, expr: ast.Expression, load: bool = False) -> Value:
+    def accept_expr(self, expr: ast.Expression, load: bool = True) -> Value:
         # this is backtracking search, not very fast but works great
         value = process_expression(self.ctx, self.scope, expr)
 
@@ -62,17 +62,24 @@ class VisitorImpl(VisitorWithScope):
         scope = self.scope.new_call_scope()
 
         for arg, param in zip_call_arguments(call, target):
-            value = self.accept_expr(arg)
+            value = self.accept_expr(arg, load=False)
 
             if isinstance(value, ComptimeValue):
                 scope.insert_comptime(param, value, final=True)
             else:
-                scope.insert_runtime(param, value, self.allocator.alloc(), final=True)
+                definition = scope.insert_runtime(param, value, self.allocator.alloc(), final=True)
+                self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
 
         return scope
 
     def f_block(self, block: ast.FBlock):
-        self.accept_all(block.statements)
+        for stmt in block.statements:
+            self.accept(stmt)
+
+            # ignore code after return
+            # TODO: add warning?
+            if isinstance(stmt, ast.FStatementReturn):
+                break
 
     def f_statement_define(self, stmt: ast.FStatementDefine):
         value = self.accept_expr(stmt.expression, load=not stmt.qualifier.is_const)
@@ -92,7 +99,7 @@ class VisitorImpl(VisitorWithScope):
             self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
 
     def f_statement_assign(self, stmt: ast.FStatementAssign):
-        value = self.accept_expr(stmt.expression, load=True)
+        value = self.accept_expr(stmt.expression)
 
         definition = self.scope.lookup(stmt.identifier)
         check_assignment(stmt.identifier, definition, value.type)
@@ -105,8 +112,15 @@ class VisitorImpl(VisitorWithScope):
     def f_statement_block(self, stmt: ast.FStatementBlock):
         self.accept_with_child_scope(stmt.block)
 
+    def f_statement_return(self, stmt: ast.FStatementReturn):
+        if stmt.expression is None:
+            return
+
+        value = self.accept_expr(stmt.expression)
+        self.scope.insert_return(value.type)
+
     def f_statement_if(self, stmt: ast.FStatementIf):
-        value = self.accept_expr(stmt.condition, load=True)
+        value = self.accept_expr(stmt.condition)
 
         if not value.type.compatible(types.BOOLEAN):
             fatal_problem('expected <bool>', stmt.condition)
@@ -125,8 +139,8 @@ class VisitorImpl(VisitorWithScope):
         jmp_end.set_address()
 
     def expression_binary(self, expr: ast.ExpressionBinary) -> Value:
-        left = self.accept_expr(expr.left, load=True)
-        right = self.accept_expr(expr.right, load=True)
+        left = self.accept_expr(expr.left)
+        right = self.accept_expr(expr.right)
 
         self.instructions.append(Opcode.from_operator(expr.operator).new(0))
 
@@ -143,7 +157,7 @@ class VisitorImpl(VisitorWithScope):
 
         return definition.value
 
-    def expression_attr(self, expr: ast.ExpressionAttr):
+    def expression_attr(self, expr: ast.ExpressionAttr) -> Value:
         definition = self.scope.lookup(expr.identifier, expected=types.NODE)
         assert isinstance(definition, RuntimeDefinition)
 
@@ -154,3 +168,10 @@ class VisitorImpl(VisitorWithScope):
 
         # the type of a node property is not known
         return AnyValue
+
+    def expression_call(self, expr: ast.ExpressionCall) -> Value:
+        func = self.ctx.file.function(expr.call.identifier)
+        func_scope = self.new_scope_for_call(expr.call, func)
+
+        self.accept_with_scope(func_scope, func.block)
+        return RuntimeValue(func_scope.returns())

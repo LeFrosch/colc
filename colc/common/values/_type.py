@@ -40,6 +40,7 @@ class Type:
         Creates the least upper bound of multiple types.
         """
 
+        # TODO: this using list as upper bound for single values is not fully supported
         return Type(
             values=set(flatten(map(lambda it: it.values, types))),
             list=any(map(lambda it: it.is_list, types)),

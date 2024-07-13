@@ -1,0 +1,11 @@
+# INPUT
+fun test() {
+  if true {
+    return 4;
+  } else {
+    return "str";
+  }
+}
+
+# TYPE
+<int | str>

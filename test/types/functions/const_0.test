@@ -1,0 +1,7 @@
+# INPUT
+fun test() {
+  return 4;
+}
+
+# TYPE
+<int>
