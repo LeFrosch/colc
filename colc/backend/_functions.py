@@ -1,36 +1,64 @@
 import dataclasses
-from typing import Protocol, Any, cast
+import abc
+from typing import Protocol, Any, cast, Optional
 
-from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type
-from colc.frontend import Operator, Comparison
+from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type, first, types
+from colc.frontend import Operator, Comparison, ast
 
-
-class EvaluateCallable(Protocol):
-    def __call__(self, *args: Any) -> ComptimeValue: ...
+from ._instruction import Opcode
+from ._file import File
 
 
 @dataclasses.dataclass
-class Function:
+class Function(abc.ABC):
     name: str
-    parameter: list[Type]
+    parameters: list[Type]
     returns: Type
-    evaluate: EvaluateCallable
+
+    @abc.abstractmethod
+    def comptime(self, *args: Any) -> Optional[ComptimeValue]: ...
 
 
-_functions: list[Function] = []
+class ComptimeImpl(Protocol):
+    def __call__(self, *args: Any) -> Any: ...
 
 
-def function(name: str):
+@dataclasses.dataclass
+class BuiltinFunction(Function):
+    opcode: Opcode
+    comptime_impl: ComptimeImpl
+
+    def comptime(self, *args: Any) -> Optional[ComptimeValue]:
+        result = self.comptime_impl(*args)
+        if result is None:
+            return None
+
+        return ComptimeValue.from_python(result)
+
+
+@dataclasses.dataclass
+class DefinedFunction(Function):
+    definition: ast.FDefinition
+
+    def comptime(self, *args: Any) -> Optional[ComptimeValue]:
+        return None
+
+
+_builtins: list[BuiltinFunction] = []
+
+
+def builtin(name: str, opcode: Opcode):
     def decorator(func):
         param_names = func.__code__.co_varnames
         annotations = func.__annotations__
 
-        _functions.append(
-            Function(
+        _builtins.append(
+            BuiltinFunction(
                 name=name,
-                parameter=[Type.from_python(annotations[it]) for it in param_names],
+                parameters=[Type.from_python(annotations[it]) for it in param_names],
                 returns=Type.from_python(annotations['return']),
-                evaluate=lambda *args: ComptimeValue.from_python(func(*args)),
+                opcode=opcode,
+                comptime_impl=func,
             )
         )
 
@@ -42,11 +70,11 @@ def function(name: str):
 def operator_infer(op: Operator, left: Value, right: Value) -> RuntimeValue:
     return_types = [
         it.returns
-        for it in _functions
+        for it in _builtins
         if it.name == op
-        and len(it.parameter) == 2
-        and it.parameter[0].compatible(left.type)
-        and it.parameter[1].compatible(right.type)
+        and len(it.parameters) == 2
+        and it.parameters[0].compatible(left.type)
+        and it.parameters[1].compatible(right.type)
     ]
 
     if len(return_types) == 0:
@@ -62,11 +90,11 @@ def comparison_infer(comp: Comparison, left: Value, right: Value) -> RuntimeValu
 def operator_evaluate(op: Operator, left: ComptimeValue, right: ComptimeValue) -> ComptimeValue:
     candidates = [
         it
-        for it in _functions
+        for it in _builtins
         if it.name == op
-        and len(it.parameter) == 2
-        and it.parameter[0].compatible(left.type)
-        and it.parameter[1].compatible(right.type)
+        and len(it.parameters) == 2
+        and it.parameters[0].compatible(left.type)
+        and it.parameters[1].compatible(right.type)
     ]
 
     if len(candidates) == 0:
@@ -75,6 +103,26 @@ def operator_evaluate(op: Operator, left: ComptimeValue, right: ComptimeValue) -
         internal_problem(f'ambiguous operator {left} {op} {right}')
 
     try:
-        return candidates[0].evaluate(left.comptime, right.comptime)
+        result = candidates[0].comptime(left.comptime, right.comptime)
+        if result is None:
+            internal_problem(f'cannot resolve operator at comptime {op}')
+
+        return result
     except ArithmeticError:
         fatal_problem(f'arithmetic error: {left.comptime} {op} {right.comptime}', op)
+
+
+def resolve_function(file: File, identifier: ast.Identifier) -> Function:
+    builtin = first(it for it in _builtins if it.name == identifier.name)
+    if builtin is not None:
+        return builtin
+
+    definition = file.function(identifier)
+
+    # TODO: if function type hints are ever supported, add them here
+    return DefinedFunction(
+        name=definition.identifier.name,
+        parameters=[types.ANY for _ in definition.parameters],
+        returns=types.ANY,
+        definition=definition,
+    )

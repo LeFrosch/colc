@@ -1,0 +1,7 @@
+# INPUT
+fun test(node) {
+  return kind(node);
+}
+
+# TYPE
+<kind>

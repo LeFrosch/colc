@@ -1,10 +1,9 @@
-from typing import Iterable, Tuple
-
-from colc.common import fatal_problem, Type
+from colc.common import fatal_problem, Type, Value
 from colc.frontend import ast
 
 from ._instruction import Instruction, Opcode
 from ._scope import Definition
+from ._functions import Function
 
 
 class Allocator:
@@ -32,16 +31,14 @@ class JmpAnchor:
         self._instruction.debug = str(len(self._instructions))
 
 
-def zip_call_arguments(call: ast.Call, target) -> Iterable[Tuple[ast.Expression, ast.Identifier]]:
-    arguments = call.arguments
-    parameters = target.parameters
+def check_arguments(call: ast.Call, func: Function):
+    if len(call.arguments) != len(func.parameters):
+        fatal_problem(f'expected {len(func.parameters)} arguments', call)
 
-    if len(arguments) < len(parameters):
-        fatal_problem('not enough arguments', call.identifier)
-    if len(arguments) > len(parameters):
-        fatal_problem('too many arguments', call.identifier)
 
-    return zip(arguments, parameters)
+def check_compatible(arg: ast.Expression, value: Value, param: Type):
+    if not value.type.compatible(param):
+        fatal_problem(f'argument {value} not compatible with {param}', arg)
 
 
 def check_assignment(identifier: ast.Identifier, definition: Definition, type: Type):

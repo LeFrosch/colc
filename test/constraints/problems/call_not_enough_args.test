@@ -8,5 +8,5 @@ con main { all:
 # OUTPUT
 test.col @ line 4
 >>     const() MACHINE;
->>     ^^^^^
-fatal problem: not enough arguments
+>>     ^^^^^^^
+fatal problem: expected 1 arguments

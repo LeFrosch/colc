@@ -1,0 +1,7 @@
+# INPUT
+fun test() {
+  return range(2, 10);
+}
+
+# TYPE
+<list int>

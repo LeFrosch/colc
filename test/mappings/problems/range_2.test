@@ -1,0 +1,10 @@
+# INPUT
+map main {
+  const a = range(0, 10);
+}
+
+# OUTPUT
+test.col @ line 2
+>>   const a = range(0, 10);
+>>         ^
+fatal problem: cannot assign runtime value

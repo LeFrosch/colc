@@ -4,12 +4,16 @@ from typing import Iterable, Optional
 from .._internal import internal_problem
 from .._utils import flatten
 
+Node = type('NodeKind', tuple(), {})
+NodeKind = type('NodeKind', tuple(), {})
+
 
 class PrimitiveType(enum.StrEnum):
     INTEGER = 'int'
     STRING = 'str'
     BOOLEAN = 'bool'
     NODE = 'node'
+    NODE_KIND = 'kind'
 
     @staticmethod
     def from_python(py_type: Optional[type]) -> 'PrimitiveType':
@@ -19,6 +23,10 @@ class PrimitiveType(enum.StrEnum):
             return PrimitiveType.INTEGER
         if py_type is bool:
             return PrimitiveType.BOOLEAN
+        if py_type is Node:
+            return PrimitiveType.NODE
+        if py_type is NodeKind:
+            return PrimitiveType.NODE_KIND
 
         internal_problem(f'invalid type {py_type}')
 
@@ -48,6 +56,9 @@ class Type:
 
     @staticmethod
     def from_python(py_type) -> 'Type':
+        if py_type is range:
+            return Type({PrimitiveType.INTEGER}, list=True)
+
         return Type({PrimitiveType.from_python(py_type)}, list=False)
 
     @property

@@ -1,12 +1,12 @@
-from colc.common import fatal_problem, Value, AnyValue, ComptimeValue, types, RuntimeValue
+from colc.common import fatal_problem, Value, AnyValue, ComptimeValue, types, RuntimeValue, unreachable
 from colc.frontend import ast
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
-from ._scope import Scope, VisitorWithScope, RuntimeDefinition
+from ._scope import VisitorWithScope, RuntimeDefinition
 from ._process_expression import process_expression
-from ._functions import operator_infer
-from ._utils import Allocator, JmpAnchor, zip_call_arguments, check_assignment
+from ._functions import operator_infer, resolve_function, BuiltinFunction, DefinedFunction
+from ._utils import Allocator, JmpAnchor, check_arguments, check_assignment, check_compatible
 
 
 def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
@@ -57,20 +57,6 @@ class VisitorImpl(VisitorWithScope):
             self.instruction_for_const(value)
 
         return value
-
-    def new_scope_for_call(self, call: ast.Call, target) -> Scope:
-        scope = self.scope.new_call_scope()
-
-        for arg, param in zip_call_arguments(call, target):
-            value = self.accept_expr(arg, load=False)
-
-            if isinstance(value, ComptimeValue):
-                scope.insert_comptime(param, value, final=True)
-            else:
-                definition = scope.insert_runtime(param, value, self.allocator.alloc(), final=True)
-                self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
-
-        return scope
 
     def f_block(self, block: ast.FBlock):
         for stmt in block.statements:
@@ -169,9 +155,39 @@ class VisitorImpl(VisitorWithScope):
         # the type of a node property is not known
         return AnyValue
 
-    def expression_call(self, expr: ast.ExpressionCall) -> Value:
-        func = self.ctx.file.function(expr.call.identifier)
-        func_scope = self.new_scope_for_call(expr.call, func)
+    def accept_builtin_function(self, call: ast.Call, func: BuiltinFunction) -> Value:
+        check_arguments(call, func)
 
-        self.accept_with_scope(func_scope, func.block)
-        return RuntimeValue(func_scope.returns())
+        for arg, param in zip(call.arguments, func.parameters):
+            value = self.accept_expr(arg)
+            check_compatible(arg, value, param)
+
+        self.instructions.append(func.opcode.new(0))
+        return RuntimeValue(func.returns)
+
+    def accept_defined_function(self, call: ast.Call, func: DefinedFunction) -> Value:
+        check_arguments(call, func)
+
+        scope = self.scope.new_call_scope()
+        for arg, param in zip(call.arguments, func.definition.parameters):
+            value = self.accept_expr(arg, load=False)
+
+            if isinstance(value, ComptimeValue):
+                scope.insert_comptime(param, value, final=True)
+            else:
+                definition = scope.insert_runtime(param, value, self.allocator.alloc(), final=True)
+                self.instructions.append(Opcode.STORE.new(definition.index, definition.name))
+
+        self.accept_with_scope(scope, func.definition.block)
+        return RuntimeValue(scope.returns())
+
+    def expression_call(self, expr: ast.ExpressionCall) -> Value:
+        func = resolve_function(self.ctx.file, expr.call.identifier)
+
+        if isinstance(func, BuiltinFunction):
+            return self.accept_builtin_function(expr.call, func)
+
+        if isinstance(func, DefinedFunction):
+            return self.accept_defined_function(expr.call, func)
+
+        unreachable()

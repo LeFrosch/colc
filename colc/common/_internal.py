@@ -32,3 +32,7 @@ def internal_problem(message: str, cause: Optional[Exception] = None) -> NoRetur
         raise cause
     else:
         raise InternalProblem(message, cause)
+
+
+def unreachable(message: str = 'should not be reachable') -> NoReturn:
+    raise InternalProblem(message)

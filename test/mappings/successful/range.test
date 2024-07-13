@@ -1,0 +1,10 @@
+# INPUT
+map main {
+  final a = range(2, 10);
+}
+
+# OUTPUT
+000: INT        2
+001: INT       10
+002: RANGE      0
+003: STORE      1 = (a)

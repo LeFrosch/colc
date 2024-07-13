@@ -1,89 +1,93 @@
+# mypy: ignore-errors
+
+from colc.common import Node, NodeKind
 from colc.frontend import Operator
 
-from ._functions import function
+from ._functions import builtin
+from ._instruction import Opcode
 
 
-@function(Operator.ADD)
+@builtin(Operator.ADD, Opcode.ADD)
 def add_str(left: str, right: str) -> str:
     return left + right
 
 
-@function(Operator.ADD)
+@builtin(Operator.ADD, Opcode.ADD)
 def add_int(left: int, right: int) -> int:
     return left + right
 
 
-@function(Operator.SUB)
+@builtin(Operator.SUB, Opcode.SUB)
 def sub_int(left: int, right: int) -> int:
     return left - right
 
 
-@function(Operator.DIV)
+@builtin(Operator.DIV, Opcode.DIV)
 def div_int(left: int, right: int) -> int:
     return left // right
 
 
-@function(Operator.MUL)
+@builtin(Operator.MUL, Opcode.MUL)
 def mul_int(left: int, right: int) -> int:
     return left * right
 
 
-@function(Operator.EQL)
+@builtin(Operator.EQL, Opcode.EQL)
 def eql_int(left: int, right: int) -> bool:
     return left == right
 
 
-@function(Operator.EQL)
+@builtin(Operator.EQL, Opcode.EQL)
 def eql_str(left: str, right: str) -> bool:
     return left == right
 
 
-@function(Operator.EQL)
+@builtin(Operator.EQL, Opcode.EQL)
 def eql_bool(left: bool, right: bool) -> bool:
     return left == right
 
 
-@function(Operator.NEQ)
+@builtin(Operator.NEQ, Opcode.NEQ)
 def neq_int(left: int, right: int) -> bool:
     return left != right
 
 
-@function(Operator.NEQ)
+@builtin(Operator.NEQ, Opcode.NEQ)
 def neq_str(left: str, right: str) -> bool:
     return left != right
 
 
-@function(Operator.NEQ)
+@builtin(Operator.NEQ, Opcode.NEQ)
 def neq_bool(left: bool, right: bool) -> bool:
     return left != right
 
 
-@function(Operator.LES)
+@builtin(Operator.LES, Opcode.LES)
 def les_int(left: int, right: int) -> bool:
     return left < right
 
 
-@function(Operator.LEQ)
+@builtin(Operator.LEQ, Opcode.LEQ)
 def leq_int(left: int, right: int) -> bool:
     return left <= right
 
 
-@function(Operator.GRE)
+@builtin(Operator.GRE, Opcode.GRE)
 def gre_int(left: int, right: int) -> bool:
     return left > right
 
 
-@function(Operator.GEQ)
+@builtin(Operator.GEQ, Opcode.GEQ)
 def geq_int(left: int, right: int) -> bool:
     return left >= right
 
 
-@function(Operator.MUT)
+@builtin(Operator.MUT, Opcode.MUT)
 def mut_int(left: int, right: int) -> bool:
     return left % right == 0
 
 
-@function(Operator.POW)
+@builtin(Operator.POW, Opcode.POW)
 def pow_int(left: int, right: int) -> bool:
     while left % right == 0:
         left = left // right
@@ -91,21 +95,31 @@ def pow_int(left: int, right: int) -> bool:
     return left == 1
 
 
-@function(Operator.OR)
+@builtin(Operator.OR, Opcode.OR)
 def or_bool(left: bool, right: bool) -> bool:
     return left or right
 
 
-@function(Operator.AND)
+@builtin(Operator.AND, Opcode.AND)
 def and_bool(left: bool, right: bool) -> bool:
     return left and right
 
 
-@function(Operator.NOT)
+@builtin(Operator.NOT, Opcode.NOT)
 def not_bool(value: bool) -> bool:
     return not value
 
 
-@function(Operator.SUB)
+@builtin(Operator.SUB, Opcode.SUB)
 def neg_int(value: int) -> int:
     return -value
+
+
+@builtin('range', Opcode.RANGE)
+def range_impl(start: int, end: int) -> range:
+    return None
+
+
+@builtin('kind', Opcode.KIND)
+def kind_impl(node: Node) -> NodeKind:
+    return None

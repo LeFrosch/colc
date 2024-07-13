@@ -1,4 +1,6 @@
 from ._type import Type as Type
+from ._type import Node as Node
+from ._type import NodeKind as NodeKind
 
 from ._value import Value as Value
 from ._value import ComptimeValue as ComptimeValue

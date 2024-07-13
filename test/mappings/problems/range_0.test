@@ -1,0 +1,10 @@
+# INPUT
+map main {
+  final a = range(0);
+}
+
+# OUTPUT
+test.col @ line 2
+>>   final a = range(0);
+>>             ^^^^^^^^
+fatal problem: expected 2 arguments

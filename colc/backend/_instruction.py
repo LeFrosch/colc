@@ -10,7 +10,10 @@ class Opcode(enum.IntEnum):
     CONST = 0x00
     STORE = 0x01
     LOAD = 0x02
+
+    # node interaction
     ATTR = 0x03
+    KIND = 0x04
 
     # operators
     ADD = 0x10
@@ -39,6 +42,11 @@ class Opcode(enum.IntEnum):
     JMP_F = 0x30
     JMP_FF = 0x31
     JMP_B = 0x32
+
+    # iterators
+    NEXT = 0x40
+    HAS_NEXT = 0x41
+    RANGE = 0x42
 
     def new(self, argument: int = 0, debug: Optional[str] = None) -> 'Instruction':
         assert argument >= 0

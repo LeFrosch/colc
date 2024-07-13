@@ -1,0 +1,10 @@
+# INPUT
+map main {
+  final a = range(0, "str");
+}
+
+# OUTPUT
+test.col @ line 2
+>>   final a = range(0, "str");
+>>                      ^^^^^
+fatal problem: argument <str> not compatible with <int>

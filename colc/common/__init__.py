@@ -1,8 +1,10 @@
 from ._internal import InternalProblem as InternalProblem
 from ._internal import internal_problem as internal_problem
+from ._internal import unreachable as unreachable
 
 from ._fatal import FatalProblem as FatalProblem
 from ._fatal import fatal_problem as fatal_problem
+from ._fatal import HasLocation as HasLocation
 
 from ._text import TextFile as TextFile
 from ._text import Location as Location
@@ -19,6 +21,8 @@ from ._string_builder import StringBuilder as StringBuilder
 
 from .values import Type as Type
 from .values import Value as Value
+from .values import Node as Node
+from .values import NodeKind as NodeKind
 from .values import RuntimeValue as RuntimeValue
 from .values import ComptimeValue as ComptimeValue
 from .values import ComptimePyType as ComptimePyType

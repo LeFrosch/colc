@@ -1,12 +1,12 @@
 from typing import Collection, Any
 
-from colc.common import internal_problem, ComptimeValue, AnyValue
+from colc.common import internal_problem, ComptimeValue, AnyValue, fatal_problem
 from colc.frontend import ast, Quantifier, Comparison
 
 from ._context import Context
 from ._scope import Scope, VisitorWithScope
 from ._lexpression import LExpression, LFunction
-from ._process_expression import process_expression, zip_call_arguments
+from ._process_expression import process_expression
 from ._config import Optimization
 from ._functions import comparison_infer
 
@@ -37,10 +37,13 @@ class VisitorImpl(VisitorWithScope):
         else:
             return LExpression(LFunction.from_quantifier(quantifier), expressions)
 
-    def new_scope_for_call(self, call: ast.Call, target) -> Scope:
+    def new_scope_for_call(self, call: ast.Call, parameters: list[ast.Identifier]) -> Scope:
+        if len(call.arguments) != len(parameters):
+            fatal_problem(f'expected {len(parameters)} arguments', call)
+
         scope = self.scope.new_call_scope()
 
-        for arg, param in zip_call_arguments(call, target):
+        for arg, param in zip(call.arguments, parameters):
             value = self.accept_expr(arg)
             scope.insert_comptime(param, value, final=True)
 
@@ -48,7 +51,7 @@ class VisitorImpl(VisitorWithScope):
 
     def accept_predicate(self, call: ast.Call) -> LExpression:
         target = self.ctx.file.predicate(call.identifier)
-        target_scope = self.new_scope_for_call(call, target)
+        target_scope = self.new_scope_for_call(call, target.parameters)
 
         return self.accept_with_scope(target_scope, target.block)
 
@@ -85,7 +88,7 @@ class VisitorImpl(VisitorWithScope):
 
     def c_statement_call(self, stmt: ast.CStatementCall) -> LExpression:
         constraint = self.ctx.file.constraint_type(stmt.constraint.identifier)
-        constraint_scope = self.new_scope_for_call(stmt.constraint, constraint)
+        constraint_scope = self.new_scope_for_call(stmt.constraint, constraint.parameters)
 
         return LExpression(
             LFunction.WITH,
