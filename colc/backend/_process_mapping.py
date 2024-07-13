@@ -1,5 +1,5 @@
-from colc.common import fatal_problem
-from colc.frontend import ast, Value, AnyValue, ComptimeValue, Type
+from colc.common import fatal_problem, Value, AnyValue, ComptimeValue, types
+from colc.frontend import ast
 
 from ._context import Context
 from ._instruction import Instruction, Opcode
@@ -27,7 +27,7 @@ class VisitorImpl(VisitorWithScope):
         self.allocator = Allocator()
         self.instructions: list[Instruction] = []
 
-        self.scope.insert_synthetic('root', Type.NODE, self.allocator.alloc())
+        self.scope.insert_synthetic('root', types.NODE, self.allocator.alloc())
 
     def instruction_for_const(self, value: ComptimeValue):
         comptime = value.comptime
@@ -95,7 +95,7 @@ class VisitorImpl(VisitorWithScope):
         value = self.accept_expr(stmt.expression, load=True)
 
         definition = self.scope.lookup(stmt.identifier)
-        check_assignment(stmt.identifier, definition, value)
+        check_assignment(stmt.identifier, definition, value.type)
 
         # it is only possible to assign to runtime definitions, comptime should always be final in this case
         assert isinstance(definition, RuntimeDefinition)
@@ -108,7 +108,7 @@ class VisitorImpl(VisitorWithScope):
     def f_statement_if(self, stmt: ast.FStatementIf):
         value = self.accept_expr(stmt.condition, load=True)
 
-        if not value.assignable_to(Type.BOOLEAN):
+        if not value.type.compatible(types.BOOLEAN):
             fatal_problem('expected <bool>', stmt.condition)
 
         jmp_end = JmpAnchor(self.instructions, Opcode.JMP_FF)
@@ -144,7 +144,7 @@ class VisitorImpl(VisitorWithScope):
         return definition.value
 
     def expression_attr(self, expr: ast.ExpressionAttr):
-        definition = self.scope.lookup(expr.identifier, expected=Type.NODE)
+        definition = self.scope.lookup(expr.identifier, expected=types.NODE)
         assert isinstance(definition, RuntimeDefinition)
 
         self.instructions.append(Opcode.LOAD.new(definition.index, expr.identifier.name))

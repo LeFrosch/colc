@@ -1,10 +1,9 @@
 import typeguard
 from typing import Optional
 
-from colc.common import Location, to_snake_case
+from colc.common import Location, to_snake_case, ComptimeValue
 
 from ._enums import Quantifier, Operator, Comparison, Aggregator, Qualifier
-from ._value import ComptimeValue
 
 
 class Node:

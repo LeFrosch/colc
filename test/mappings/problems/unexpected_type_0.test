@@ -8,4 +8,4 @@ map main {
 test.col @ line 3
 >>   var b = a.attr;
 >>           ^
-fatal problem: expected identifier of type node
+fatal problem: identifier <int> not compatible with <node>

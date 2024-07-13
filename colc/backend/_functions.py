@@ -1,8 +1,8 @@
 import dataclasses
 from typing import Protocol, Any, cast
 
-from colc.common import fatal_problem, internal_problem
-from colc.frontend import Operator, Value, RuntimeValue, ComptimeValue, Type, Comparison
+from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type
+from colc.frontend import Operator, Comparison
 
 
 class EvaluateCallable(Protocol):
@@ -30,7 +30,7 @@ def function(name: str):
                 name=name,
                 parameter=[Type.from_python(annotations[it]) for it in param_names],
                 returns=Type.from_python(annotations['return']),
-                evaluate=lambda *args: ComptimeValue(func(*args)),
+                evaluate=lambda *args: ComptimeValue.from_python(func(*args)),
             )
         )
 
@@ -45,14 +45,14 @@ def operator_infer(op: Operator, left: Value, right: Value) -> RuntimeValue:
         for it in _functions
         if it.name == op
         and len(it.parameter) == 2
-        and it.parameter[0] in left.possible_types
-        and it.parameter[1] in right.possible_types
+        and it.parameter[0].compatible(left.type)
+        and it.parameter[1].compatible(right.type)
     ]
 
     if len(return_types) == 0:
         fatal_problem(f'undefined operator {left} {op} {right}', op)
 
-    return RuntimeValue(set(return_types))
+    return RuntimeValue(Type.lup(return_types))
 
 
 def comparison_infer(comp: Comparison, left: Value, right: Value) -> RuntimeValue:
@@ -65,8 +65,8 @@ def operator_evaluate(op: Operator, left: ComptimeValue, right: ComptimeValue) -
         for it in _functions
         if it.name == op
         and len(it.parameter) == 2
-        and it.parameter[0] in left.possible_types
-        and it.parameter[1] in right.possible_types
+        and it.parameter[0].compatible(left.type)
+        and it.parameter[1].compatible(right.type)
     ]
 
     if len(candidates) == 0:

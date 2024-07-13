@@ -1,7 +1,7 @@
 from typing import Iterable, Tuple
 
-from colc.common import fatal_problem
-from colc.frontend import ast, Value
+from colc.common import fatal_problem, Type
+from colc.frontend import ast
 
 from ._instruction import Instruction, Opcode
 from ._scope import Definition
@@ -44,8 +44,8 @@ def zip_call_arguments(call: ast.Call, target) -> Iterable[Tuple[ast.Expression,
     return zip(arguments, parameters)
 
 
-def check_assignment(identifier: ast.Identifier, definition: Definition, value: Value):
+def check_assignment(identifier: ast.Identifier, definition: Definition, type: Type):
     if definition.final:
         fatal_problem('cannot assign to final identifier', identifier)
-    if not value.assignable_to(definition.value.possible_types):
-        fatal_problem(f'cannot assign {value} to {definition.value} identifier', identifier)
+    if not definition.value.type.compatible(type):
+        fatal_problem(f'cannot assign {type} to {definition.value} identifier', identifier)

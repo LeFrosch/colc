@@ -12,5 +12,16 @@ from ._io import read_file as read_file
 from ._io import write_file as write_file
 
 from ._utils import to_snake_case as to_snake_case
+from ._utils import flatten as flatten
+from ._utils import first as first
 
 from ._string_builder import StringBuilder as StringBuilder
+
+from .values import Type as Type
+from .values import Value as Value
+from .values import RuntimeValue as RuntimeValue
+from .values import ComptimeValue as ComptimeValue
+from .values import ComptimePyType as ComptimePyType
+from .values import AnyValue as AnyValue
+from .values import NoneValue as NoneValue
+from .values import types as types

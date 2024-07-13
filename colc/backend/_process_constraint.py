@@ -1,7 +1,7 @@
 from typing import Collection, Any
 
-from colc.common import internal_problem
-from colc.frontend import ast, ComptimeValue, Quantifier, Comparison, AnyValue
+from colc.common import internal_problem, ComptimeValue, AnyValue
+from colc.frontend import ast, Quantifier, Comparison
 
 from ._context import Context
 from ._scope import Scope, VisitorWithScope

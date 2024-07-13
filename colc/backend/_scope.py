@@ -2,8 +2,8 @@ import dataclasses
 import abc
 from typing import Optional, Any
 
-from colc.common import fatal_problem, internal_problem
-from colc.frontend import ast, Visitor, Value, RuntimeValue, ComptimeValue, Type
+from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type, first
+from colc.frontend import ast, Visitor
 
 
 @dataclasses.dataclass
@@ -48,7 +48,7 @@ class Scope:
     def _insert(self, identifier: ast.Identifier, definition: Definition):
         if any(it for it in self._definitions if it.name == identifier.name):
             fatal_problem('identifier is already defined', identifier)
-        if definition.value.is_none:
+        if definition.value.type.is_none:
             fatal_problem('cannot assign <none>', identifier)
 
         self._definitions.append(definition)
@@ -66,7 +66,7 @@ class Scope:
         return definition
 
     def insert_synthetic(self, name: str, type: Type, index: int) -> RuntimeDefinition:
-        definition = RuntimeDefinition(name, True, RuntimeValue({type}), index)
+        definition = RuntimeDefinition(name, True, RuntimeValue(type), index)
 
         if any(it for it in self._definitions if it.name == name):
             internal_problem(f'identifier is already defined {name}')
@@ -75,15 +75,15 @@ class Scope:
         return definition
 
     def lookup(self, identifier: ast.Identifier, expected: Optional[Type] = None) -> Definition:
-        definition = next((it for it in self._definitions if it.name == identifier.name), None)
+        definition = first(it for it in self._definitions if it.name == identifier.name)
 
         if definition is None and self._parent is not None:
             definition = self._parent.lookup(identifier)
         if definition is None:
             fatal_problem('undefined identifier', identifier)
 
-        if expected is not None and not definition.value.assignable_to(expected):
-            fatal_problem(f'expected identifier of type {expected}', identifier)
+        if expected is not None and not definition.value.type.compatible(expected):
+            fatal_problem(f'identifier {definition.value.type} not compatible with {expected}', identifier)
 
         return definition
 

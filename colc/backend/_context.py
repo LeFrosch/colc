@@ -1,11 +1,10 @@
-from colc.common import internal_problem
-from colc.frontend import ComptimeValue, ComptimeValueType
+from colc.common import internal_problem, ComptimeValue, ComptimePyType
 
 from ._file import File
 from ._config import Config
 
 
-def check_const_pool_value(value: ComptimeValueType) -> int | str:
+def check_const_pool_value(value: ComptimePyType) -> int | str:
     if value is None:
         internal_problem('cannot intern none')
     if isinstance(value, bool):
@@ -20,9 +19,9 @@ class Context:
         self.file = file
 
         # allow assignments of none, compilation should fail
-        self._const_pool: list[ComptimeValueType] = []
+        self._const_pool: list[ComptimePyType] = []
 
-    def intern_const(self, value: ComptimeValue | ComptimeValueType) -> int:
+    def intern_const(self, value: ComptimeValue | ComptimePyType) -> int:
         if isinstance(value, ComptimeValue):
             value = value.comptime
 

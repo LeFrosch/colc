@@ -1,7 +1,7 @@
 from typing import Optional
 
-from colc.common import internal_problem
-from colc.frontend import ast, ComptimeValue, NoneValue
+from colc.common import internal_problem, ComptimeValue, NoneValue
+from colc.frontend import ast
 
 from ._scope import Scope, VisitorWithScope, ComptimeDefinition
 from ._context import Context

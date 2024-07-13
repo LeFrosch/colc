@@ -1,10 +1,9 @@
 import lark
 
-from colc.common import TextFile, Location, fatal_problem, internal_problem
+from colc.common import TextFile, Location, fatal_problem, internal_problem, ComptimeValue
 
 from . import _ast as ast
 from ._enums import Quantifier, Comparison, Aggregator, Operator, Qualifier
-from ._value import ComptimeValue
 
 
 @lark.v_args(meta=True)
@@ -204,25 +203,25 @@ class Transformer(lark.Transformer):
     def expression_int(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
-            value=ComptimeValue(int(children[0])),
+            value=ComptimeValue.from_python(int(children[0])),
         )
 
     def expression_str(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
-            value=ComptimeValue(str(children[0])[1:-1]),
+            value=ComptimeValue.from_python(str(children[0])[1:-1]),
         )
 
     def expression_true(self, meta, _):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
-            value=ComptimeValue(True),
+            value=ComptimeValue.from_python(True),
         )
 
     def expression_false(self, meta, _):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
-            value=ComptimeValue(False),
+            value=ComptimeValue.from_python(False),
         )
 
     def expression_ref(self, meta, children):

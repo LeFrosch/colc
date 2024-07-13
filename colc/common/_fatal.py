@@ -1,5 +1,5 @@
 import dataclasses
-import typing
+from typing import NoReturn, Protocol
 
 from ._text import Location, Position
 from ._string_builder import StringBuilder
@@ -52,6 +52,11 @@ class FatalProblem(Exception):
         return sb.build()
 
 
-def fatal_problem(message: str, *args) -> typing.NoReturn:
+class HasLocation(Protocol):
+    @property
+    def location(self) -> Location: ...
+
+
+def fatal_problem(message: str, *args: Location | HasLocation) -> NoReturn:
     locations = [it if isinstance(it, Location) else it.location for it in args]
     raise FatalProblem(message, locations)
