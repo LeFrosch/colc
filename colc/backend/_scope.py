@@ -5,6 +5,8 @@ from typing import Optional, Any
 from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type, first
 from colc.frontend import ast, Visitor
 
+from ._jmp_anchor import JmpAnchor
+
 
 @dataclasses.dataclass
 class Definition(abc.ABC):
@@ -44,7 +46,10 @@ class Scope:
     def __init__(self, parent: Optional['Scope']):
         self._parent = parent
         self._definitions: list[Definition] = []
+
+        # TODO: extract to scope context
         self._returns: list[Type] = []
+        self._anchors: list[JmpAnchor] = []
 
     def _insert(self, identifier: ast.Identifier, definition: Definition):
         if any(it for it in self._definitions if it.name == identifier.name):
@@ -100,6 +105,16 @@ class Scope:
 
         return Type.lup(self._returns)
 
+    def insert_jmp_anchor(self, anchor: JmpAnchor):
+        if self._parent is not None:
+            self._parent.insert_jmp_anchor(anchor)
+        else:
+            self._anchors.append(anchor)
+
+    def finalize(self):
+        for anchor in self._anchors:
+            anchor.set_address()
+
     def new_call_scope(self) -> 'Scope':
         return Scope(None)
 
@@ -112,11 +127,16 @@ class VisitorWithScope(Visitor):
         super().__init__()
         self.scope = scope or Scope(None)
 
+    def finalize(self):
+        self.scope.finalize()
+
     def accept_with_scope(self, scope: Scope, node: Optional[ast.Node]) -> Any:
         current_scope = self.scope
 
         self.scope = scope
         result = self.accept(node)
+        self.scope.finalize()
+
         self.scope = current_scope
 
         return result

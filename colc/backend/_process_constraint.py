@@ -13,7 +13,12 @@ from ._functions import comparison_infer
 
 def process_constraint(ctx: Context) -> LExpression:
     constraint = ctx.file.constraint_main()
-    return VisitorImpl(ctx).accept(constraint.block)
+
+    visitor = VisitorImpl(ctx)
+    result = visitor.accept(constraint.block)
+    visitor.finalize()
+
+    return result
 
 
 class VisitorImpl(VisitorWithScope):

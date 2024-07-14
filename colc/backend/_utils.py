@@ -1,7 +1,6 @@
 from colc.common import fatal_problem, Type, Value
 from colc.frontend import ast
 
-from ._instruction import Instruction, Opcode
 from ._scope import Definition
 from ._functions import Function
 
@@ -13,22 +12,6 @@ class Allocator:
     def alloc(self) -> int:
         self.index += 1
         return self.index - 1
-
-
-class JmpAnchor:
-    def __init__(self, instructions: list[Instruction], opcode: Opcode):
-        self._instructions = instructions
-        self._instruction = opcode.new(0)
-
-        instructions.append(self._instruction)
-        self._address = len(instructions)
-
-    def set_address(self):
-        offset = len(self._instructions) - self._address
-        assert 0 < offset < 265
-
-        self._instruction.argument = offset
-        self._instruction.debug = str(len(self._instructions))
 
 
 def check_arguments(call: ast.Call, func: Function):

@@ -6,7 +6,8 @@ from ._instruction import Instruction, Opcode
 from ._scope import VisitorWithScope, RuntimeDefinition
 from ._process_expression import process_expression
 from ._functions import operator_infer, resolve_function, BuiltinFunction, DefinedFunction
-from ._utils import Allocator, JmpAnchor, check_arguments, check_assignment, check_compatible
+from ._jmp_anchor import JmpAnchor
+from ._utils import Allocator, check_arguments, check_assignment, check_compatible
 
 
 def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
@@ -16,6 +17,7 @@ def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
 def process_mapping(ctx: Context, mapping: ast.MDefinition) -> list[Instruction]:
     visitor = VisitorImpl(ctx)
     visitor.accept(mapping.block)
+    visitor.finalize()
 
     return visitor.instructions
 
@@ -62,11 +64,6 @@ class VisitorImpl(VisitorWithScope):
         for stmt in block.statements:
             self.accept(stmt)
 
-            # ignore code after return
-            # TODO: add warning?
-            if isinstance(stmt, ast.FStatementReturn):
-                break
-
     def f_statement_define(self, stmt: ast.FStatementDefine):
         value = self.accept_expr(stmt.expression, load=not stmt.qualifier.is_const)
 
@@ -99,11 +96,12 @@ class VisitorImpl(VisitorWithScope):
         self.accept_with_child_scope(stmt.block)
 
     def f_statement_return(self, stmt: ast.FStatementReturn):
-        if stmt.expression is None:
-            return
+        if stmt.expression is not None:
+            value = self.accept_expr(stmt.expression)
+            self.scope.insert_return(value.type)
 
-        value = self.accept_expr(stmt.expression)
-        self.scope.insert_return(value.type)
+        anchor = JmpAnchor(self.instructions, Opcode.JMP_F)
+        self.scope.insert_jmp_anchor(anchor)
 
     def f_statement_if(self, stmt: ast.FStatementIf):
         value = self.accept_expr(stmt.condition)
