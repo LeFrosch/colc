@@ -1,0 +1,12 @@
+# INPUT
+map main {
+  for a in range(0, 10) {
+    final b = a + "str";
+  }
+}
+
+# OUTPUT
+test.col @ line 3
+>>     final b = a + "str";
+>>                 ^
+fatal problem: undefined operator <int> + <str>

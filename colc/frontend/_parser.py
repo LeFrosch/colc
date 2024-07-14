@@ -200,6 +200,14 @@ class Transformer(lark.Transformer):
             else_block=children[4],
         )
 
+    def f_statement_for(self, meta, children):
+        return ast.FStatementFor(
+            location=self.location_from_meta(meta),
+            identifier=self.identifier_from_token(children[1]),
+            condition=children[3],
+            block=children[4],
+        )
+
     def expression_int(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),

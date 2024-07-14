@@ -65,6 +65,7 @@ f_statement: f_block                         -> f_statement_block
   | IDENTIFIER "=" expression ";"            -> f_statement_assign
   | "return" [expression] ";"                -> f_statement_return
   | "if" expression f_block ["else" f_block] -> f_statement_if
+  | "for" IDENTIFIER "in" expression f_block -> f_statement_for
 
 c_block: "{" QUANTIFIER c_statement* "}"
 p_block: "{" QUANTIFIER p_statement* "}"

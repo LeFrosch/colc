@@ -125,3 +125,6 @@ class ComptimeVisitorImpl(VisitorWithScope):
             self.accept(stmt.if_block)
         elif stmt.else_block is not None:
             self.accept(stmt.else_block)
+
+    def f_statement_for(self, stmt: ast.FStatementFor):
+        raise CannotProcessAtComptime(stmt)

@@ -1,0 +1,25 @@
+# INPUT
+map main {
+  for b in range(0, 10) { }
+  for b in range(0, 10) { }
+}
+
+# OUTPUT
+000: INT        0
+001: INT       10
+002: RANGE      0
+003: STORE      1 = (for)
+004: HAS_NEXT   1
+005: JMP_FF     3 = (9)
+006: NEXT       1
+007: STORE      2 = (b)
+008: JMP_B      4 = (4)
+009: INT        0
+010: INT       10
+011: RANGE      0
+012: STORE      3 = (for)
+013: HAS_NEXT   3
+014: JMP_FF     3 = (18)
+015: NEXT       3
+016: STORE      4 = (b)
+017: JMP_B      4 = (13)

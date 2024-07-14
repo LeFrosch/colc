@@ -69,6 +69,10 @@ class Type:
     def is_any(self) -> bool:
         return len(self.values) == len(PrimitiveType)
 
+    @property
+    def as_scalar(self) -> 'Type':
+        return Type(self.values, list=False)
+
     def compatible(self, other: 'Type') -> bool:
         if self.is_list != other.is_list:
             return False

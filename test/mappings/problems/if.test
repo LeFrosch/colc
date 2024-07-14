@@ -1,0 +1,10 @@
+# INPUT
+map main {
+  if 123 {}
+}
+
+# OUTPUT
+test.col @ line 2
+>>   if 123 {}
+>>      ^^^
+fatal problem: expression <int> not compatible with <bool>

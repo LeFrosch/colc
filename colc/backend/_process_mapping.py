@@ -107,9 +107,7 @@ class VisitorImpl(VisitorWithScope):
 
     def f_statement_if(self, stmt: ast.FStatementIf):
         value = self.accept_expr(stmt.condition)
-
-        if not value.type.compatible(types.BOOLEAN):
-            fatal_problem('expected <bool>', stmt.condition)
+        check_compatible(stmt.condition, value, types.BOOLEAN)
 
         jmp_end = JmpAnchor(self.instructions, Opcode.JMP_FF)
         self.accept_with_child_scope(stmt.if_block)
@@ -121,6 +119,35 @@ class VisitorImpl(VisitorWithScope):
             jmp_end = jmp
 
             self.accept_with_child_scope(stmt.else_block)
+
+        jmp_end.set_address()
+
+    def f_statement_for(self, stmt: ast.FStatementFor):
+        list_value = self.accept_expr(stmt.condition)
+        check_compatible(stmt.condition, list_value, types.ANY_LIST)
+
+        # loop header: store list in unnamed local variable
+        list_index = self.allocator.alloc()
+        self.instructions.append(Opcode.STORE.new(list_index, 'for'))
+
+        # loop start: check if there is a next value
+        start = len(self.instructions)
+        self.instructions.append(Opcode.HAS_NEXT.new(list_index))
+        jmp_end = JmpAnchor(self.instructions, Opcode.JMP_FF)
+
+        # loop body: store current value and run block
+        self.instructions.append(Opcode.NEXT.new(list_index))
+        var_index = self.allocator.alloc()
+        self.instructions.append(Opcode.STORE.new(var_index, stmt.identifier.name))
+
+        scope = self.scope.new_child_scope()
+        scope.insert_runtime(stmt.identifier, RuntimeValue(list_value.type.as_scalar), var_index, final=True)
+
+        self.accept_with_scope(scope, stmt.block)
+
+        # loop end: jump back to start
+        end = len(self.instructions)
+        self.instructions.append(Opcode.JMP_B.new(end - start, str(start)))
 
         jmp_end.set_address()
 

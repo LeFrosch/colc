@@ -47,6 +47,7 @@ class Opcode(enum.IntEnum):
     NEXT = 0x40
     HAS_NEXT = 0x41
     RANGE = 0x42
+    RESET = 0x4F
 
     def new(self, argument: int = 0, debug: Optional[str] = None) -> 'Instruction':
         assert argument >= 0

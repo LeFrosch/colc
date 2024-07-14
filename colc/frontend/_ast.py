@@ -197,6 +197,12 @@ class FStatementIf(FStatement):
     else_block: Optional[FBlock]
 
 
+class FStatementFor(FStatement):
+    identifier: Identifier
+    condition: Expression
+    block: FBlock
+
+
 class FDefinition(Definition):
     parameters: list[Identifier]
     block: FBlock

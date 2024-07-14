@@ -1,0 +1,21 @@
+# INPUT
+map main {
+  for b in range(0, 10) {
+     final a = b + 1;
+  }
+}
+
+# OUTPUT
+000: INT        0
+001: INT       10
+002: RANGE      0
+003: STORE      1 = (for)
+004: HAS_NEXT   1
+005: JMP_FF     7 = (13)
+006: NEXT       1
+007: STORE      2 = (b)
+008: LOAD       2 = (b)
+009: INT        1
+010: ADD        0
+011: STORE      3 = (a)
+012: JMP_B      8 = (4)

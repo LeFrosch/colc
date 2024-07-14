@@ -36,9 +36,9 @@ def check_arguments(call: ast.Call, func: Function):
         fatal_problem(f'expected {len(func.parameters)} arguments', call)
 
 
-def check_compatible(arg: ast.Expression, value: Value, param: Type):
-    if not value.type.compatible(param):
-        fatal_problem(f'argument {value} not compatible with {param}', arg)
+def check_compatible(expr: ast.Expression, value: Value, type: Type):
+    if not value.type.compatible(type):
+        fatal_problem(f'expression {value} not compatible with {type}', expr)
 
 
 def check_assignment(identifier: ast.Identifier, definition: Definition, type: Type):

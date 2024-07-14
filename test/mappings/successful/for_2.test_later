@@ -1,0 +1,22 @@
+# INPUT
+fun test(a) {
+  for b in range(0, a) {
+    return 1;
+  }
+}
+map main {
+  final r = test(3);
+}
+
+# OUTPUT
+000: INT        0
+001: INT        3
+002: RANGE      0
+003: STORE      1 = (for)
+004: HAS_NEXT   1
+005: JMP_FF     4 = (10)
+006: NEXT       1
+007: STORE      2 = (b)
+008: INT        1
+009: JMP_B      5 = (4)
+010: STORE      3 = (r)
