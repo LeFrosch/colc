@@ -112,7 +112,7 @@ class Scope:
             self._anchors.append(anchor)
 
     def finalize(self):
-        for anchor in self._anchors:
+        for anchor in reversed(self._anchors):
             anchor.set_address()
 
     def new_call_scope(self) -> 'Scope':

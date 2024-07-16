@@ -1,0 +1,7 @@
+# INPUT
+map main {
+    return;
+    return;
+}
+
+# OUTPUT

@@ -1,0 +1,12 @@
+# INPUT
+map main {
+    return;
+    return "abc";
+}
+
+# CONST POOL
+000: abc
+
+# OUTPUT
+000: JMP_F      1 = (2)
+001: CONST      0 = ('abc')
