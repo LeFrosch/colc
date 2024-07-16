@@ -1,6 +1,6 @@
 from .__about__ import __version__
 
-from colc.backend import LExpression, Instruction, Context
+from colc.backend import LExpression, Mapping, Context
 
 
 class Object:
@@ -12,10 +12,10 @@ class Object:
     # shared pool of constant definitions
     const_pool: list[str | int]
 
-    # map from mapping name to bytecode instructions
-    mappings: dict[str, list[Instruction]]
+    # list of available mappings
+    mappings: list[Mapping]
 
-    def __init__(self, ctx: Context, constraint: LExpression, mappings: dict[str, list[Instruction]]):
+    def __init__(self, ctx: Context, constraint: LExpression, mappings: list[Mapping]):
         self.version = __version__
         self.constraint = constraint
         self.mappings = mappings

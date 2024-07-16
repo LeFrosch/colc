@@ -1,0 +1,5 @@
+# INPUT
+con main { all: }
+
+# OUTPUT
+fatal problem: no mapping

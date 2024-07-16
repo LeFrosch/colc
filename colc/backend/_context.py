@@ -1,7 +1,10 @@
+from typing import Optional
+
 from colc.common import internal_problem, ComptimeValue, ComptimePyType
 
 from ._file import File
 from ._config import Config
+from ._utils import Pool
 
 
 def check_const_pool_value(value: ComptimePyType) -> int | str:
@@ -19,17 +22,19 @@ class Context:
         self.file = file
 
         # allow assignments of none, compilation should fail
-        self._const_pool: list[ComptimePyType] = []
+        self._const_pool = Pool[ComptimePyType]()
+        self._label_pool = Pool[str]()
 
     def intern_const(self, value: ComptimeValue | ComptimePyType) -> int:
         if isinstance(value, ComptimeValue):
             value = value.comptime
-
-        if value in self._const_pool:
-            return self._const_pool.index(value)
-        else:
-            self._const_pool.append(value)
-            return len(self._const_pool) - 1
+        return self._const_pool.intern(value)
 
     def get_const_pool(self) -> list[int | str]:
         return [check_const_pool_value(it) for it in self._const_pool]
+
+    def intern_label(self, label: str) -> int:
+        return self._label_pool.intern(label)
+
+    def lookup_label(self, label: str) -> Optional[int]:
+        return self._label_pool.lookup(label)

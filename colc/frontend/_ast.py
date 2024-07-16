@@ -86,6 +86,10 @@ class Call(Node):
     arguments: list[Expression]
 
 
+class Label(Node):
+    identifier: Identifier
+
+
 class ExpressionCall(Expression):
     call: Call
 
@@ -110,11 +114,13 @@ class CStatementAttr(CStatement):
 
 
 class CStatementCall(CStatement):
+    label: Optional[Label]
     predicate: Call
     constraint: Call
 
 
 class CStatementWith(CStatement):
+    label: Optional[Label]
     predicate: Call
     kind: Kind
     block: Optional[CBlock]
@@ -210,6 +216,7 @@ class FDefinition(Definition):
 
 class MDefinition(Definition):
     block: FBlock
+    labels: list[Identifier]
 
 
 class Include(Node):

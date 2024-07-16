@@ -1,0 +1,9 @@
+/include/ "std";
+
+con main { all:
+  cores: min(1) CORE;
+}
+
+map test if cores {}
+
+map default {}

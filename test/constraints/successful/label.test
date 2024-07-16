@@ -1,0 +1,12 @@
+# INPUT
+/include/ "std";
+
+con test(CORE) { all: }
+
+con main { all:
+  cores: min(4) CORE;
+  other: max(4) test();
+}
+
+# OUTPUT
+[ALL, [WITH, 0, 'CORE', [GREATER_EQUAL, [LIST_SIZE], 4]], [WITH, 1, 'CORE', [LESS_EQUAL, [LIST_SIZE], 4], [ALL]]]

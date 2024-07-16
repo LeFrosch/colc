@@ -8,10 +8,32 @@ from ._process_expression import process_expression
 from ._functions import operator_infer, resolve_function, BuiltinFunction, DefinedFunction
 from ._jmp_anchor import JmpAnchor
 from ._utils import Allocator, check_arguments, check_assignment, check_compatible
+from ._mapping import Mapping
 
 
-def process_mappings(ctx: Context) -> dict[str, list[Instruction]]:
-    return {it.identifier.name: process_mapping(ctx, it) for it in ctx.file.mappings}
+def process_mappings(ctx: Context) -> list[Mapping]:
+    mappings = ctx.file.mappings
+    if len(mappings) == 0:
+        fatal_problem('no mapping')
+    if all(len(it.labels) > 0 for it in mappings):
+        fatal_problem('no unconditional mapping')
+
+    return [
+        Mapping(
+            name=mapping.identifier.name,
+            labels=[_lookup_label(ctx, it) for it in mapping.labels],
+            code=process_mapping(ctx, mapping),
+        )
+        for mapping in mappings
+    ]
+
+
+def _lookup_label(ctx: Context, identifier: ast.Identifier) -> int:
+    label = ctx.lookup_label(identifier.name)
+    if label is None:
+        fatal_problem('undefined identifier', identifier)
+
+    return label
 
 
 def process_mapping(ctx: Context, mapping: ast.MDefinition) -> list[Instruction]:

@@ -45,7 +45,7 @@ def print_debug_info(obj: Object):
         print(format_pool(obj.const_pool))
         print()
 
-    for name, instructions in obj.mappings.items():
-        print('MAPPING: %s' % name)
-        print(format_instructions(instructions))
+    for mapping in obj.mappings:
+        print('MAPPING: %s' % mapping.name)
+        print(format_instructions(mapping.code))
         print()

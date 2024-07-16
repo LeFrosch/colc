@@ -1,4 +1,4 @@
-from typing import Collection, Any
+from typing import Collection, Any, Optional
 
 from colc.common import internal_problem, ComptimeValue, AnyValue, fatal_problem
 from colc.frontend import ast, Quantifier, Comparison
@@ -41,6 +41,12 @@ class VisitorImpl(VisitorWithScope):
             return expressions[0]
         else:
             return LExpression(LFunction.from_quantifier(quantifier), expressions)
+
+    def accept_label(self, label: Optional[ast.Label]) -> Optional[int]:
+        if label is None:
+            return None
+
+        return self.ctx.intern_label(label.identifier.name)
 
     def new_scope_for_call(self, call: ast.Call, parameters: list[ast.Identifier]) -> Scope:
         if len(call.arguments) != len(parameters):
@@ -85,6 +91,7 @@ class VisitorImpl(VisitorWithScope):
         return LExpression(
             LFunction.WITH,
             [
+                self.accept_label(stmt.label),
                 stmt.kind.name,
                 self.accept_predicate(stmt.predicate),
                 self.accept(stmt.block),
@@ -98,6 +105,7 @@ class VisitorImpl(VisitorWithScope):
         return LExpression(
             LFunction.WITH,
             [
+                self.accept_label(stmt.label),
                 constraint.kind.name,
                 self.accept_predicate(stmt.predicate),
                 self.accept_with_scope(constraint_scope, constraint.block),

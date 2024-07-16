@@ -50,11 +50,12 @@ _list{item}: | item ("," item)*
 _c_list{item}: "," _list{item}
 
 call: IDENTIFIER "(" _list{expression} ")"
+label: IDENTIFIER ":"
 
 c_statement: c_block ";"                 -> c_statement_block
-  | call NODE_KIND [c_block] ";"         -> c_statement_with
   | IDENTIFIER COMPARISON expression ";" -> c_statement_attr
-  | call call ";"                        -> c_statement_call
+  | [label] call NODE_KIND [c_block] ";" -> c_statement_with
+  | [label] call call ";"                -> c_statement_call
 
 p_statement: p_block ";"                                   -> p_statement_block
   | "size" COMPARISON expression ";"                       -> p_statement_size
@@ -75,7 +76,7 @@ f_block: "{" f_statement* "}"
   | "con" IDENTIFIER "(" NODE_KIND _c_list{IDENTIFIER}? ")" c_block -> c_definition_type
   | "con" IDENTIFIER "(" "list" _c_list{IDENTIFIER}? ")" p_block    -> p_definition
   | "fun" IDENTIFIER "(" _list{IDENTIFIER} ")" f_block              -> f_definition
-  | "map" IDENTIFIER f_block                                        -> m_definition
+  | "map" IDENTIFIER ["if" _list{IDENTIFIER}] f_block               -> m_definition
 
 include: "/include/" STRING ";"
 

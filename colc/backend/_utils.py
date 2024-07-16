@@ -1,8 +1,12 @@
+from typing import TypeVar, Generic, Optional
+
 from colc.common import fatal_problem, Type, Value
 from colc.frontend import ast
 
 from ._scope import Definition
 from ._functions import Function
+
+T = TypeVar('T')
 
 
 class Allocator:
@@ -12,6 +16,27 @@ class Allocator:
     def alloc(self) -> int:
         self.index += 1
         return self.index - 1
+
+
+class Pool(Generic[T]):
+    def __init__(self):
+        self._items: list[T] = []
+
+    def __iter__(self):
+        return self._items.__iter__()
+
+    def intern(self, value: T) -> int:
+        if value in self._items:
+            return self._items.index(value)
+        else:
+            self._items.append(value)
+            return len(self._items) - 1
+
+    def lookup(self, value: T) -> Optional[int]:
+        if value in self._items:
+            return self._items.index(value)
+        else:
+            return None
 
 
 def check_arguments(call: ast.Call, func: Function):

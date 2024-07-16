@@ -39,7 +39,7 @@ class File:
         definition = self._resolve(ast.CDefinitionMain, 'main')
 
         if definition is None:
-            fatal_problem('undefined main constraint')
+            fatal_problem('no main constraint')
 
         return typing.cast(ast.CDefinitionMain, definition)
 

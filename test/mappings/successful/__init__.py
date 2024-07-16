@@ -1,5 +1,7 @@
 import unittest
 
+from colc.common import first
+
 from colc import Config, debug, FatalProblem
 from test.utils import FileTestMeta, compile_mappings
 
@@ -15,10 +17,10 @@ class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
 
         self.assertGreater(len(mappings), 0)
 
-        mapping = next(iter(mappings.values()))
-        self.assertEqual(output, debug.format_instructions(mapping))
+        mapping = first(mappings)
+        self.assertEqual(output, debug.format_instructions(mapping.code))
 
         if const_pool:
-            self.assertEqual(const_pool, debug.format_pool(ctx._const_pool))
+            self.assertEqual(const_pool, debug.format_pool(ctx.get_const_pool()))
         else:
-            self.assertEqual(len(ctx._const_pool), 0)
+            self.assertEqual(len(ctx.get_const_pool()), 0)

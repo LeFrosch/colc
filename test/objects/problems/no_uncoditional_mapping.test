@@ -1,0 +1,7 @@
+# INPUT
+con main { all: }
+
+map main if test { }
+
+# OUTPUT
+fatal problem: no unconditional mapping

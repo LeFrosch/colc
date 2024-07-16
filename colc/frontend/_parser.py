@@ -95,16 +95,18 @@ class Transformer(lark.Transformer):
     def c_statement_call(self, meta, children):
         return ast.CStatementCall(
             location=self.location_from_meta(meta),
-            predicate=children[0],
-            constraint=children[1],
+            label=children[0],
+            predicate=children[1],
+            constraint=children[2],
         )
 
     def c_statement_with(self, meta, children):
         return ast.CStatementWith(
             location=self.location_from_meta(meta),
-            predicate=children[0],
-            kind=self.kind_from_token(children[1]),
-            block=children[2],
+            label=children[0],
+            predicate=children[1],
+            kind=self.kind_from_token(children[2]),
+            block=children[3],
         )
 
     def p_definition(self, meta, children):
@@ -156,7 +158,8 @@ class Transformer(lark.Transformer):
         return ast.MDefinition(
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[1]),
-            block=children[2],
+            labels=[self.identifier_from_token(it) for it in children[3:-1]],
+            block=children[-1],
         )
 
     def f_block(self, meta, children):
@@ -264,6 +267,12 @@ class Transformer(lark.Transformer):
             location=self.location_from_meta(meta),
             identifier=self.identifier_from_token(children[0]),
             arguments=[it for it in children if isinstance(it, ast.Expression)],
+        )
+
+    def label(self, meta, children):
+        return ast.Label(
+            location=self.location_from_meta(meta),
+            identifier=self.identifier_from_token(children[0]),
         )
 
 

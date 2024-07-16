@@ -1,0 +1,12 @@
+# INPUT
+con main { all: }
+
+map test if test { }
+
+map default { }
+
+# OUTPUT
+test.col @ line 3
+>> map test if test { }
+>>             ^^^^
+fatal problem: undefined identifier
