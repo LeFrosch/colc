@@ -5,7 +5,7 @@ from ._context import Context
 from ._instruction import Instruction, Opcode
 from ._scope import VisitorWithScope, RuntimeDefinition
 from ._process_expression import process_expression
-from ._functions import operator_infer, resolve_function, BuiltinFunction, DefinedFunction
+from ._functions import operator_binary_infer, operator_unary_infer, resolve_function, BuiltinFunction, DefinedFunction
 from ._jmp_anchor import JmpAnchor
 from ._utils import Allocator, check_arguments, check_assignment, check_compatible
 from ._mapping import Mapping
@@ -171,13 +171,18 @@ class VisitorImpl(VisitorWithScope):
 
         jmp_end.set_address()
 
+    def expression_unary(self, expr: ast.ExpressionUnary) -> Value:
+        value = self.accept_expr(expr.expression)
+        self.instructions.append(Opcode.from_operator_unary(expr.operator).new(0))
+        return operator_unary_infer(expr.operator, value)
+
     def expression_binary(self, expr: ast.ExpressionBinary) -> Value:
         left = self.accept_expr(expr.left)
         right = self.accept_expr(expr.right)
 
-        self.instructions.append(Opcode.from_operator(expr.operator).new(0))
+        self.instructions.append(Opcode.from_operator_binary(expr.operator).new(0))
 
-        return operator_infer(expr.operator, left, right)
+        return operator_binary_infer(expr.operator, left, right)
 
     def expression_literal(self, expr: ast.ExpressionLiteral) -> Value:
         return expr.value

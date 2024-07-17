@@ -56,7 +56,16 @@ class Opcode(enum.IntEnum):
         return Instruction(self, argument, debug)
 
     @staticmethod
-    def from_operator(op: Operator) -> 'Opcode':
+    def from_operator_unary(op: Operator) -> 'Opcode':
+        return op.switch(
+            {
+                Operator.SUB: Opcode.NEG,
+                Operator.NOT: Opcode.NOT,
+            }
+        )
+
+    @staticmethod
+    def from_operator_binary(op: Operator) -> 'Opcode':
         return op.switch(
             {
                 Operator.ADD: Opcode.ADD,
@@ -66,7 +75,6 @@ class Opcode(enum.IntEnum):
                 Operator.AND: Opcode.AND,
                 Operator.OR: Opcode.OR,
                 Operator.EQL: Opcode.EQL,
-                Operator.NEQ: Opcode.NEQ,
                 Operator.LES: Opcode.LES,
                 Operator.LEQ: Opcode.LEQ,
                 Operator.GRE: Opcode.GRE,

@@ -67,7 +67,20 @@ def builtin(name: str, opcode: Opcode):
     return decorator
 
 
-def operator_infer(op: Operator, left: Value, right: Value) -> RuntimeValue:
+def operator_unary_infer(op: Operator, value: Value) -> RuntimeValue:
+    return_types = [
+        it.returns
+        for it in _builtins
+        if it.name == op and len(it.parameters) == 1 and it.parameters[0].compatible(value.type)
+    ]
+
+    if len(return_types) == 0:
+        fatal_problem(f'undefined operator {op} {value.type}', op)
+
+    return RuntimeValue(Type.lup(return_types))
+
+
+def operator_binary_infer(op: Operator, left: Value, right: Value) -> RuntimeValue:
     return_types = [
         it.returns
         for it in _builtins
@@ -78,16 +91,33 @@ def operator_infer(op: Operator, left: Value, right: Value) -> RuntimeValue:
     ]
 
     if len(return_types) == 0:
-        fatal_problem(f'undefined operator {left} {op} {right}', op)
+        fatal_problem(f'undefined operator {left.type} {op} {right.type}', op)
 
     return RuntimeValue(Type.lup(return_types))
 
 
 def comparison_infer(comp: Comparison, left: Value, right: Value) -> RuntimeValue:
-    return operator_infer(cast(Operator, comp), left, right)
+    return operator_binary_infer(cast(Operator, comp), left, right)
 
 
-def operator_evaluate(op: Operator, left: ComptimeValue, right: ComptimeValue) -> ComptimeValue:
+def operator_unary_evaluate(op: Operator, value: ComptimeValue) -> ComptimeValue:
+    candidates = [
+        it for it in _builtins if it.name == op and len(it.parameters) == 1 and it.parameters[0].compatible(value.type)
+    ]
+
+    if len(candidates) == 0:
+        fatal_problem(f'undefined operator {op} {value.type}', op)
+    if len(candidates) != 1:
+        internal_problem(f'ambiguous operator {op} {value.type}')
+
+    result = candidates[0].comptime(value.comptime)
+    if result is None:
+        internal_problem(f'cannot resolve operator at comptime {op}')
+
+    return result
+
+
+def operator_binary_evaluate(op: Operator, left: ComptimeValue, right: ComptimeValue) -> ComptimeValue:
     candidates = [
         it
         for it in _builtins
@@ -98,9 +128,9 @@ def operator_evaluate(op: Operator, left: ComptimeValue, right: ComptimeValue) -
     ]
 
     if len(candidates) == 0:
-        fatal_problem(f'undefined operator {left} {op} {right}', op)
+        fatal_problem(f'undefined operator {left.type} {op} {right.type}', op)
     if len(candidates) != 1:
-        internal_problem(f'ambiguous operator {left} {op} {right}')
+        internal_problem(f'ambiguous operator {left.type} {op} {right.type}')
 
     try:
         result = candidates[0].comptime(left.comptime, right.comptime)

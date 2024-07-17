@@ -260,6 +260,13 @@ class Transformer(lark.Transformer):
             call=children[0],
         )
 
+    def expression_unary(self, meta, children):
+        return ast.ExpressionUnary(
+            location=self.location_from_meta(meta),
+            operator=Operator.from_token(self.file, children[0]),
+            expression=children[1],
+        )
+
     def expression_binary(self, meta, children):
         return ast.ExpressionBinary(
             location=self.location_from_meta(meta),
@@ -267,6 +274,9 @@ class Transformer(lark.Transformer):
             left=children[0],
             right=children[2],
         )
+
+    def expression_group(self, meta, children):
+        return children[1]
 
     def call(self, meta, children):
         return ast.Call(

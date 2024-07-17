@@ -1,0 +1,14 @@
+# INPUT
+map main {
+  final a = 10;
+  final b = -a + 3;
+}
+
+# OUTPUT
+000: INT       10
+001: STORE      1 = (a)
+002: LOAD       1 = (a)
+003: NEG        0
+004: INT        3
+005: ADD        0
+006: STORE      2 = (b)

@@ -5,8 +5,14 @@ from colc.frontend import ast
 
 from ._scope import Scope, VisitorWithScope, ComptimeDefinition
 from ._context import Context
-from ._functions import operator_evaluate, resolve_function, BuiltinFunction, DefinedFunction
 from ._utils import check_arguments, check_assignment, check_compatible
+from ._functions import (
+    operator_binary_evaluate,
+    operator_unary_evaluate,
+    resolve_function,
+    BuiltinFunction,
+    DefinedFunction,
+)
 
 
 class CannotProcessAtComptime(Exception):
@@ -33,11 +39,15 @@ class ComptimeVisitorImpl(VisitorWithScope):
         super().__init__(scope)
         self.ctx = ctx
 
+    def expression_unary(self, expr: ast.ExpressionUnary) -> ComptimeValue:
+        value = self.accept(expr.expression)
+        return operator_unary_evaluate(expr.operator, value)
+
     def expression_binary(self, expr: ast.ExpressionBinary) -> ComptimeValue:
         left = self.accept(expr.left)
         right = self.accept(expr.right)
 
-        return operator_evaluate(expr.operator, left, right)
+        return operator_binary_evaluate(expr.operator, left, right)
 
     def expression_literal(self, expr: ast.ExpressionLiteral) -> ComptimeValue:
         return expr.value
