@@ -7,4 +7,4 @@ map main {
 test.col @ line 2
 >>   a = 3 + "abc";
 >>         ^
-fatal problem: undefined operator <int> + <str>
+fatal problem: undefined operator <num> + <str>

@@ -4,4 +4,4 @@ fun test() {
 }
 
 # TYPE
-<list int>
+<list num>

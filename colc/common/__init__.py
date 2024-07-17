@@ -23,6 +23,7 @@ from .values import Type as Type
 from .values import Value as Value
 from .values import Node as Node
 from .values import NodeKind as NodeKind
+from .values import num as num
 from .values import RuntimeValue as RuntimeValue
 from .values import ComptimeValue as ComptimeValue
 from .values import ComptimePyType as ComptimePyType

@@ -10,4 +10,4 @@ fun test() {
 }
 
 # TYPE
-<int | str>
+<num | str>

@@ -1,13 +1,13 @@
 from typing import Optional
 
-from colc.common import internal_problem, ComptimeValue, ComptimePyType
+from colc.common import internal_problem, ComptimeValue, ComptimePyType, num
 
 from ._file import File
 from ._config import Config
 from ._utils import Pool
 
 
-def check_const_pool_value(value: ComptimePyType) -> int | str:
+def check_const_pool_value(value: ComptimePyType) -> num | str:
     if value is None:
         internal_problem('cannot intern none')
     if isinstance(value, bool):
@@ -30,7 +30,7 @@ class Context:
             value = value.comptime
         return self._const_pool.intern(value)
 
-    def get_const_pool(self) -> list[int | str]:
+    def get_const_pool(self) -> list[num | str]:
         return [check_const_pool_value(it) for it in self._const_pool]
 
     def intern_label(self, label: str) -> int:

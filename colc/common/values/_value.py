@@ -1,6 +1,6 @@
 import abc
 
-from ._type import Type
+from ._type import Type, num
 from . import _types as types
 
 
@@ -36,7 +36,7 @@ class RuntimeValue(Value):
         return self
 
 
-ComptimePyType = str | int | bool | None
+ComptimePyType = str | num | bool | None
 
 
 class ComptimeValue(Value):

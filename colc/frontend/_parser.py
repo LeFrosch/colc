@@ -217,6 +217,12 @@ class Transformer(lark.Transformer):
             value=ComptimeValue.from_python(int(children[0])),
         )
 
+    def expression_float(self, meta, children):
+        return ast.ExpressionLiteral(
+            location=self.location_from_meta(meta),
+            value=ComptimeValue.from_python(float(children[0])),
+        )
+
     def expression_str(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),

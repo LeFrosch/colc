@@ -9,4 +9,4 @@ map main {
 test.col @ line 3
 >>     final b = a + "str";
 >>                 ^
-fatal problem: undefined operator <int> + <str>
+fatal problem: undefined operator <num> + <str>

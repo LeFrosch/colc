@@ -7,4 +7,4 @@ con main { all:
 test.col @ line 2
 >>   size == 3 && true;
 >>             ^^
-fatal problem: undefined operator <int> && <bool>
+fatal problem: undefined operator <num> && <bool>

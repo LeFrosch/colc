@@ -8,4 +8,4 @@ map main {
 test.col @ line 3
 >>   var b = a + "str";
 >>             ^
-fatal problem: undefined operator <int> + <str>
+fatal problem: undefined operator <num> + <str>

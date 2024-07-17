@@ -1,11 +1,8 @@
-%import common.WS
+%import common (WS, DIGIT, INT, FLOAT)
 %import common.ESCAPED_STRING -> STRING
 
 %ignore WS
 
-DIGIT: "0".."9"
-
-INTEGER: DIGIT+
 LETTER_UPPER_CASE: "A".."Z"
 LETTER_LOWER_CASE: "a".."z"
 LETTER: LETTER_UPPER_CASE | LETTER_LOWER_CASE | DIGIT | "_"
@@ -35,7 +32,8 @@ QUALIFIER.1: "final" | "const" | "var"
   | expression_prod "*" expression_atom -> expression_binary
   | expression_prod "/" expression_atom -> expression_binary
 
-?expression_atom: INTEGER     -> expression_int
+?expression_atom: INT         -> expression_int
+  | FLOAT                     -> expression_float
   | STRING                    -> expression_str
   | "true"                    -> expression_true
   | "false"                   -> expression_false

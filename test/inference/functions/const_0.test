@@ -4,4 +4,4 @@ fun test() {
 }
 
 # TYPE
-<int>
+<num>

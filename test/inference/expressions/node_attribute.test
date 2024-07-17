@@ -1,6 +1,6 @@
 # INPUT
 root.attr -> <any>
-root.attr + 3 -> <int>
+root.attr + 3 -> <num>
 root.attr + "" -> <str>
-root.attr + root.attr -> <int | str>
+root.attr + root.attr -> <num | str>
 root.attr == root.attr -> <bool>

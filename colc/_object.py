@@ -1,5 +1,6 @@
 from .__about__ import __version__
 
+from colc.common import num
 from colc.backend import LExpression, Mapping, Context
 
 
@@ -10,7 +11,7 @@ class Object:
     constraint: LExpression
 
     # shared pool of constant definitions
-    const_pool: list[str | int]
+    const_pool: list[str | num]
 
     # list of available mappings
     mappings: list[Mapping]

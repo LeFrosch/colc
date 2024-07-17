@@ -7,4 +7,4 @@ map main {
 test.col @ line 2
 >>   final a = range(0, "str");
 >>                      ^^^^^
-fatal problem: expression <str> not compatible with <int>
+fatal problem: expression <str> not compatible with <num>

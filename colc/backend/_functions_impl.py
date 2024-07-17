@@ -1,6 +1,6 @@
 # mypy: ignore-errors
 
-from colc.common import Node, NodeKind
+from colc.common import Node, NodeKind, num
 from colc.frontend import Operator
 
 from ._functions import builtin
@@ -13,27 +13,27 @@ def add_str(left: str, right: str) -> str:
 
 
 @builtin(Operator.ADD, Opcode.ADD)
-def add_int(left: int, right: int) -> int:
+def add_int(left: num, right: num) -> int:
     return left + right
 
 
 @builtin(Operator.SUB, Opcode.SUB)
-def sub_int(left: int, right: int) -> int:
+def sub_int(left: num, right: num) -> int:
     return left - right
 
 
 @builtin(Operator.DIV, Opcode.DIV)
-def div_int(left: int, right: int) -> int:
+def div_int(left: num, right: num) -> int:
     return left // right
 
 
 @builtin(Operator.MUL, Opcode.MUL)
-def mul_int(left: int, right: int) -> int:
+def mul_int(left: num, right: num) -> int:
     return left * right
 
 
 @builtin(Operator.EQL, Opcode.EQL)
-def eql_int(left: int, right: int) -> bool:
+def eql_int(left: num, right: num) -> bool:
     return left == right
 
 
@@ -48,7 +48,7 @@ def eql_bool(left: bool, right: bool) -> bool:
 
 
 @builtin(Operator.NEQ, Opcode.NEQ)
-def neq_int(left: int, right: int) -> bool:
+def neq_int(left: num, right: num) -> bool:
     return left != right
 
 
@@ -63,32 +63,32 @@ def neq_bool(left: bool, right: bool) -> bool:
 
 
 @builtin(Operator.LES, Opcode.LES)
-def les_int(left: int, right: int) -> bool:
+def les_int(left: num, right: num) -> bool:
     return left < right
 
 
 @builtin(Operator.LEQ, Opcode.LEQ)
-def leq_int(left: int, right: int) -> bool:
+def leq_int(left: num, right: num) -> bool:
     return left <= right
 
 
 @builtin(Operator.GRE, Opcode.GRE)
-def gre_int(left: int, right: int) -> bool:
+def gre_int(left: num, right: num) -> bool:
     return left > right
 
 
 @builtin(Operator.GEQ, Opcode.GEQ)
-def geq_int(left: int, right: int) -> bool:
+def geq_int(left: num, right: num) -> bool:
     return left >= right
 
 
 @builtin(Operator.MUT, Opcode.MUT)
-def mut_int(left: int, right: int) -> bool:
+def mut_int(left: num, right: num) -> bool:
     return left % right == 0
 
 
 @builtin(Operator.POW, Opcode.POW)
-def pow_int(left: int, right: int) -> bool:
+def pow_int(left: num, right: num) -> bool:
     while left % right == 0:
         left = left // right
 
@@ -111,12 +111,12 @@ def not_bool(value: bool) -> bool:
 
 
 @builtin(Operator.SUB, Opcode.SUB)
-def neg_int(value: int) -> int:
+def neg_int(value: num) -> int:
     return -value
 
 
 @builtin('range', Opcode.RANGE)
-def range_impl(start: int, end: int) -> range:
+def range_impl(start: num, end: num) -> range:
     return None
 
 

@@ -7,4 +7,4 @@ map main {
 test.col @ line 2
 >>   if 123 {}
 >>      ^^^
-fatal problem: expression <int> not compatible with <bool>
+fatal problem: expression <num> not compatible with <bool>

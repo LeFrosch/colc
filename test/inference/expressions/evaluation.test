@@ -1,7 +1,15 @@
 # INPUT
 3 >= 4 -> False: <bool>
 "str" + "str" == "strstr" -> True: <bool>
-8 / 2 + 4 * 15 -> 64: <int>
+8 / 2 + 4 * 15 -> 64: <num>
 8 *= 4 -> True: <bool>
 8 **= 4 -> False: <bool>
 16 **= 4 -> True: <bool>
+4.0 -> 4.0: <num>
+.4 -> 0.4: <num>
+-4 -> -4: <num>
+!true -> False: <bool>
+1 + 2 * 3 -> 7: <num>
+(1 + 2) * 3 -> 9: <num>
+((((1)))) -> 1: <num>
+.4 + 1 -> 1.4: <num>
