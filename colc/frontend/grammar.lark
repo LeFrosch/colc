@@ -1,7 +1,8 @@
-%import common (WS, DIGIT, INT, FLOAT)
+%import common (WS, DIGIT, INT, FLOAT, SH_COMMENT)
 %import common.ESCAPED_STRING -> STRING
 
 %ignore WS
+%ignore SH_COMMENT
 
 LETTER_UPPER_CASE: "A".."Z"
 LETTER_LOWER_CASE: "a".."z"
