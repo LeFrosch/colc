@@ -24,7 +24,11 @@ def sub_int(left: num, right: num) -> int:
 
 @builtin(Operator.DIV, Opcode.DIV)
 def div_int(left: num, right: num) -> int:
-    return left // right
+    # TODO: prefer explicit true div?
+    if isinstance(left, int) and isinstance(right, int):
+        return left // right
+    else:
+        return left / right
 
 
 @builtin(Operator.MUL, Opcode.MUL)
