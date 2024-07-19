@@ -9,6 +9,7 @@ from ._functions import operator_binary_infer, operator_unary_infer, resolve_fun
 from ._jmp_anchor import JmpAnchor
 from ._utils import Allocator, check_arguments, check_assignment, check_compatible
 from ._mapping import Mapping
+from ._fixpoint import fixpoint_can_convert, fixpoint_from_float
 
 
 def process_mappings(ctx: Context) -> list[Mapping]:
@@ -62,6 +63,8 @@ class VisitorImpl(VisitorWithScope):
             instruction = Opcode.FALSE.new(0)
         elif isinstance(comptime, int) and 0 <= comptime <= 255:
             instruction = Opcode.INT.new(comptime)
+        elif isinstance(comptime, float) and fixpoint_can_convert(comptime):
+            instruction = Opcode.FLOAT.new(fixpoint_from_float(comptime), str(comptime))
         else:
             index = self.ctx.intern_const(comptime)
             instruction = Opcode.CONST.new(index, repr(comptime))

@@ -14,5 +14,7 @@ from ._config import Config as Config
 
 from ._mapping import Mapping as Mapping
 
+from ._fixpoint import fixpoint_to_float as fixpoint_to_float
+
 # ensure implementations are loaded
 from . import _functions_impl as _functions_impl
