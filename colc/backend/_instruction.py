@@ -20,34 +20,35 @@ class Opcode(enum.IntEnum):
     SUB = 0x11
     MUL = 0x12
     DIV = 0x13
-    AND = 0x14
-    OR = 0x15
-    NEG = 0x16
-    NOT = 0x17
-    EQL = 0x18
-    NEQ = 0x19
-    LES = 0x1A
-    LEQ = 0x1B
-    GRE = 0x1C
-    GEQ = 0x1D
-    MUT = 0x1E
-    POW = 0x1F
+    DIV_FLOOR = 0x14
+    AND = 0x15
+    OR = 0x16
+    NEG = 0x17
+    NOT = 0x18
+    EQL = 0x19
+    NEQ = 0x1A
+    LES = 0x1B
+    LEQ = 0x1C
+    GRE = 0x1D
+    GEQ = 0x1E
+    MUT = 0x1F
+    POW = 0x20
 
     # const values
-    TRUE = 0x20
-    FALSE = 0x21
-    INT = 0x22
+    TRUE = 0x30
+    FALSE = 0x31
+    INT = 0x32
 
     # control flow
-    JMP_F = 0x30
-    JMP_FF = 0x31
-    JMP_B = 0x32
+    JMP_F = 0x40
+    JMP_FF = 0x41
+    JMP_B = 0x42
 
     # iterators
-    NEXT = 0x40
-    HAS_NEXT = 0x41
-    RANGE = 0x42
-    RESET = 0x4F
+    NEXT = 0x50
+    HAS_NEXT = 0x51
+    RANGE = 0x52
+    RESET = 0x5F
 
     def new(self, argument: int = 0, debug: Optional[str] = None) -> 'Instruction':
         assert argument >= 0

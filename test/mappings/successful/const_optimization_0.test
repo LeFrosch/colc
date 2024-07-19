@@ -1,7 +1,7 @@
 # INPUT
 map main {
   const a = 1 + 3;
-  const b = 8 / 2;
+  const b = 8 // 2;
   final c = a * b;
 }
 

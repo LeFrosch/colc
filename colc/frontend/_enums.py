@@ -43,6 +43,7 @@ class Operator(AstEnum):
     SUB = '-'
     MUL = '*'
     DIV = '/'
+    DIV_FLOOR = '//'
     AND = '&&'
     OR = '||'
     EQL = '=='

@@ -29,17 +29,20 @@ QUALIFIER.1: "final" | "const" | "var"
   | expression_sum "+" expression_prod -> expression_binary
   | expression_sum "-" expression_prod -> expression_binary
 
-?expression_prod: expression_atom
-  | expression_prod "*" expression_atom -> expression_binary
-  | expression_prod "/" expression_atom -> expression_binary
+?expression_prod: expression_unary
+  | expression_prod "*" expression_unary  -> expression_binary
+  | expression_prod "/" expression_unary  -> expression_binary
+  | expression_prod "//" expression_unary -> expression_binary
+
+?expression_unary: expression_atom
+  | "!" expression_unary
+  | "-" expression_unary
 
 ?expression_atom: INT         -> expression_int
   | FLOAT                     -> expression_float
   | STRING                    -> expression_str
   | "true"                    -> expression_true
   | "false"                   -> expression_false
-  | "-" expression_atom       -> expression_unary
-  | "!" expression_atom       -> expression_unary
   | IDENTIFIER                -> expression_ref
   | call                      -> expression_call
   | IDENTIFIER "." IDENTIFIER -> expression_attr

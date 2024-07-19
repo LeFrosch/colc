@@ -13,26 +13,27 @@ def add_str(left: str, right: str) -> str:
 
 
 @builtin(Operator.ADD, Opcode.ADD)
-def add_int(left: num, right: num) -> int:
+def add_int(left: num, right: num) -> num:
     return left + right
 
 
 @builtin(Operator.SUB, Opcode.SUB)
-def sub_int(left: num, right: num) -> int:
+def sub_int(left: num, right: num) -> num:
     return left - right
 
 
 @builtin(Operator.DIV, Opcode.DIV)
-def div_int(left: num, right: num) -> int:
-    # TODO: prefer explicit true div?
-    if isinstance(left, int) and isinstance(right, int):
-        return left // right
-    else:
-        return left / right
+def div_int(left: num, right: num) -> float:
+    return float(left) / float(right)
+
+
+@builtin(Operator.DIV_FLOOR, Opcode.DIV_FLOOR)
+def div_floor_int(left: num, right: num) -> num:
+    return left // right
 
 
 @builtin(Operator.MUL, Opcode.MUL)
-def mul_int(left: num, right: num) -> int:
+def mul_int(left: num, right: num) -> num:
     return left * right
 
 
@@ -115,7 +116,7 @@ def not_bool(value: bool) -> bool:
 
 
 @builtin(Operator.SUB, Opcode.SUB)
-def neg_int(value: num) -> int:
+def neg_int(value: num) -> num:
     return -value
 
 
