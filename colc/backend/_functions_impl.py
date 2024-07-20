@@ -6,6 +6,8 @@ from colc.frontend import Operator
 from ._functions import builtin
 from ._instruction import Opcode
 
+any = num | str | bool | None
+
 
 @builtin(Operator.ADD, Opcode.ADD)
 def add_str(left: str, right: str) -> str:
@@ -38,33 +40,16 @@ def mul_int(left: num, right: num) -> num:
 
 
 @builtin(Operator.EQL, Opcode.EQL)
-def eql_int(left: num, right: num) -> bool:
-    return left == right
+def eql_any(left: any, right: any) -> bool:
+    if type(left) is not type(right):
+        return False
 
-
-@builtin(Operator.EQL, Opcode.EQL)
-def eql_str(left: str, right: str) -> bool:
-    return left == right
-
-
-@builtin(Operator.EQL, Opcode.EQL)
-def eql_bool(left: bool, right: bool) -> bool:
     return left == right
 
 
 @builtin(Operator.NEQ, Opcode.NEQ)
-def neq_int(left: num, right: num) -> bool:
-    return left != right
-
-
-@builtin(Operator.NEQ, Opcode.NEQ)
-def neq_str(left: str, right: str) -> bool:
-    return left != right
-
-
-@builtin(Operator.NEQ, Opcode.NEQ)
-def neq_bool(left: bool, right: bool) -> bool:
-    return left != right
+def neq_any(left: any, right: any) -> bool:
+    return not eql_any(left, right)
 
 
 @builtin(Operator.LES, Opcode.LES)

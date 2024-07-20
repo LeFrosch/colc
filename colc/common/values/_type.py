@@ -1,5 +1,7 @@
 import enum
-from typing import Iterable, Optional
+
+from types import UnionType
+from typing import Iterable, Optional, get_args
 
 from .._internal import internal_problem
 from .._utils import flatten
@@ -64,7 +66,12 @@ class Type:
         if py_type is range:
             return Type({PrimitiveType.NUMBER}, list=True)
 
-        return Type({PrimitiveType.from_python(py_type)}, list=False)
+        if isinstance(py_type, UnionType):
+            types = set(map(lambda it: PrimitiveType.from_python(it), get_args(py_type)))
+        else:
+            types = {PrimitiveType.from_python(py_type)}
+
+        return Type(types, list=False)
 
     @property
     def is_any(self) -> bool:

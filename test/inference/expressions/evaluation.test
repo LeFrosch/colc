@@ -17,3 +17,6 @@
 3 / 2 -> 1.5: <num>
 3 // 2.0 -> 1.0: <num>
 1 + 1.0 -> 2.0: <num>
+none == none -> True: <bool>
+1 == "str" -> False: <bool>
+1 != none -> True: <bool>
