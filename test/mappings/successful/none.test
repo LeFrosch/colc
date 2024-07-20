@@ -5,4 +5,4 @@ map main {
 
 # OUTPUT
 000: NONE       0
-001: STORE      1 = (a)
+001: STORE      1

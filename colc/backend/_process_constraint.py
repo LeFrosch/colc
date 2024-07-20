@@ -16,7 +16,6 @@ def process_constraint(ctx: Context) -> LExpression:
 
     visitor = VisitorImpl(ctx)
     result = visitor.accept(constraint.block)
-    visitor.finalize()
 
     return result
 

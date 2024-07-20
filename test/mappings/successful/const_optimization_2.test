@@ -8,8 +8,8 @@ map main {
 001: attr
 
 # OUTPUT
-000: CONST      0 = ('abcdef')
-001: LOAD       0 = (root)
-002: ATTR       1 = (attr)
+000: CONST      0
+001: LOAD       0
+002: ATTR       1
 003: ADD        0
-004: STORE      1 = (a)
+004: STORE      1

@@ -11,4 +11,4 @@ map main {
 
 # OUTPUT
 000: INT        7
-001: STORE      1 = (a)
+001: STORE      1

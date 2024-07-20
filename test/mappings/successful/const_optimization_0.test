@@ -7,4 +7,4 @@ map main {
 
 # OUTPUT
 000: INT       16
-001: STORE      1 = (c)
+001: STORE      1

@@ -10,16 +10,17 @@ map main {
 
 # OUTPUT
 000: INT        1
-001: STORE      1 = (a)
-002: LOAD       1 = (a)
-003: STORE      2 = (p1)
-004: LOAD       1 = (a)
-005: STORE      3 = (p2)
-006: LOAD       1 = (a)
-007: STORE      4 = (p3)
-008: LOAD       2 = (p1)
-009: LOAD       3 = (p2)
+001: STORE      1
+002: LOAD       1
+003: STORE      2
+004: LOAD       1
+005: STORE      3
+006: LOAD       1
+007: STORE      4
+008: LOAD       2
+009: LOAD       3
 010: ADD        0
-011: LOAD       4 = (p3)
+011: LOAD       4
 012: ADD        0
-013: STORE      5 = (r)
+013: JMP_F      1
+014: STORE      5

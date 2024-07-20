@@ -5,7 +5,7 @@ from typing import Protocol, Any, cast, Optional
 from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type, first, types
 from colc.frontend import Operator, Comparison, ast
 
-from ._instruction import Opcode
+from ._opcode import Opcode
 from ._file import File
 
 

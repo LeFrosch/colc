@@ -1,5 +1,5 @@
 from colc.common import StringBuilder
-from colc.backend import Instruction
+from colc.backend import Opcode
 
 from ._object import Object
 
@@ -13,24 +13,16 @@ def format_pool(values: list) -> str:
     return builder.build()
 
 
-def _format_instruction(index: int, instruction: Instruction) -> str:
-    string = '%03d: %-8s %3d' % (
-        index,
-        instruction.opcode.name,
-        instruction.argument,
-    )
-
-    if instruction.debug is not None:
-        string += ' = (%s)' % instruction.debug
-
-    return string
-
-
-def format_instructions(instructions: list[Instruction]) -> str:
+def format_code(buffer: bytes) -> str:
     builder = StringBuilder()
 
-    for i, instruction in enumerate(instructions):
-        builder.write_line(_format_instruction(i, instruction))
+    for i in range(0, len(buffer) // 2):
+        line = '%03d: %-8s %3d' % (
+            i,
+            Opcode(buffer[i * 2]).name,
+            buffer[i * 2 + 1],
+        )
+        builder.write_line(line)
 
     return builder.build()
 
@@ -47,5 +39,5 @@ def print_debug_info(obj: Object):
 
     for mapping in obj.mappings:
         print('MAPPING: %s' % mapping.name)
-        print(format_instructions(mapping.code))
+        print(format_code(mapping.code))
         print()

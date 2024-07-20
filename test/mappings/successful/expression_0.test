@@ -6,9 +6,9 @@ map main {
 
 # OUTPUT
 000: INT       10
-001: STORE      1 = (a)
-002: LOAD       1 = (a)
+001: STORE      1
+002: LOAD       1
 003: NEG        0
 004: INT        3
 005: ADD        0
-006: STORE      2 = (b)
+006: STORE      2

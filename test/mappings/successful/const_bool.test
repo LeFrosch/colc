@@ -6,4 +6,4 @@ map main {
 
 # OUTPUT
 000: TRUE       0
-001: STORE      1 = (b)
+001: STORE      1

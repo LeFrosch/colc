@@ -8,7 +8,6 @@ from ._object import Object as Object
 from .backend import LExpression as LExpression
 from .backend import LFunction as LFunction
 from .backend import Opcode as Opcode
-from .backend import Instruction as Instruction
 from .backend import Config as Config
 from .backend import fixpoint_to_float as fixpoint_to_float
 

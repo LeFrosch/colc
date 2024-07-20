@@ -29,6 +29,6 @@ class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
             visitor.scope.insert_runtime(param, AnyValue, i, True)
 
         visitor.accept(func.block)
-        returns = visitor.scope.returns()
+        _, returns = visitor.scope.returns()
 
         self.assertEqual(repr(returns), type)

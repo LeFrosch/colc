@@ -1,7 +1,10 @@
 from ._lexpression import LExpression as LExpression
 from ._lexpression import LFunction as LFunction
+
+from ._opcode import Opcode as Opcode
+
 from ._instruction import Instruction as Instruction
-from ._instruction import Opcode as Opcode
+from ._instruction import InstructionBuffer as InstructionBuffer
 
 from ._process_constraint import process_constraint as process_constraint
 from ._process_mapping import process_mapping as process_mapping

@@ -12,13 +12,13 @@ map main {
 001: 64.0
 
 # OUTPUT
-000: FLOAT      2 = (0.25)
-001: STORE      1 = (a)
-002: FLOAT      4 = (0.5)
-003: STORE      2 = (b)
-004: FLOAT    105 = (13.125)
-005: STORE      3 = (c)
-006: CONST      0 = (0.1)
-007: STORE      4 = (d)
-008: CONST      1 = (64.0)
-009: STORE      5 = (e)
+000: FLOAT      2
+001: STORE      1
+002: FLOAT      4
+003: STORE      2
+004: FLOAT    105
+005: STORE      3
+006: CONST      0
+007: STORE      4
+008: CONST      1
+009: STORE      5

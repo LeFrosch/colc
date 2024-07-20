@@ -8,8 +8,8 @@ map main {
 000: attr
 
 # OUTPUT
-000: LOAD       0 = (root)
-001: ATTR       0 = (attr)
+000: LOAD       0
+001: ATTR       0
 002: INT        3
 003: ADD        0
-004: STORE      1 = (b)
+004: STORE      1

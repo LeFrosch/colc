@@ -1,75 +1,54 @@
-import dataclasses
-import enum
-from typing import Optional
-
 from colc.frontend import Operator
 
+from ._opcode import Opcode
 
-class Opcode(enum.IntEnum):
-    # basic instructions
-    CONST = 0x00
-    STORE = 0x01
-    LOAD = 0x02
 
-    # node interaction
-    ATTR = 0x03
-    KIND = 0x04
+class Label:
+    def __init__(self, name: str):
+        self.name = name
 
-    # operators
-    ADD = 0x10
-    SUB = 0x11
-    MUL = 0x12
-    DIV = 0x13
-    DIV_FLOOR = 0x14
-    AND = 0x15
-    OR = 0x16
-    NEG = 0x17
-    NOT = 0x18
-    EQL = 0x19
-    NEQ = 0x1A
-    LES = 0x1B
-    LEQ = 0x1C
-    GRE = 0x1D
-    GEQ = 0x1E
-    MUT = 0x1F
-    POW = 0x20
 
-    # const values
-    TRUE = 0x30
-    FALSE = 0x31
-    INT = 0x32
-    FLOAT = 0x33
-    NONE = 0x34
+class Instruction:
+    def __init__(self, opcode: Opcode, argument: int | Label = 0):
+        self.opcode = opcode
+        self.argument = argument
 
-    # control flow
-    JMP_F = 0x40
-    JMP_FF = 0x41
-    JMP_B = 0x42
+    @property
+    def argument_label(self) -> Label:
+        assert isinstance(self.argument, Label)
+        return self.argument
 
-    # iterators
-    NEXT = 0x50
-    HAS_NEXT = 0x51
-    RANGE = 0x52
-    RESET = 0x5F
-
-    def new(self, argument: int = 0, debug: Optional[str] = None) -> 'Instruction':
-        assert argument >= 0
-        assert argument <= 255
-
-        return Instruction(self, argument, debug)
+    @property
+    def argument_value(self) -> int:
+        assert isinstance(self.argument, int)
+        return self.argument
 
     @staticmethod
-    def from_operator_unary(op: Operator) -> 'Opcode':
-        return op.switch(
+    def new_store(index: int):
+        return Instruction(Opcode.STORE, argument=index)
+
+    @staticmethod
+    def new_load(index: int):
+        return Instruction(Opcode.LOAD, argument=index)
+
+    @staticmethod
+    def new_jmp(opcode: Opcode, label: Label):
+        return Instruction(opcode, argument=label)
+
+    @staticmethod
+    def new_unary_operator(operator: Operator):
+        opcode = operator.switch(
             {
                 Operator.SUB: Opcode.NEG,
                 Operator.NOT: Opcode.NOT,
             }
         )
 
+        return Instruction(opcode)
+
     @staticmethod
-    def from_operator_binary(op: Operator) -> 'Opcode':
-        return op.switch(
+    def new_binary_operator(operator: Operator):
+        opcode = operator.switch(
             {
                 Operator.ADD: Opcode.ADD,
                 Operator.SUB: Opcode.SUB,
@@ -87,17 +66,16 @@ class Opcode(enum.IntEnum):
             }
         )
 
+        return Instruction(opcode)
 
-@dataclasses.dataclass
-class Instruction:
-    opcode: Opcode
-    argument: int
-    debug: Optional[str]
 
-    def __getstate__(self):
-        return self.opcode << 8 | self.argument
+class InstructionBuffer:
+    def __init__(self):
+        self.instructions: list[Instruction] = []
+        self.labels: dict[Label, int] = {}
 
-    def __setstate__(self, state):
-        self.opcode = Opcode(state >> 8)
-        self.argument = state & 0xFF
-        self.debug = None
+    def add(self, instruction: Instruction):
+        self.instructions.append(instruction)
+
+    def add_label(self, label: Label):
+        self.labels[label] = len(self.instructions)

@@ -6,9 +6,9 @@ map main {
 
 # OUTPUT
 000: TRUE       0
-001: STORE      1 = (a)
-002: LOAD       1 = (a)
+001: STORE      1
+002: LOAD       1
 003: NOT        0
 004: TRUE       0
 005: AND        0
-006: STORE      2 = (b)
+006: STORE      2

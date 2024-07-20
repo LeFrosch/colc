@@ -9,9 +9,9 @@ map main {
 001: 500
 
 # OUTPUT
-000: CONST      0 = (301)
-001: STORE      1 = (a)
-002: LOAD       1 = (a)
-003: CONST      1 = (500)
+000: CONST      0
+001: STORE      1
+002: LOAD       1
+003: CONST      1
 004: ADD        0
-005: STORE      2 = (b)
+005: STORE      2

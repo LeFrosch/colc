@@ -1,11 +1,11 @@
 import dataclasses
 import abc
-from typing import Optional, Any
+from typing import Optional, Any, Tuple
 
 from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type, first
 from colc.frontend import ast, Visitor
 
-from ._jmp_anchor import JmpAnchor
+from ._instruction import Label
 
 
 @dataclasses.dataclass
@@ -49,7 +49,7 @@ class Scope:
 
         # TODO: extract to scope context
         self._returns: list[Type] = []
-        self._anchors: list[JmpAnchor] = []
+        self._label = Label('function')
 
     def _insert(self, identifier: ast.Identifier, definition: Definition):
         if any(it for it in self._definitions if it.name == identifier.name):
@@ -78,11 +78,12 @@ class Scope:
 
         return definition
 
-    def insert_return(self, type: Type):
+    def insert_return(self, type: Type) -> Label:
         if self._parent is not None:
-            self._parent.insert_return(type)
+            return self._parent.insert_return(type)
         else:
             self._returns.append(type)
+            return self._label
 
     def lookup(self, identifier: ast.Identifier, expected: Optional[Type] = None) -> Definition:
         definition = first(it for it in self._definitions if it.name == identifier.name)
@@ -97,21 +98,11 @@ class Scope:
 
         return definition
 
-    def returns(self) -> Type:
+    def returns(self) -> Tuple[Label, Type]:
         if self._parent is not None:
             internal_problem('only call scopes collect return types')
 
-        return Type.lup(self._returns)
-
-    def insert_jmp_anchor(self, anchor: JmpAnchor):
-        if self._parent is not None:
-            self._parent.insert_jmp_anchor(anchor)
-        else:
-            self._anchors.append(anchor)
-
-    def finalize(self):
-        for anchor in reversed(self._anchors):
-            anchor.set_address()
+        return self._label, Type.lup(self._returns)
 
     def new_call_scope(self) -> 'Scope':
         return Scope(None)
@@ -125,16 +116,11 @@ class VisitorWithScope(Visitor):
         super().__init__()
         self.scope = scope or Scope(None)
 
-    def finalize(self):
-        self.scope.finalize()
-
     def accept_with_scope(self, scope: Scope, node: Optional[ast.Node]) -> Any:
         current_scope = self.scope
 
         self.scope = scope
         result = self.accept(node)
-        self.scope.finalize()
-
         self.scope = current_scope
 
         return result

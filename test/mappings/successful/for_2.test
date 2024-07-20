@@ -13,12 +13,12 @@ map main {
 000: INT        0
 001: INT        3
 002: RANGE      0
-003: STORE      1 = (for)
+003: STORE      1
 004: HAS_NEXT   1
-005: JMP_FF     5 = (11)
+005: JMP_FF     6
 006: NEXT       1
-007: STORE      2 = (b)
+007: STORE      2
 008: INT        1
-009: JMP_F      1 = (11)
-010: JMP_B      6 = (4)
-011: STORE      3 = (r)
+009: JMP_F      2
+010: JMP_B      6
+011: STORE      3

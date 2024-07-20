@@ -5,3 +5,7 @@ map main {
 }
 
 # OUTPUT
+000: NONE       0
+001: JMP_F      3
+002: NONE       0
+003: JMP_F      1

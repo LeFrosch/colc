@@ -10,6 +10,6 @@ map main {
 
 # OUTPUT
 000: INT        3
-001: STORE      1 = (b)
-002: CONST      0 = (256)
-003: STORE      2 = (c)
+001: STORE      1
+002: CONST      0
+003: STORE      2

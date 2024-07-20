@@ -1,8 +1,8 @@
 import pathlib
 from typing import Tuple, Optional
 
-from colc import TextFile, parse_file, LExpression, Instruction, Object
-from colc.backend import Context, Config, process_constraint, process_mappings
+from colc import TextFile, parse_file, LExpression, Object
+from colc.backend import Context, Config, process_constraint, process_mappings, Mapping
 
 
 def create_test_context(text: str, config: Optional[Config] = None) -> Context:
@@ -15,7 +15,7 @@ def compile_constraint(text: str, config: Optional[Config] = None) -> Tuple[Cont
     return ctx, process_constraint(ctx)
 
 
-def compile_mappings(text: str, config: Optional[Config] = None) -> Tuple[Context, dict[str, list[Instruction]]]:
+def compile_mappings(text: str, config: Optional[Config] = None) -> Tuple[Context, list[Mapping]]:
     ctx = create_test_context(text, config)
     return ctx, process_mappings(ctx)
 

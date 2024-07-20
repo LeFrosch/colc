@@ -4,7 +4,7 @@ from colc.common import Node, NodeKind, num
 from colc.frontend import Operator
 
 from ._functions import builtin
-from ._instruction import Opcode
+from ._opcode import Opcode
 
 any = num | str | bool | None
 

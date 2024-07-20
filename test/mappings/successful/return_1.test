@@ -8,5 +8,7 @@ map main {
 000: abc
 
 # OUTPUT
-000: JMP_F      1 = (2)
-001: CONST      0 = ('abc')
+000: NONE       0
+001: JMP_F      3
+002: CONST      0
+003: JMP_F      1

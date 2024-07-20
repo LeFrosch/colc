@@ -18,7 +18,7 @@ class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
         self.assertGreater(len(mappings), 0)
 
         mapping = first(mappings)
-        self.assertEqual(output, debug.format_instructions(mapping.code))
+        self.assertEqual(output, debug.format_code(mapping.code))
 
         if const_pool:
             self.assertEqual(const_pool, debug.format_pool(ctx.get_const_pool()))
