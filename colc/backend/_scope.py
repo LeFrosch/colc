@@ -54,8 +54,6 @@ class Scope:
     def _insert(self, identifier: ast.Identifier, definition: Definition):
         if any(it for it in self._definitions if it.name == identifier.name):
             fatal_problem('identifier is already defined', identifier)
-        if definition.value.type.is_none:
-            fatal_problem('cannot assign <none>', identifier)
 
         self._definitions.append(definition)
 

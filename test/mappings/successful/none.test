@@ -1,0 +1,8 @@
+# INPUT
+map main {
+  final a = none;
+}
+
+# OUTPUT
+000: NONE       0
+001: STORE      1 = (a)

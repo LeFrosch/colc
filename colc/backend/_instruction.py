@@ -39,6 +39,7 @@ class Opcode(enum.IntEnum):
     FALSE = 0x31
     INT = 0x32
     FLOAT = 0x33
+    NONE = 0x34
 
     # control flow
     JMP_F = 0x40

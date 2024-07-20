@@ -43,6 +43,7 @@ QUALIFIER.1: "final" | "const" | "var"
   | STRING                    -> expression_str
   | "true"                    -> expression_true
   | "false"                   -> expression_false
+  | "none"                    -> expression_none
   | IDENTIFIER                -> expression_ref
   | call                      -> expression_call
   | IDENTIFIER "." IDENTIFIER -> expression_attr

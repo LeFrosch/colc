@@ -241,6 +241,12 @@ class Transformer(lark.Transformer):
             value=ComptimeValue.from_python(False),
         )
 
+    def expression_none(self, meta, _):
+        return ast.ExpressionLiteral(
+            location=self.location_from_meta(meta),
+            value=ComptimeValue.from_python(None),
+        )
+
     def expression_ref(self, meta, children):
         return ast.ExpressionRef(
             location=self.location_from_meta(meta),

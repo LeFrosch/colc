@@ -1,14 +1,15 @@
 # INPUT
-fun test(a) {
+fun test() {
   return;
 }
 
 map main {
-  final a = test(root);
+  const a = test();
+  final b = root.attr + a;
 }
 
 # OUTPUT
-test.col @ line 6
->>   final a = test(root);
->>         ^
-fatal problem: cannot assign <none>
+test.col @ line 7
+>>   final b = root.attr + a;
+>>                       ^
+fatal problem: undefined operator <any> + <none>

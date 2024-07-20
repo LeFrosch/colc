@@ -61,6 +61,8 @@ class VisitorImpl(VisitorWithScope):
             instruction = Opcode.TRUE.new(0)
         elif comptime is False:
             instruction = Opcode.FALSE.new(0)
+        elif comptime is None:
+            instruction = Opcode.NONE.new(0)
         elif isinstance(comptime, int) and 0 <= comptime <= 255:
             instruction = Opcode.INT.new(comptime)
         elif isinstance(comptime, float) and fixpoint_can_convert(comptime):

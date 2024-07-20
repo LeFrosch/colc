@@ -11,6 +11,7 @@ NodeKind = type('NodeKind', tuple(), {})
 
 
 class PrimitiveType(enum.StrEnum):
+    NONE = 'none'
     NUMBER = 'num'
     STRING = 'str'
     BOOLEAN = 'bool'
@@ -19,6 +20,8 @@ class PrimitiveType(enum.StrEnum):
 
     @staticmethod
     def from_python(py_type: Optional[type]) -> 'PrimitiveType':
+        if py_type is type(None):
+            return PrimitiveType.NONE
         if py_type is str:
             return PrimitiveType.STRING
         if py_type is num or py_type is int or py_type is float:
@@ -64,10 +67,6 @@ class Type:
         return Type({PrimitiveType.from_python(py_type)}, list=False)
 
     @property
-    def is_none(self) -> bool:
-        return len(self.values) == 0
-
-    @property
     def is_any(self) -> bool:
         return len(self.values) == len(PrimitiveType)
 
@@ -82,9 +81,7 @@ class Type:
         return len(self.values & other.values) > 0
 
     def __repr__(self):
-        if self.is_none:
-            type = 'none'
-        elif self.is_any:
+        if self.is_any:
             type = 'any'
         else:
             # sort for testing
