@@ -1,0 +1,46 @@
+# INPUT
+/include/ "std";
+
+fun execute(command, node) {
+  final core = first(node, CORE);
+
+  exec(command, core, children(node));
+}
+
+map main {
+  execute("test", root);
+}
+
+# CONST POOL
+000: CORE
+001: no child of kind: CORE
+002: test
+
+# OUTPUT
+000: LOAD       0
+001: STORE      1
+002: LOAD       1
+003: STORE      2
+004: LOAD       2
+005: KIND       0
+006: WHERE      0
+007: ITER       0
+008: STORE      3
+009: HAS_NEXT   3
+010: JMP_FF     6
+011: NEXT       3
+012: STORE      4
+013: LOAD       4
+014: JMP_F      4
+015: JMP_B      6
+016: CONST      1
+017: FAIL       0
+018: STORE      5
+019: CONST      2
+020: LOAD       5
+021: LOAD       1
+022: CHILDREN   0
+023: EXEC       0
+024: DROP       0
+025: NONE       0
+026: DROP       0

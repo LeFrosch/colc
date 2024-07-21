@@ -1,0 +1,16 @@
+# INPUT
+map main {
+  exec("test", root, [root]);
+}
+
+# CONST POOL
+000: test
+
+# OUTPUT
+000: CONST      0
+001: LOAD       0
+002: LIST       0
+003: LOAD       0
+004: APPEND     0
+005: EXEC       0
+006: DROP       0

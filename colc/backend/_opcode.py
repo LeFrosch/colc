@@ -15,7 +15,8 @@ class Opcode(enum.IntEnum):
     ATTR = 0x10
     KIND_OF = 0x11
     WHERE = 0x12
-    EXEC = 0x13
+    CHILDREN = 0x13
+    EXEC = 0x14
 
     # operators
     ADD = 0x20

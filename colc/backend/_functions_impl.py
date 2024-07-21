@@ -139,3 +139,13 @@ def str_impl(value: any) -> str:
 @builtin('append', Opcode.APPEND)
 def append_impl(target: list[any], value: any):
     target.append(value)
+
+
+@builtin('exec', Opcode.EXEC)
+def exec_impl(command: str, core: Node, resources: list[Node]):
+    return None
+
+
+@builtin('children', Opcode.CHILDREN)
+def children_impl(node: Node) -> list[Node]:
+    return None
