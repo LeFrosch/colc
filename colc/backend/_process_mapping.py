@@ -216,6 +216,13 @@ class VisitorImpl(VisitorWithScope):
         self.buffer.add(Instruction(Opcode.FAIL))
         return True
 
+    def f_statement_expr(self, stmt: ast.FStatementExpr) -> bool:
+        self.accept_expr(stmt.expression)
+        # TODO: warn if value is not none and unused
+
+        self.buffer.add(Instruction(Opcode.DROP))
+        return False
+
     def expression_unary(self, expr: ast.ExpressionUnary) -> Value:
         value = self.accept_expr(expr.expression)
         self.buffer.add(Instruction.new_unary_operator(expr.operator))

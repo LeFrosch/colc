@@ -1,0 +1,8 @@
+# INPUT
+map main {
+  4 + 3;
+}
+
+# OUTPUT
+000: INT        7
+001: DROP       0

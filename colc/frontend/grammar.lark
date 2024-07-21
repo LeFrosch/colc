@@ -72,6 +72,7 @@ f_statement: f_block                         -> f_statement_block
   | "if" expression f_block ["else" f_block] -> f_statement_if
   | "for" IDENTIFIER "in" expression f_block -> f_statement_for
   | "fail" expression ";"                    -> f_statement_fail
+  | expression ";"                           -> f_statement_expr
 
 c_block: "{" QUANTIFIER c_statement* "}"
 p_block: "{" QUANTIFIER p_statement* "}"

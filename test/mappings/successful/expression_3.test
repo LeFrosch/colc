@@ -1,0 +1,13 @@
+# INPUT
+fun test() {
+  final b = 4;
+  return b;
+}
+
+map main {
+  test();
+}
+
+# OUTPUT
+000: INT        4
+001: DROP       0

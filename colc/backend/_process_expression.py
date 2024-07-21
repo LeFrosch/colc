@@ -144,3 +144,6 @@ class ComptimeVisitorImpl(VisitorWithScope):
         check_compatible(stmt.expression, value, types.STRING)
 
         fatal_problem('failure: ' + value.data, stmt)
+
+    def f_statement_expr(self, stmt: ast.FStatementExpr):
+        self.accept(stmt.expression)

@@ -8,12 +8,14 @@ class Opcode(enum.IntEnum):
     LOAD = 0x02
     KIND = 0x03
     STR_OF = 0x04
-    FAIL = 0x05
+    DROP = 0x05
+    FAIL = 0x06
 
     # node interaction
     ATTR = 0x10
     KIND_OF = 0x11
     WHERE = 0x12
+    EXEC = 0x13
 
     # operators
     ADD = 0x20

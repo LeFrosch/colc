@@ -217,6 +217,12 @@ class Transformer(lark.Transformer):
             expression=children[1],
         )
 
+    def f_statement_expr(self, meta, children):
+        return ast.FStatementExpr(
+            location=self.location_from_meta(meta),
+            expression=children[0],
+        )
+
     def expression_int(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
