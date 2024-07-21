@@ -1,12 +1,12 @@
 # mypy: ignore-errors
 
-from colc.common import Node, NodeKind, num, comptime
+from colc.common import Node, NodeKind, num, comptime_data
 from colc.frontend import Operator
 
 from ._functions import builtin
 from ._opcode import Opcode
 
-any = comptime | Node
+any = comptime_data | Node
 
 
 @builtin(Operator.ADD, Opcode.ADD)
@@ -106,7 +106,7 @@ def neg_int(value: num) -> num:
 
 
 @builtin('range', Opcode.RANGE)
-def range_impl(start: num, end: num) -> range:
+def range_impl(start: num, end: num) -> list[num]:
     return None
 
 
@@ -134,3 +134,4 @@ def str_impl(value: any) -> str:
         return 'false'
 
     return str(value)
+

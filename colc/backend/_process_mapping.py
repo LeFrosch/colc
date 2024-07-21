@@ -1,4 +1,4 @@
-from colc.common import fatal_problem, Value, AnyValue, ComptimeValue, types, RuntimeValue, unreachable
+from colc.common import fatal_problem, Value, AnyValue, ComptimeValue, types, RuntimeValue, unreachable, Type, NodeKind, comptime_data, comptime_list
 from colc.frontend import ast
 
 from ._context import Context
@@ -60,28 +60,39 @@ class VisitorImpl(VisitorWithScope):
 
         self.buffer.add_label(sctx.end)
 
-    def instruction_for_const(self, value: ComptimeValue):
-        comptime = value.data
+    def instruction_for_data(self, value: comptime_data):
+        if value is True:
+            instruction = Instruction(Opcode.TRUE)
+        elif value is False:
+            instruction = Instruction(Opcode.FALSE)
+        elif value is None:
+            instruction = Instruction(Opcode.NONE)
+        elif isinstance(value, int) and 0 <= value <= 255:
+            instruction = Instruction(Opcode.INT, argument=value)
+        elif isinstance(value, float) and fixpoint_can_convert(value):
+            instruction = Instruction(Opcode.FLOAT, argument=fixpoint_from_float(value))
+        else:
+            index = self.ctx.intern_const(value)
 
-        match value.type:
-            case types.BOOLEAN if comptime:
-                instruction = Instruction(Opcode.TRUE)
-            case types.BOOLEAN if not comptime:
-                instruction = Instruction(Opcode.FALSE)
-            case types.NONE:
-                instruction = Instruction(Opcode.NONE)
-            case types.NUMBER if isinstance(comptime, int) and 0 <= comptime <= 255:
-                instruction = Instruction(Opcode.INT, argument=comptime)
-            case types.NUMBER if isinstance(comptime, float) and fixpoint_can_convert(comptime):
-                instruction = Instruction(Opcode.FLOAT, argument=fixpoint_from_float(comptime))
-            case types.NODE_KIND:
-                index = self.ctx.intern_const(comptime)
+            if isinstance(value, NodeKind):
                 instruction = Instruction(Opcode.KIND, argument=index)
-            case _:
-                index = self.ctx.intern_const(comptime)
+            else:
                 instruction = Instruction(Opcode.CONST, argument=index)
 
         self.buffer.add(instruction)
+
+    def instruction_for_list(self, value: comptime_list):
+        self.buffer.add(Instruction(Opcode.LIST))
+
+        for element in value:
+            self.instruction_for_data(element)
+            self.buffer.add(Instruction(Opcode.APPEND))
+
+    def instruction_for_const(self, value: ComptimeValue):
+        if isinstance(value.data, list):
+            self.instruction_for_list(value.data)
+        else:
+            self.instruction_for_data(value.data)
 
     def accept_expr(self, expr: ast.Expression, load: bool = True) -> Value:
         # this is backtracking search, not very fast but works great
@@ -302,3 +313,23 @@ class VisitorImpl(VisitorWithScope):
             return self.accept_defined_function(expr.call, func)
 
         unreachable()
+
+    def expression_list(self, expr: ast.ExpressionList) -> Value:
+        # first push empty list to append to
+        self.buffer.add(Instruction(Opcode.LIST))
+
+        values: list[Value] = []
+        # append all elements
+        for element in expr.elements:
+            value = self.accept_expr(element)
+            self.buffer.add(Instruction(Opcode.APPEND))
+
+            if value.type.is_list:
+                fatal_problem('nested lists are not supported', element)
+
+            values.append(value)
+
+        if len(values) == 0:
+            return RuntimeValue(types.ANY_LIST)
+        else:
+            return RuntimeValue(Type.lup(it.type for it in values).as_list)

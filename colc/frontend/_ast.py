@@ -81,6 +81,10 @@ class ExpressionAttr(Expression):
     attribute: Identifier
 
 
+class ExpressionList(Expression):
+    elements: list[Expression]
+
+
 class Call(Node):
     identifier: Identifier
     arguments: list[Expression]

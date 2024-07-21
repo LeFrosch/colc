@@ -33,7 +33,7 @@ class BuiltinFunction(Function):
         if result is None:
             return None
 
-        return ComptimeValue.from_python(result)
+        return ComptimeValue(result, self.returns)
 
 
 @dataclasses.dataclass
@@ -56,7 +56,7 @@ def builtin(name: str, opcode: Opcode):
             BuiltinFunction(
                 name=name,
                 parameters=[Type.from_python(annotations[it]) for it in param_names],
-                returns=Type.from_python(annotations['return']),
+                returns=Type.from_python(annotations.get('return')),
                 opcode=opcode,
                 comptime_impl=func,
             )

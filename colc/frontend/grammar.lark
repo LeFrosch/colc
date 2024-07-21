@@ -4,6 +4,9 @@
 %ignore WS
 %ignore SH_COMMENT
 
+_list{item}: | item ("," item)*
+_c_list{item}: "," _list{item}
+
 LETTER_UPPER_CASE: "A".."Z"
 LETTER_LOWER_CASE: "a".."z"
 LETTER: LETTER_UPPER_CASE | LETTER_LOWER_CASE | DIGIT | "_"
@@ -49,9 +52,7 @@ QUALIFIER.1: "final" | "const" | "var"
   | call                      -> expression_call
   | IDENTIFIER "." IDENTIFIER -> expression_attr
   | "(" expression ")"        -> expression_group
-
-_list{item}: | item ("," item)*
-_c_list{item}: "," _list{item}
+  | "[" _list{expression} "]" -> expression_list
 
 call: IDENTIFIER "(" _list{expression} ")"
 label: IDENTIFIER ":"

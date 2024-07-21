@@ -48,12 +48,16 @@ class Opcode(enum.IntEnum):
     JMP_FF = 0x51
     JMP_B = 0x52
 
-    # iterators
-    NEXT = 0x60
-    HAS_NEXT = 0x61
-    RANGE = 0x62
+    # lists
+    LIST = 0x60
+    APPEND = 0x61
+    REMOVE = 0x62
     LENGTH = 0x63
-    RESET = 0x64
+    RANGE = 0x64
+    ITER = 0x65
+    NEXT = 0x66
+    HAS_NEXT = 0x67
+    RESET = 0x68
 
     @property
     def is_jmp(self) -> bool:

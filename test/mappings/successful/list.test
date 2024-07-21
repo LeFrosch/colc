@@ -1,0 +1,17 @@
+# INPUT
+map main {
+  final a = [134, "test", none];
+}
+
+# CONST POOL
+000: test
+
+# OUTPUT
+000: LIST       0
+001: INT      134
+002: APPEND     0
+003: CONST      0
+004: APPEND     0
+005: NONE       0
+006: APPEND     0
+007: STORE      1

@@ -2,6 +2,8 @@ from ._type import Type as Type
 from ._type import Node as Node
 from ._type import NodeKind as NodeKind
 from ._type import num as num
+from ._type import comptime_data as comptime_data
+from ._type import comptime_list as comptime_list
 from ._type import comptime as comptime
 
 from ._value import Value as Value

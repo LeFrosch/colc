@@ -1,6 +1,6 @@
 from typing import Optional
 
-from colc.common import internal_problem, ComptimeValue, NoneValue, unreachable, HasLocation, types, fatal_problem
+from colc.common import internal_problem, ComptimeValue, NoneValue, unreachable, HasLocation, types, fatal_problem, Type
 from colc.frontend import ast
 
 from ._scope import Scope, VisitorWithScope, ComptimeDefinition
@@ -104,6 +104,17 @@ class ComptimeVisitorImpl(VisitorWithScope):
             return self.accept_defined_function(expr.call, func)
 
         unreachable()
+
+    def expression_list(self, expr: ast.ExpressionList) -> ComptimeValue:
+        elements = self.accept_all(expr.elements)
+
+        if len(elements) == 0:
+            return ComptimeValue([], types.ANY_LIST)
+
+        return ComptimeValue(
+            data=[it.data for it in elements],
+            type=Type.lup(it.type for it in elements).as_list,
+        )
 
     def f_block(self, expr: ast.FBlock):
         for stmt in expr.statements:

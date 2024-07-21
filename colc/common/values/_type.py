@@ -16,7 +16,10 @@ class NodeKind(str): ...
 
 
 num = int | float
-comptime = num | str | bool | NodeKind | None
+
+comptime_data = num | str | bool | NodeKind | None
+comptime_list = list[comptime_data]
+comptime = comptime_list | comptime_data
 
 
 class PrimitiveType(enum.StrEnum):
@@ -29,7 +32,7 @@ class PrimitiveType(enum.StrEnum):
 
     @staticmethod
     def from_python(py_type: Optional[type]) -> 'PrimitiveType':
-        if py_type is type(None):
+        if py_type is None or py_type is type(None):
             return PrimitiveType.NONE
         if py_type is str:
             return PrimitiveType.STRING
@@ -53,7 +56,7 @@ class Type:
         self.values = values
         self.is_list = list
 
-        # list of none is not allowed
+        # void list is not allowed
         assert not list or len(values) > 0
 
     @staticmethod
@@ -70,9 +73,6 @@ class Type:
 
     @staticmethod
     def from_python(py_type) -> 'Type':
-        if py_type is range:
-            return Type({PrimitiveType.NUMBER}, list=True)
-
         if get_origin(py_type) is list:
             py_type = first(get_args(py_type))
             is_list = True
@@ -93,6 +93,10 @@ class Type:
     @property
     def as_scalar(self) -> 'Type':
         return Type(self.values, list=False)
+
+    @property
+    def as_list(self) -> 'Type':
+        return Type(self.values, list=True)
 
     def compatible(self, other: 'Type') -> bool:
         if self.is_list != other.is_list:

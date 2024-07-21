@@ -24,6 +24,8 @@ from .values import Value as Value
 from .values import Node as Node
 from .values import NodeKind as NodeKind
 from .values import num as num
+from .values import comptime_data as comptime_data
+from .values import comptime_list as comptime_list
 from .values import comptime as comptime
 from .values import RuntimeValue as RuntimeValue
 from .values import ComptimeValue as ComptimeValue

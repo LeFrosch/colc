@@ -302,6 +302,12 @@ class Transformer(lark.Transformer):
     def expression_group(self, meta, children):
         return children[1]
 
+    def expression_list(self, meta, children):
+        return ast.ExpressionList(
+            location=self.location_from_meta(meta),
+            elements=[it for it in children if isinstance(it, ast.Expression)],
+        )
+
     def call(self, meta, children):
         return ast.Call(
             location=self.location_from_meta(meta),

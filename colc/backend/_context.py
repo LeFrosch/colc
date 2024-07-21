@@ -12,6 +12,8 @@ def check_const_pool_value(value: comptime) -> num | str:
         internal_problem('cannot intern none')
     if isinstance(value, bool):
         internal_problem('cannot intern bool')
+    if isinstance(value, list):
+        internal_problem('cannot intern list')
 
     return value
 
