@@ -61,21 +61,25 @@ class VisitorImpl(VisitorWithScope):
         self.buffer.add_label(sctx.end)
 
     def instruction_for_const(self, value: ComptimeValue):
-        comptime = value.comptime
+        comptime = value.value
 
-        if comptime is True:
-            instruction = Instruction(Opcode.TRUE)
-        elif comptime is False:
-            instruction = Instruction(Opcode.FALSE)
-        elif comptime is None:
-            instruction = Instruction(Opcode.NONE)
-        elif isinstance(comptime, int) and 0 <= comptime <= 255:
-            instruction = Instruction(Opcode.INT, argument=comptime)
-        elif isinstance(comptime, float) and fixpoint_can_convert(comptime):
-            instruction = Instruction(Opcode.FLOAT, argument=fixpoint_from_float(comptime))
-        else:
-            index = self.ctx.intern_const(comptime)
-            instruction = Instruction(Opcode.CONST, argument=index)
+        match value.type:
+            case types.BOOLEAN if comptime:
+                instruction = Instruction(Opcode.TRUE)
+            case types.BOOLEAN if not comptime:
+                instruction = Instruction(Opcode.FALSE)
+            case types.NONE:
+                instruction = Instruction(Opcode.NONE)
+            case types.NUMBER if isinstance(comptime, int) and 0 <= comptime <= 255:
+                instruction = Instruction(Opcode.INT, argument=comptime)
+            case types.NUMBER if isinstance(comptime, float) and fixpoint_can_convert(comptime):
+                instruction = Instruction(Opcode.FLOAT, argument=fixpoint_from_float(comptime))
+            case types.NODE_KIND:
+                index = self.ctx.intern_const(comptime)
+                instruction = Instruction(Opcode.KIND, argument=index)
+            case _:
+                index = self.ctx.intern_const(comptime)
+                instruction = Instruction(Opcode.CONST, argument=index)
 
         self.buffer.add(instruction)
 

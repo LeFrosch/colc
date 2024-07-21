@@ -126,12 +126,12 @@ class ComptimeVisitorImpl(VisitorWithScope):
         check_assignment(stmt.identifier, definition, value)
         assert isinstance(definition, ComptimeDefinition)
 
-        definition.value.comptime = value.comptime
+        definition.value.value = value.value
 
     def f_statement_if(self, stmt: ast.FStatementIf):
         value = self.accept(stmt.condition)
 
-        if value.comptime:
+        if value.value:
             self.accept(stmt.if_block)
         elif stmt.else_block is not None:
             self.accept(stmt.else_block)

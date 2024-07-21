@@ -1,0 +1,30 @@
+# INPUT
+fun first(node, kind) {
+  for child in where(node, kind) {
+    return child;
+  }
+}
+
+map main {
+  final a = first(root, CORE);
+}
+
+# CONST POOL
+000: CORE
+
+# OUTPUT
+000: LOAD       0
+001: STORE      1
+002: LOAD       1
+003: KIND       0
+004: WHERE      0
+005: STORE      2
+006: HAS_NEXT   2
+007: JMP_FF     6
+008: NEXT       2
+009: STORE      3
+010: LOAD       3
+011: JMP_F      3
+012: JMP_B      6
+013: NONE       0
+014: STORE      4

@@ -6,7 +6,7 @@ from colc.frontend import Operator
 from ._functions import builtin
 from ._opcode import Opcode
 
-any = num | str | bool | None
+comparable = num | str | bool | None | NodeKind
 
 
 @builtin(Operator.ADD, Opcode.ADD)
@@ -40,7 +40,7 @@ def mul_int(left: num, right: num) -> num:
 
 
 @builtin(Operator.EQL, Opcode.EQL)
-def eql_any(left: any, right: any) -> bool:
+def eql_any(left: comparable, right: comparable) -> bool:
     if type(left) is not type(right):
         return False
 
@@ -48,7 +48,7 @@ def eql_any(left: any, right: any) -> bool:
 
 
 @builtin(Operator.NEQ, Opcode.NEQ)
-def neq_any(left: any, right: any) -> bool:
+def neq_any(left: comparable, right: comparable) -> bool:
     return not eql_any(left, right)
 
 
@@ -110,6 +110,11 @@ def range_impl(start: num, end: num) -> range:
     return None
 
 
-@builtin('kind', Opcode.KIND)
+@builtin('kind', Opcode.KIND_OF)
 def kind_impl(node: Node) -> NodeKind:
+    return None
+
+
+@builtin('where', Opcode.WHERE)
+def where_impl(node: Node, kind: NodeKind) -> list[Node]:
     return None

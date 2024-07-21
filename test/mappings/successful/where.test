@@ -1,0 +1,13 @@
+# INPUT
+map main {
+    final a = where(root, CORE);
+}
+
+# CONST POOL
+000: CORE
+
+# OUTPUT
+000: LOAD       0
+001: KIND       0
+002: WHERE      0
+003: STORE      1

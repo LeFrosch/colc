@@ -1,6 +1,6 @@
 import abc
 
-from ._type import Type, num
+from ._type import Type, comptime
 from . import _types as types
 
 
@@ -36,18 +36,15 @@ class RuntimeValue(Value):
         return self
 
 
-ComptimePyType = str | num | bool | None
-
-
 class ComptimeValue(Value):
-    comptime: ComptimePyType
+    value: comptime
 
-    def __init__(self, value: ComptimePyType, type: Type):
-        self.comptime = value
+    def __init__(self, value: comptime, type: Type):
+        self.value = value
         self.type = type
 
     @staticmethod
-    def from_python(value: ComptimePyType) -> 'ComptimeValue':
+    def from_python(value: comptime) -> 'ComptimeValue':
         return ComptimeValue(value, Type.from_python(type(value)))
 
     @property
@@ -62,7 +59,7 @@ class ComptimeValue(Value):
         return super().__repr__()
 
     def __repr__(self):
-        return '%s: %s' % (self.comptime, super().__repr__())
+        return '%s: %s' % (self.value, super().__repr__())
 
 
 AnyValue = RuntimeValue(types.ANY)

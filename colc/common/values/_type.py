@@ -1,15 +1,18 @@
 import enum
 
 from types import UnionType
-from typing import Iterable, Optional, get_args
+from typing import Iterable, Optional, get_args, get_origin
+
+from colc.common import first
 
 from .._internal import internal_problem
 from .._utils import flatten
 
 num = int | float
+comptime = num | str | bool | None
 
 Node = type('NodeKind', tuple(), {})
-NodeKind = type('NodeKind', tuple(), {})
+NodeKind = type('NodeKind', (str,), {})
 
 
 class PrimitiveType(enum.StrEnum):
@@ -66,12 +69,18 @@ class Type:
         if py_type is range:
             return Type({PrimitiveType.NUMBER}, list=True)
 
+        if get_origin(py_type) is list:
+            py_type = first(get_args(py_type))
+            is_list = True
+        else:
+            is_list = False
+
         if isinstance(py_type, UnionType):
             types = set(map(lambda it: PrimitiveType.from_python(it), get_args(py_type)))
         else:
             types = {PrimitiveType.from_python(py_type)}
 
-        return Type(types, list=False)
+        return Type(types, list=is_list)
 
     @property
     def is_any(self) -> bool:

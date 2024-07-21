@@ -45,6 +45,7 @@ QUALIFIER.1: "final" | "const" | "var"
   | "false"                   -> expression_false
   | "none"                    -> expression_none
   | IDENTIFIER                -> expression_ref
+  | NODE_KIND                 -> expression_kind
   | call                      -> expression_call
   | IDENTIFIER "." IDENTIFIER -> expression_attr
   | "(" expression ")"        -> expression_group

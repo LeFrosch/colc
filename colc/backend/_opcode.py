@@ -6,10 +6,12 @@ class Opcode(enum.IntEnum):
     CONST = 0x00
     STORE = 0x01
     LOAD = 0x02
+    KIND = 0x03
 
     # node interaction
-    ATTR = 0x03
-    KIND = 0x04
+    ATTR = 0x04
+    KIND_OF = 0x05
+    WHERE = 0x06
 
     # operators
     ADD = 0x10

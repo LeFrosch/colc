@@ -69,7 +69,7 @@ class VisitorImpl(VisitorWithScope):
         value = self.accept_expr(expr)
         comparison_infer(comparison, AnyValue, value)
 
-        return value.comptime
+        return value.value
 
     def c_block(self, block: ast.CBlock) -> LExpression:
         return self.accept_block(block.quantifier, block.statements)

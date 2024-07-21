@@ -110,7 +110,7 @@ def operator_unary_evaluate(op: Operator, value: ComptimeValue) -> ComptimeValue
     if len(candidates) != 1:
         internal_problem(f'ambiguous operator {op} {value.type}')
 
-    result = candidates[0].comptime(value.comptime)
+    result = candidates[0].comptime(value.value)
     if result is None:
         internal_problem(f'cannot resolve operator at comptime {op}')
 
@@ -133,13 +133,13 @@ def operator_binary_evaluate(op: Operator, left: ComptimeValue, right: ComptimeV
         internal_problem(f'ambiguous operator {left.type} {op} {right.type}')
 
     try:
-        result = candidates[0].comptime(left.comptime, right.comptime)
+        result = candidates[0].comptime(left.value, right.value)
         if result is None:
             internal_problem(f'cannot resolve operator at comptime {op}')
 
         return result
     except ArithmeticError:
-        fatal_problem(f'arithmetic error: {left.comptime} {op} {right.comptime}', op)
+        fatal_problem(f'arithmetic error: {left.value} {op} {right.value}', op)
 
 
 def resolve_function(file: File, identifier: ast.Identifier) -> Function:

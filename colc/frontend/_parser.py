@@ -1,6 +1,6 @@
 import lark
 
-from colc.common import TextFile, Location, fatal_problem, internal_problem, ComptimeValue
+from colc.common import TextFile, Location, fatal_problem, internal_problem, ComptimeValue, NodeKind
 
 from . import _ast as ast
 from ._enums import Quantifier, Comparison, Aggregator, Operator, Qualifier
@@ -245,6 +245,12 @@ class Transformer(lark.Transformer):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),
             value=ComptimeValue.from_python(None),
+        )
+
+    def expression_kind(self, meta, children):
+        return ast.ExpressionLiteral(
+            location=self.location_from_meta(meta),
+            value=ComptimeValue.from_python(NodeKind(children[0])),
         )
 
     def expression_ref(self, meta, children):
