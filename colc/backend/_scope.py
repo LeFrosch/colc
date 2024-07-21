@@ -1,11 +1,11 @@
 import dataclasses
 import abc
-from typing import Optional, Any, Tuple
+from typing import Optional, Any, Tuple, TypeVar, Type as PyType
 
 from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type, first
 from colc.frontend import ast, Visitor
 
-from ._instruction import Label
+from . import _scope_context as scopes
 
 
 @dataclasses.dataclass
@@ -42,14 +42,14 @@ class ComptimeDefinition(Definition):
         return True
 
 
+C = TypeVar('C', bound=scopes.Context)
+
+
 class Scope:
-    def __init__(self, parent: Optional['Scope']):
+    def __init__(self, parent: Optional['Scope'], ctx: Optional[scopes.Context]):
         self._parent = parent
         self._definitions: list[Definition] = []
-
-        # TODO: extract to scope context
-        self._returns: list[Type] = []
-        self._label = Label('function')
+        self._context = ctx
 
     def _insert(self, identifier: ast.Identifier, definition: Definition):
         if any(it for it in self._definitions if it.name == identifier.name):
@@ -78,13 +78,6 @@ class Scope:
 
         return definition
 
-    def insert_return(self, type: Type) -> Label:
-        if self._parent is not None:
-            return self._parent.insert_return(type)
-        else:
-            self._returns.append(type)
-            return self._label
-
     def lookup(self, identifier: ast.Identifier, expected: Optional[Type] = None) -> Definition:
         definition = first(it for it in self._definitions if it.name == identifier.name)
 
@@ -98,23 +91,27 @@ class Scope:
 
         return definition
 
-    def returns(self) -> Tuple[Label, Type]:
+    def find(self, context_type: PyType[C]) -> Optional[C]:
+        if isinstance(self._context, context_type):
+            return self._context
+
         if self._parent is not None:
-            internal_problem('only call scopes collect return types')
+            return self._parent.find(context_type)
 
-        return self._label, Type.lup(self._returns)
+        return None
 
-    def new_call_scope(self) -> 'Scope':
-        return Scope(None)
+    def new_call_scope(self, name: str) -> Tuple[scopes.Function, 'Scope']:
+        ctx = scopes.Function(name)
+        return ctx, Scope(None, ctx)
 
-    def new_child_scope(self) -> 'Scope':
-        return Scope(self)
+    def new_child_scope(self, ctx: Optional[scopes.Context] = None) -> 'Scope':
+        return Scope(self, ctx)
 
 
 class VisitorWithScope(Visitor):
     def __init__(self, scope: Optional[Scope] = None):
         super().__init__()
-        self.scope = scope or Scope(None)
+        self.scope: Scope = scope or Scope(None, scopes.Root())
 
     def accept_with_scope(self, scope: Scope, node: Optional[ast.Node]) -> Any:
         current_scope = self.scope

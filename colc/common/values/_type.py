@@ -101,3 +101,11 @@ class Type:
             return '<list %s>' % type
         else:
             return '<%s>' % type
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Type):
+            return False
+        if self.is_list != other.is_list:
+            return False
+
+        return self.values == other.values

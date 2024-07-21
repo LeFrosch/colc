@@ -4,6 +4,7 @@ from typing import cast
 from colc.frontend import ast
 from colc.common import AnyValue
 from colc.backend._process_mapping import VisitorImpl
+from colc.backend._scope import scopes
 from test.utils import FileTestMeta, create_test_context
 
 
@@ -29,6 +30,6 @@ class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
             visitor.scope.insert_runtime(param, AnyValue, i, True)
 
         visitor.accept(func.block)
-        _, returns = visitor.scope.returns()
+        returns = visitor.scope.find(scopes.Function).get_return()
 
         self.assertEqual(repr(returns), type)

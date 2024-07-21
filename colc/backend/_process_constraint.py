@@ -51,7 +51,7 @@ class VisitorImpl(VisitorWithScope):
         if len(call.arguments) != len(parameters):
             fatal_problem(f'expected {len(parameters)} arguments', call)
 
-        scope = self.scope.new_call_scope()
+        _, scope = self.scope.new_call_scope(call.identifier.name)
 
         for arg, param in zip(call.arguments, parameters):
             value = self.accept_expr(arg)

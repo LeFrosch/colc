@@ -7,11 +7,17 @@ class Label:
     def __init__(self, name: str):
         self.name = name
 
+    def __repr__(self):
+        return f'Label({self.name})'
+
 
 class Instruction:
     def __init__(self, opcode: Opcode, argument: int | Label = 0):
         self.opcode = opcode
         self.argument = argument
+
+    def __repr__(self):
+        return f'{self.opcode.name}({self.argument})'
 
     @property
     def argument_label(self) -> Label:
@@ -79,3 +85,20 @@ class InstructionBuffer:
 
     def add_label(self, label: Label):
         self.labels[label] = len(self.instructions)
+
+    def build(self) -> bytes:
+        builder = bytearray()
+
+        for i, instr in enumerate(self.instructions):
+            builder.append(instr.opcode)
+
+            if not instr.opcode.is_jmp:
+                builder.append(instr.argument_value)
+            else:
+                label = instr.argument_label
+                index = self.labels.get(label)
+                assert index is not None
+
+                builder.append(abs(i - index))
+
+        return builder

@@ -4,13 +4,12 @@ from colc.frontend import ast
 from ._context import Context
 from ._instruction import Label, Instruction, InstructionBuffer
 from ._opcode import Opcode
-from ._scope import VisitorWithScope, RuntimeDefinition
+from ._scope import VisitorWithScope, RuntimeDefinition, scopes
 from ._process_expression import process_expression
 from ._functions import operator_binary_infer, operator_unary_infer, resolve_function, BuiltinFunction, DefinedFunction
 from ._utils import Allocator, check_arguments, check_assignment, check_compatible
 from ._mapping import Mapping
 from ._fixpoint import fixpoint_can_convert, fixpoint_from_float
-from ._process_instructions import process_instructions
 
 
 def process_mappings(ctx: Context) -> list[Mapping]:
@@ -24,7 +23,7 @@ def process_mappings(ctx: Context) -> list[Mapping]:
         Mapping(
             name=mapping.identifier.name,
             labels=[_lookup_label(ctx, it) for it in mapping.labels],
-            code=process_instructions(process_mapping(ctx, mapping)),
+            code=process_mapping(ctx, mapping),
         )
         for mapping in mappings
     ]
@@ -38,12 +37,12 @@ def _lookup_label(ctx: Context, identifier: ast.Identifier) -> int:
     return label
 
 
-def process_mapping(ctx: Context, mapping: ast.MDefinition) -> InstructionBuffer:
+def process_mapping(ctx: Context, mapping: ast.MDefinition) -> bytes:
     visitor = VisitorImpl(ctx)
     visitor.accept(mapping.block)
     visitor.finalize()
 
-    return visitor.buffer
+    return visitor.buffer.build()
 
 
 class VisitorImpl(VisitorWithScope):
@@ -56,8 +55,10 @@ class VisitorImpl(VisitorWithScope):
         self.scope.insert_synthetic('root', types.NODE, self.allocator.alloc())
 
     def finalize(self):
-        label, _ = self.scope.returns()
-        self.buffer.add_label(label)
+        sctx = self.scope.find(scopes.Root)
+        assert sctx is not None
+
+        self.buffer.add_label(sctx.end)
 
     def instruction_for_const(self, value: ComptimeValue):
         comptime = value.comptime
@@ -128,14 +129,20 @@ class VisitorImpl(VisitorWithScope):
         self.accept_with_child_scope(stmt.block)
 
     def f_statement_return(self, stmt: ast.FStatementReturn):
+        # there should always be a function or root scope available
+        sctx = self.scope.find(scopes.Function)
+        assert sctx is not None
+
         if stmt.expression is not None:
+            # TODO: warn if returning a value from root
+
             value = self.accept_expr(stmt.expression)
-            label = self.scope.insert_return(value.type)
+            sctx.add_return(value.type)
         else:
             self.buffer.add(Instruction(Opcode.NONE))
-            label = self.scope.insert_return(types.NONE)
+            sctx.add_return(types.NONE)
 
-        self.buffer.add(Instruction.new_jmp(Opcode.JMP_F, label))
+        self.buffer.add(Instruction.new_jmp(Opcode.JMP_F, sctx.end))
 
     def f_statement_if(self, stmt: ast.FStatementIf):
         # evaluate condition
@@ -162,6 +169,8 @@ class VisitorImpl(VisitorWithScope):
         self.buffer.add_label(label)
 
     def f_statement_for(self, stmt: ast.FStatementFor):
+        sctx = scopes.Loop()
+
         list_value = self.accept_expr(stmt.condition)
         check_compatible(stmt.condition, list_value, types.ANY_LIST)
 
@@ -169,27 +178,24 @@ class VisitorImpl(VisitorWithScope):
         list_index = self.allocator.alloc()
         self.buffer.add(Instruction.new_store(list_index))
 
-        label_start = Label('for_start')
-        label_end = Label('for_end')
-
         # loop start: check if there is a next value
-        self.buffer.add_label(label_start)
+        self.buffer.add_label(sctx.start)
         self.buffer.add(Instruction(Opcode.HAS_NEXT, list_index))
-        self.buffer.add(Instruction.new_jmp(Opcode.JMP_FF, label_end))
+        self.buffer.add(Instruction.new_jmp(Opcode.JMP_FF, sctx.end))
 
         # loop body: store current value and run block
         self.buffer.add(Instruction(Opcode.NEXT, list_index))
         var_index = self.allocator.alloc()
         self.buffer.add(Instruction.new_store(var_index))
 
-        scope = self.scope.new_child_scope()
+        scope = self.scope.new_child_scope(sctx)
         scope.insert_runtime(stmt.identifier, RuntimeValue(list_value.type.as_scalar), var_index, final=True)
 
         self.accept_with_scope(scope, stmt.block)
 
         # loop end: jump back to start
-        self.buffer.add(Instruction.new_jmp(Opcode.JMP_B, label_start))
-        self.buffer.add_label(label_end)
+        self.buffer.add(Instruction.new_jmp(Opcode.JMP_B, sctx.start))
+        self.buffer.add_label(sctx.end)
 
     def expression_unary(self, expr: ast.ExpressionUnary) -> Value:
         value = self.accept_expr(expr.expression)
@@ -240,7 +246,7 @@ class VisitorImpl(VisitorWithScope):
     def accept_defined_function(self, call: ast.Call, func: DefinedFunction) -> Value:
         check_arguments(call, func)
 
-        scope = self.scope.new_call_scope()
+        sctx, scope = self.scope.new_call_scope(call.identifier.name)
         for arg, param in zip(call.arguments, func.definition.parameters):
             value = self.accept_expr(arg, load=False)
 
@@ -252,10 +258,8 @@ class VisitorImpl(VisitorWithScope):
 
         self.accept_with_scope(scope, func.definition.block)
 
-        label, type = scope.returns()
-        self.buffer.add_label(label)
-
-        return RuntimeValue(type)
+        self.buffer.add_label(sctx.end)
+        return RuntimeValue(sctx.get_return())
 
     def expression_call(self, expr: ast.ExpressionCall) -> Value:
         func = resolve_function(self.ctx.file, expr.call.identifier)

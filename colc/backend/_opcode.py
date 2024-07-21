@@ -48,7 +48,6 @@ class Opcode(enum.IntEnum):
     RANGE = 0x52
     RESET = 0x5F
 
-
     @property
     def is_jmp(self) -> bool:
         return 0x40 <= self.value < 0x50

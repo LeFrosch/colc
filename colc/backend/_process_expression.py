@@ -82,7 +82,7 @@ class ComptimeVisitorImpl(VisitorWithScope):
     def accept_defined_function(self, call: ast.Call, func: DefinedFunction) -> ComptimeValue:
         check_arguments(call, func)
 
-        scope = self.scope.new_call_scope()
+        _, scope = self.scope.new_call_scope(call.identifier.name)
         for arg, param in zip(call.arguments, func.definition.parameters):
             value = self.accept(arg)
 
