@@ -1,0 +1,13 @@
+# INPUT
+fun test(a) {
+  if true {
+    return 4;
+  } else {
+    if false {
+        return "str";
+    }
+  }
+}
+
+# TYPE
+<none | num | str>

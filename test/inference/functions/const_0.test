@@ -4,4 +4,4 @@ fun test() {
 }
 
 # TYPE
-<num>
+4: <num>

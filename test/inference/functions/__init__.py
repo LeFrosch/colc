@@ -1,35 +1,28 @@
 import unittest
 from typing import cast
 
+from colc.common import first
 from colc.frontend import ast
-from colc.common import AnyValue
 from colc.backend._process_mapping import VisitorImpl
-from colc.backend._scope import scopes
+
 from test.utils import FileTestMeta, create_test_context
 
 
+def _compile_function(input: str) -> ast.FDefinition:
+    ctx = create_test_context(input)
+    return cast(ast.FDefinition, ctx.file.definitions[0])
+
+
 class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
-    def do_single_test(self, expr, expected):
-        text = 'map main { r = %s; }' % expr
-        ctx = create_test_context(text)
-
-        func = ctx.file.mappings[0]
-        stmt = cast(ast.FStatementAssign, func.block.statements[0])
-        expr = stmt.expression
-
-        value = VisitorImpl(ctx).accept_expr(expr)
-        self.assertEqual(repr(value), expected)
-
     def do_test(self, input: str, type: str):
-        ctx = create_test_context(input)
+        func = _compile_function(input)
+        args = ', '.join(['root.attr'] * len(func.parameters))
 
-        func = ctx.file.definitions[0]
-        visitor = VisitorImpl(ctx)
+        file = '%s map main { var r = %s(%s); }' % (input, func.identifier.name, args)
+        ctx = create_test_context(file)
 
-        for i, param in enumerate(func.parameters):
-            visitor.scope.insert_runtime(param, AnyValue, i, True)
-
-        visitor.accept(func.block)
-        returns = visitor.scope.find(scopes.Function).get_return()
+        mapping = first(ctx.file.mappings)
+        call = mapping.block.statements[0].expression
+        returns = VisitorImpl(ctx).accept_expr(call)
 
         self.assertEqual(repr(returns), type)

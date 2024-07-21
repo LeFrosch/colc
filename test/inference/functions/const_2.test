@@ -1,13 +1,13 @@
 # INPUT
 fun test() {
-  if true {
+  if false {
     return 4;
   } else {
-    if false {
-      return "str";
+    if true {
+      return "abc";
     }
   }
 }
 
 # TYPE
-<num | str>
+abc: <str>

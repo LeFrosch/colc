@@ -1,0 +1,9 @@
+# INPUT
+fun test(a) {
+  if true {
+    return 4;
+  }
+}
+
+# TYPE
+<none | num>

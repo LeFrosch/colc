@@ -93,11 +93,10 @@ class VisitorImpl(VisitorWithScope):
 
         return value
 
-    def f_block(self, block: ast.FBlock):
-        for stmt in block.statements:
-            self.accept(stmt)
+    def f_block(self, block: ast.FBlock) -> bool:
+        return any(self.accept_all(block.statements))
 
-    def f_statement_define(self, stmt: ast.FStatementDefine):
+    def f_statement_define(self, stmt: ast.FStatementDefine) -> bool:
         value = self.accept_expr(stmt.expression, load=not stmt.qualifier.is_const)
 
         if stmt.qualifier.is_const:
@@ -114,7 +113,9 @@ class VisitorImpl(VisitorWithScope):
             )
             self.buffer.add(Instruction.new_store(definition.index))
 
-    def f_statement_assign(self, stmt: ast.FStatementAssign):
+        return False
+
+    def f_statement_assign(self, stmt: ast.FStatementAssign) -> bool:
         value = self.accept_expr(stmt.expression)
 
         definition = self.scope.lookup(stmt.identifier)
@@ -124,11 +125,12 @@ class VisitorImpl(VisitorWithScope):
         assert isinstance(definition, RuntimeDefinition)
 
         self.buffer.add(Instruction.new_store(definition.index))
+        return False
 
-    def f_statement_block(self, stmt: ast.FStatementBlock):
-        self.accept_with_child_scope(stmt.block)
+    def f_statement_block(self, stmt: ast.FStatementBlock) -> bool:
+        return self.accept_with_child_scope(stmt.block)
 
-    def f_statement_return(self, stmt: ast.FStatementReturn):
+    def f_statement_return(self, stmt: ast.FStatementReturn) -> bool:
         # there should always be a function or root scope available
         sctx = self.scope.find(scopes.Function)
         assert sctx is not None
@@ -143,8 +145,9 @@ class VisitorImpl(VisitorWithScope):
             sctx.add_return(types.NONE)
 
         self.buffer.add(Instruction.new_jmp(Opcode.JMP_F, sctx.end))
+        return True
 
-    def f_statement_if(self, stmt: ast.FStatementIf):
+    def f_statement_if(self, stmt: ast.FStatementIf) -> bool:
         # evaluate condition
         value = self.accept_expr(stmt.condition)
         check_compatible(stmt.condition, value, types.BOOLEAN)
@@ -153,7 +156,7 @@ class VisitorImpl(VisitorWithScope):
         label = Label('if_false')
         self.buffer.add(Instruction.new_jmp(Opcode.JMP_FF, label))
 
-        self.accept_with_child_scope(stmt.if_block)
+        returns = self.accept_with_child_scope(stmt.if_block)
 
         if stmt.else_block is not None:
             # create unconditional jump to end after true branch
@@ -164,11 +167,14 @@ class VisitorImpl(VisitorWithScope):
             self.buffer.add_label(label)
             label = label_end
 
-            self.accept_with_child_scope(stmt.else_block)
+            returns = self.accept_with_child_scope(stmt.else_block) and returns
+        else:
+            returns = False
 
         self.buffer.add_label(label)
+        return returns
 
-    def f_statement_for(self, stmt: ast.FStatementFor):
+    def f_statement_for(self, stmt: ast.FStatementFor) -> bool:
         sctx = scopes.Loop()
 
         list_value = self.accept_expr(stmt.condition)
@@ -196,6 +202,8 @@ class VisitorImpl(VisitorWithScope):
         # loop end: jump back to start
         self.buffer.add(Instruction.new_jmp(Opcode.JMP_B, sctx.start))
         self.buffer.add_label(sctx.end)
+
+        return False
 
     def expression_unary(self, expr: ast.ExpressionUnary) -> Value:
         value = self.accept_expr(expr.expression)
@@ -256,7 +264,12 @@ class VisitorImpl(VisitorWithScope):
                 definition = scope.insert_runtime(param, value, self.allocator.alloc(), final=True)
                 self.buffer.add(Instruction.new_store(definition.index))
 
-        self.accept_with_scope(scope, func.definition.block)
+        returns = self.accept_with_scope(scope, func.definition.block)
+
+        # if there is no explicit return from the function, insert implicit none
+        if not returns:
+            self.buffer.add(Instruction(Opcode.NONE))
+            sctx.add_return(types.NONE)
 
         self.buffer.add_label(sctx.end)
         return RuntimeValue(sctx.get_return())

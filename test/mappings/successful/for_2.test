@@ -19,6 +19,7 @@ map main {
 006: NEXT       1
 007: STORE      2
 008: INT        1
-009: JMP_F      2
+009: JMP_F      3
 010: JMP_B      6
-011: STORE      3
+011: NONE       0
+012: STORE      3

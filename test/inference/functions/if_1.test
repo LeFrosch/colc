@@ -1,5 +1,5 @@
 # INPUT
-fun test() {
+fun test(a) {
   if true {
     return 4;
   } else {
@@ -8,4 +8,4 @@ fun test() {
 }
 
 # TYPE
-4: <num>
+<num | str>
