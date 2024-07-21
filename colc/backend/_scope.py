@@ -1,6 +1,6 @@
 import dataclasses
 import abc
-from typing import Optional, Any, Tuple, TypeVar, Type as PyType
+from typing import Optional, Any, Tuple, TypeVar
 
 from colc.common import fatal_problem, internal_problem, Value, RuntimeValue, ComptimeValue, Type, first
 from colc.frontend import ast, Visitor
@@ -91,7 +91,7 @@ class Scope:
 
         return definition
 
-    def find(self, context_type: PyType[C]) -> Optional[C]:
+    def find(self, context_type: type[C]) -> Optional[C]:
         if isinstance(self._context, context_type):
             return self._context
 

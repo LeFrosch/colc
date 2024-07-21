@@ -121,5 +121,16 @@ def where_impl(node: Node, kind: NodeKind) -> list[Node]:
 
 
 @builtin('len', Opcode.LENGTH)
-def len_impl(node: list[any]) -> int:
+def len_impl(value: list[any]) -> int:
     return None
+
+
+@builtin('str', Opcode.STR_OF)
+def str_impl(value: any) -> str:
+    # pythons true and false is uppercase
+    if value is True:
+        return 'true'
+    if value is False:
+        return 'false'
+
+    return str(value)

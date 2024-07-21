@@ -3,3 +3,9 @@ where(root, CORE) -> <list node>
 range(0, 10) -> <list num>
 len(range(0, 10)) -> <num>
 len(where(root, CORE)) -> <num>
+str(123) -> 123: <str>
+str("abc") -> abc: <str>
+str(CORE) -> CORE: <str>
+str(true) -> true: <str>
+str(false) -> false: <str>
+str(1 / 4) -> 0.25: <str>

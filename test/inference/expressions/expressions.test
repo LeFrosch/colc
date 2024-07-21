@@ -20,3 +20,4 @@
 none == none -> True: <bool>
 1 == "str" -> False: <bool>
 1 != none -> True: <bool>
+"abc" + str(3) -> abc3: <str>

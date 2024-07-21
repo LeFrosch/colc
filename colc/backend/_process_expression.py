@@ -68,10 +68,10 @@ class ComptimeVisitorImpl(VisitorWithScope):
 
         args = []
         for arg, param in zip(call.arguments, func.parameters):
-            value = self.accept(arg)
-            check_compatible(arg, value, param)
+            comptime = self.accept(arg)
+            check_compatible(arg, comptime, param)
 
-            args.append(value)
+            args.append(comptime.value)
 
         result = func.comptime(*args)
         if result is None:
