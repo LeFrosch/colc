@@ -1,0 +1,10 @@
+# INPUT
+map main {
+  final a = len(123);
+}
+
+# OUTPUT
+test.col @ line 2
+>>   final a = len(123);
+>>                 ^^^
+fatal problem: expression <num> not compatible with <list any>

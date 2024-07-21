@@ -1,0 +1,23 @@
+# INPUT
+fun has(node, kind) {
+  return len(where(node, kind)) > 0;
+}
+
+map main {
+  final a = has(root, CORE);
+}
+
+# CONST POOL
+000: CORE
+
+# OUTPUT
+000: LOAD       0
+001: STORE      1
+002: LOAD       1
+003: KIND       0
+004: WHERE      0
+005: LENGTH     0
+006: INT        0
+007: GRE        0
+008: JMP_F      1
+009: STORE      2

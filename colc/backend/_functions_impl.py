@@ -1,12 +1,12 @@
 # mypy: ignore-errors
 
-from colc.common import Node, NodeKind, num
+from colc.common import Node, NodeKind, num, comptime
 from colc.frontend import Operator
 
 from ._functions import builtin
 from ._opcode import Opcode
 
-comparable = num | str | bool | None | NodeKind
+any = comptime | Node
 
 
 @builtin(Operator.ADD, Opcode.ADD)
@@ -40,7 +40,7 @@ def mul_int(left: num, right: num) -> num:
 
 
 @builtin(Operator.EQL, Opcode.EQL)
-def eql_any(left: comparable, right: comparable) -> bool:
+def eql_any(left: any, right: any) -> bool:
     if type(left) is not type(right):
         return False
 
@@ -48,7 +48,7 @@ def eql_any(left: comparable, right: comparable) -> bool:
 
 
 @builtin(Operator.NEQ, Opcode.NEQ)
-def neq_any(left: comparable, right: comparable) -> bool:
+def neq_any(left: any, right: any) -> bool:
     return not eql_any(left, right)
 
 
@@ -117,4 +117,9 @@ def kind_impl(node: Node) -> NodeKind:
 
 @builtin('where', Opcode.WHERE)
 def where_impl(node: Node, kind: NodeKind) -> list[Node]:
+    return None
+
+
+@builtin('len', Opcode.LENGTH)
+def len_impl(node: list[any]) -> int:
     return None

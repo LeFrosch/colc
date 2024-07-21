@@ -48,6 +48,7 @@ class Opcode(enum.IntEnum):
     NEXT = 0x50
     HAS_NEXT = 0x51
     RANGE = 0x52
+    LENGTH = 0x53
     RESET = 0x5F
 
     @property

@@ -1,2 +1,5 @@
 # INPUT
 where(root, CORE) -> <list node>
+range(0, 10) -> <list num>
+len(range(0, 10)) -> <num>
+len(where(root, CORE)) -> <num>

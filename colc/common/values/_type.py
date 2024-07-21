@@ -8,11 +8,15 @@ from colc.common import first
 from .._internal import internal_problem
 from .._utils import flatten
 
-num = int | float
-comptime = num | str | bool | None
 
-Node = type('NodeKind', tuple(), {})
-NodeKind = type('NodeKind', (str,), {})
+class Node: ...
+
+
+class NodeKind(str): ...
+
+
+num = int | float
+comptime = num | str | bool | NodeKind | None
 
 
 class PrimitiveType(enum.StrEnum):
