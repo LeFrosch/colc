@@ -25,4 +25,4 @@ class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
         call = mapping.block.statements[0].expression
         returns = VisitorImpl(ctx).accept_expr(call)
 
-        self.assertEqual(repr(returns), type)
+        self.assertEqual(type, repr(returns))

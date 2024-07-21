@@ -1,0 +1,7 @@
+# INPUT
+fun test(a) {
+  fail "test";
+}
+
+# TYPE
+<>

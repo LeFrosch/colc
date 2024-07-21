@@ -27,7 +27,7 @@ class Context:
 
     def intern_const(self, value: ComptimeValue | comptime) -> int:
         if isinstance(value, ComptimeValue):
-            value = value.value
+            value = value.data
         return self._const_pool.intern(value)
 
     def get_const_pool(self) -> list[num | str]:

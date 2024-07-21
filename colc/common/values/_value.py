@@ -37,10 +37,10 @@ class RuntimeValue(Value):
 
 
 class ComptimeValue(Value):
-    value: comptime
+    data: comptime
 
-    def __init__(self, value: comptime, type: Type):
-        self.value = value
+    def __init__(self, data: comptime, type: Type):
+        self.data = data
         self.type = type
 
     @staticmethod
@@ -59,7 +59,7 @@ class ComptimeValue(Value):
         return super().__repr__()
 
     def __repr__(self):
-        return '%s: %s' % (self.value, super().__repr__())
+        return '%s: %s' % (self.data, super().__repr__())
 
 
 AnyValue = RuntimeValue(types.ANY)

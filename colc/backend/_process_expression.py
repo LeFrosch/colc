@@ -1,6 +1,6 @@
 from typing import Optional
 
-from colc.common import internal_problem, ComptimeValue, NoneValue, unreachable, HasLocation
+from colc.common import internal_problem, ComptimeValue, NoneValue, unreachable, HasLocation, types, fatal_problem
 from colc.frontend import ast
 
 from ._scope import Scope, VisitorWithScope, ComptimeDefinition
@@ -68,10 +68,10 @@ class ComptimeVisitorImpl(VisitorWithScope):
 
         args = []
         for arg, param in zip(call.arguments, func.parameters):
-            comptime = self.accept(arg)
-            check_compatible(arg, comptime, param)
+            value = self.accept(arg)
+            check_compatible(arg, value, param)
 
-            args.append(comptime.value)
+            args.append(value.data)
 
         result = func.comptime(*args)
         if result is None:
@@ -126,15 +126,21 @@ class ComptimeVisitorImpl(VisitorWithScope):
         check_assignment(stmt.identifier, definition, value)
         assert isinstance(definition, ComptimeDefinition)
 
-        definition.value.value = value.value
+        definition.value.data = value.data
 
     def f_statement_if(self, stmt: ast.FStatementIf):
         value = self.accept(stmt.condition)
 
-        if value.value:
+        if value.data:
             self.accept(stmt.if_block)
         elif stmt.else_block is not None:
             self.accept(stmt.else_block)
 
     def f_statement_for(self, stmt: ast.FStatementFor):
         raise CannotProcessAtComptime(stmt)
+
+    def f_statement_fail(self, stmt: ast.FStatementFail):
+        value = self.accept(stmt.expression)
+        check_compatible(stmt.expression, value, types.STRING)
+
+        fatal_problem('failure: ' + value.data, stmt)

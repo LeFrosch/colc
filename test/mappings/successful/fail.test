@@ -1,0 +1,11 @@
+# INPUT
+map main {
+  fail "test" + str(123);
+}
+
+# CONST POOL
+000: test123
+
+# OUTPUT
+000: CONST      0
+001: FAIL       0

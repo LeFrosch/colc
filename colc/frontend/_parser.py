@@ -211,6 +211,12 @@ class Transformer(lark.Transformer):
             block=children[4],
         )
 
+    def f_statement_fail(self, meta, children):
+        return ast.FStatementFail(
+            location=self.location_from_meta(meta),
+            expression=children[1],
+        )
+
     def expression_int(self, meta, children):
         return ast.ExpressionLiteral(
             location=self.location_from_meta(meta),

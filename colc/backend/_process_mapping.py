@@ -61,7 +61,7 @@ class VisitorImpl(VisitorWithScope):
         self.buffer.add_label(sctx.end)
 
     def instruction_for_const(self, value: ComptimeValue):
-        comptime = value.value
+        comptime = value.data
 
         match value.type:
             case types.BOOLEAN if comptime:
@@ -208,6 +208,13 @@ class VisitorImpl(VisitorWithScope):
         self.buffer.add_label(sctx.end)
 
         return False
+
+    def f_statement_fail(self, stmt: ast.FStatementFail) -> bool:
+        value = self.accept_expr(stmt.expression)
+        check_compatible(stmt.expression, value, types.STRING)
+
+        self.buffer.add(Instruction(Opcode.FAIL))
+        return True
 
     def expression_unary(self, expr: ast.ExpressionUnary) -> Value:
         value = self.accept_expr(expr.expression)

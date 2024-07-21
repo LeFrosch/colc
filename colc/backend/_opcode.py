@@ -8,50 +8,51 @@ class Opcode(enum.IntEnum):
     LOAD = 0x02
     KIND = 0x03
     STR_OF = 0x04
+    FAIL = 0x05
 
     # node interaction
-    ATTR = 0x05
-    KIND_OF = 0x06
-    WHERE = 0x07
+    ATTR = 0x10
+    KIND_OF = 0x11
+    WHERE = 0x12
 
     # operators
-    ADD = 0x10
-    SUB = 0x11
-    MUL = 0x12
-    DIV = 0x13
-    DIV_FLOOR = 0x14
-    AND = 0x15
-    OR = 0x16
-    NEG = 0x17
-    NOT = 0x18
-    EQL = 0x19
-    NEQ = 0x1A
-    LES = 0x1B
-    LEQ = 0x1C
-    GRE = 0x1D
-    GEQ = 0x1E
-    MUT = 0x1F
-    POW = 0x20
+    ADD = 0x20
+    SUB = 0x21
+    MUL = 0x22
+    DIV = 0x23
+    DIV_FLOOR = 0x24
+    AND = 0x25
+    OR = 0x26
+    NEG = 0x27
+    NOT = 0x28
+    EQL = 0x29
+    NEQ = 0x2A
+    LES = 0x2B
+    LEQ = 0x2C
+    GRE = 0x2D
+    GEQ = 0x2E
+    MUT = 0x2F
+    POW = 0x30
 
     # const values
-    TRUE = 0x30
-    FALSE = 0x31
-    INT = 0x32
-    FLOAT = 0x33
-    NONE = 0x34
+    TRUE = 0x40
+    FALSE = 0x41
+    INT = 0x42
+    FLOAT = 0x43
+    NONE = 0x44
 
     # control flow
-    JMP_F = 0x40
-    JMP_FF = 0x41
-    JMP_B = 0x42
+    JMP_F = 0x50
+    JMP_FF = 0x51
+    JMP_B = 0x52
 
     # iterators
-    NEXT = 0x50
-    HAS_NEXT = 0x51
-    RANGE = 0x52
-    LENGTH = 0x53
-    RESET = 0x5F
+    NEXT = 0x60
+    HAS_NEXT = 0x61
+    RANGE = 0x62
+    LENGTH = 0x63
+    RESET = 0x64
 
     @property
     def is_jmp(self) -> bool:
-        return 0x40 <= self.value < 0x50
+        return 0x50 <= self.value < 0x60

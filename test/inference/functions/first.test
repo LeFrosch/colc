@@ -1,0 +1,11 @@
+# INPUT
+fun first(node, kind) {
+  for child in where(node, kind) {
+    return child;
+  }
+
+  fail "no child of kind: " + str(kind);
+}
+
+# TYPE
+<node>

@@ -209,6 +209,10 @@ class FStatementFor(FStatement):
     block: FBlock
 
 
+class FStatementFail(FStatement):
+    expression: Expression
+
+
 class FDefinition(Definition):
     parameters: list[Identifier]
     block: FBlock

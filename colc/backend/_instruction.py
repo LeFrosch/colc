@@ -63,6 +63,7 @@ class Instruction:
                 Operator.AND: Opcode.AND,
                 Operator.OR: Opcode.OR,
                 Operator.EQL: Opcode.EQL,
+                Operator.NEQ: Opcode.NEQ,
                 Operator.LES: Opcode.LES,
                 Operator.LEQ: Opcode.LEQ,
                 Operator.GRE: Opcode.GRE,

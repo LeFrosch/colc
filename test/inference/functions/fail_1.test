@@ -1,0 +1,11 @@
+# INPUT
+fun test(a) {
+  if a != 3 {
+    fail "test";
+  } else {
+    return 3;
+  }
+}
+
+# TYPE
+<num>
