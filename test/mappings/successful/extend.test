@@ -1,0 +1,49 @@
+# INPUT
+fun extend(list, other) {
+  for item in other {
+    append(list, item);
+  }
+}
+
+map main {
+  final a = [1, 2, 3];
+  final b = [2, 3, 5];
+
+  extend(a, b);
+}
+
+# OUTPUT
+000: LIST       0
+001: INT        1
+002: APPEND     0
+003: INT        2
+004: APPEND     0
+005: INT        3
+006: APPEND     0
+007: STORE      1
+008: LIST       0
+009: INT        2
+010: APPEND     0
+011: INT        3
+012: APPEND     0
+013: INT        5
+014: APPEND     0
+015: STORE      2
+016: LOAD       1
+017: STORE      3
+018: LOAD       2
+019: STORE      4
+020: LOAD       4
+021: ITER       0
+022: STORE      5
+023: HAS_NEXT   5
+024: JMP_FF     8
+025: NEXT       5
+026: STORE      6
+027: LOAD       3
+028: LOAD       6
+029: APPEND     0
+030: DROP       0
+031: JMP_B      8
+032: NONE       0
+033: DROP       0

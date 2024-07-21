@@ -1,4 +1,16 @@
-from colc.common import fatal_problem, Value, AnyValue, ComptimeValue, types, RuntimeValue, unreachable, Type, NodeKind, comptime_data, comptime_list
+from colc.common import (
+    fatal_problem,
+    Value,
+    AnyValue,
+    ComptimeValue,
+    types,
+    RuntimeValue,
+    unreachable,
+    Type,
+    NodeKind,
+    comptime_data,
+    comptime_list,
+)
 from colc.frontend import ast
 
 from ._context import Context
@@ -195,8 +207,9 @@ class VisitorImpl(VisitorWithScope):
         list_value = self.accept_expr(stmt.condition)
         check_compatible(stmt.condition, list_value, types.ANY_LIST)
 
-        # loop header: store list in unnamed local variable
+        # loop header: create and store iter in unnamed local variable
         list_index = self.allocator.alloc()
+        self.buffer.add(Instruction(Opcode.ITER))
         self.buffer.add(Instruction.new_store(list_index))
 
         # loop start: check if there is a next value

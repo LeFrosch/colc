@@ -135,3 +135,7 @@ def str_impl(value: any) -> str:
 
     return str(value)
 
+
+@builtin('append', Opcode.APPEND)
+def append_impl(target: list[any], value: any):
+    target.append(value)

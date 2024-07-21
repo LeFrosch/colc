@@ -1,0 +1,13 @@
+# INPUT
+map main {
+  final a = [];
+  append(a, 123);
+}
+
+# OUTPUT
+000: LIST       0
+001: STORE      1
+002: LOAD       1
+003: INT      123
+004: APPEND     0
+005: DROP       0
