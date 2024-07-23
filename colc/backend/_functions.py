@@ -67,33 +67,43 @@ def builtin(name: str, opcode: Opcode):
     return decorator
 
 
+def _operator_find(name: str, n_params: int) -> BuiltinFunction:
+    operator = first(it for it in _builtins if it.name == name and len(it.parameters) == n_params)
+
+    if operator is None:
+        internal_problem(f'undefined operator: {name}')
+
+    return operator
+
+
+def _operator_unary_find_compatible(op: Operator, value: Type) -> BuiltinFunction:
+    operator = _operator_find(op, 1)
+
+    if len(operator.parameters) != 1:
+        internal_problem(f'invalid unary operator: {op}')
+    if not operator.parameters[0].compatible(value):
+        fatal_problem(f'undefined operator {op} {value}', op)
+
+    return operator
+
+
+def _operator_binary_find_compatible(op: Operator, left: Type, right: Type) -> BuiltinFunction:
+    operator = _operator_find(op, 2)
+
+    if len(operator.parameters) != 2:
+        internal_problem(f'invalid binary operator: {op}')
+    if not operator.parameters[0].compatible(left) or not operator.parameters[1].compatible(right):
+        fatal_problem(f'undefined operator {left} {op} {right}', op)
+
+    return operator
+
+
 def operator_unary_infer(op: Operator, value: Value) -> RuntimeValue:
-    return_types = [
-        it.returns
-        for it in _builtins
-        if it.name == op and len(it.parameters) == 1 and it.parameters[0].compatible(value.type)
-    ]
-
-    if len(return_types) == 0:
-        fatal_problem(f'undefined operator {op} {value.type}', op)
-
-    return RuntimeValue(Type.lup(return_types))
+    return RuntimeValue(_operator_unary_find_compatible(op, value.type).returns)
 
 
 def operator_binary_infer(op: Operator, left: Value, right: Value) -> RuntimeValue:
-    return_types = [
-        it.returns
-        for it in _builtins
-        if it.name == op
-        and len(it.parameters) == 2
-        and it.parameters[0].compatible(left.type)
-        and it.parameters[1].compatible(right.type)
-    ]
-
-    if len(return_types) == 0:
-        fatal_problem(f'undefined operator {left.type} {op} {right.type}', op)
-
-    return RuntimeValue(Type.lup(return_types))
+    return RuntimeValue(_operator_binary_find_compatible(op, left.type, right.type).returns)
 
 
 def comparison_infer(comp: Comparison, left: Value, right: Value) -> RuntimeValue:
@@ -101,16 +111,9 @@ def comparison_infer(comp: Comparison, left: Value, right: Value) -> RuntimeValu
 
 
 def operator_unary_evaluate(op: Operator, value: ComptimeValue) -> ComptimeValue:
-    candidates = [
-        it for it in _builtins if it.name == op and len(it.parameters) == 1 and it.parameters[0].compatible(value.type)
-    ]
+    operator = _operator_unary_find_compatible(op, value.type)
 
-    if len(candidates) == 0:
-        fatal_problem(f'undefined operator {op} {value.type}', op)
-    if len(candidates) != 1:
-        internal_problem(f'ambiguous operator {op} {value.type}')
-
-    result = candidates[0].comptime(value.data)
+    result = operator.comptime(value.data)
     if result is None:
         internal_problem(f'cannot resolve operator at comptime {op}')
 
@@ -118,22 +121,10 @@ def operator_unary_evaluate(op: Operator, value: ComptimeValue) -> ComptimeValue
 
 
 def operator_binary_evaluate(op: Operator, left: ComptimeValue, right: ComptimeValue) -> ComptimeValue:
-    candidates = [
-        it
-        for it in _builtins
-        if it.name == op
-        and len(it.parameters) == 2
-        and it.parameters[0].compatible(left.type)
-        and it.parameters[1].compatible(right.type)
-    ]
-
-    if len(candidates) == 0:
-        fatal_problem(f'undefined operator {left.type} {op} {right.type}', op)
-    if len(candidates) != 1:
-        internal_problem(f'ambiguous operator {left.type} {op} {right.type}')
+    operator = _operator_binary_find_compatible(op, left.type, right.type)
 
     try:
-        result = candidates[0].comptime(left.data, right.data)
+        result = operator.comptime(left.data, right.data)
         if result is None:
             internal_problem(f'cannot resolve operator at comptime {op}')
 
@@ -143,9 +134,9 @@ def operator_binary_evaluate(op: Operator, left: ComptimeValue, right: ComptimeV
 
 
 def resolve_function(file: File, identifier: ast.Identifier) -> Function:
-    builtin = first(it for it in _builtins if it.name == identifier.name)
-    if builtin is not None:
-        return builtin
+    function = first(it for it in _builtins if it.name == identifier.name)
+    if function is not None:
+        return function
 
     definition = file.function(identifier)
 
