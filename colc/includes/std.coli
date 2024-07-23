@@ -15,18 +15,28 @@ con const(list, n) { all:
   size == n;
 }
 
-fun first(node, kind) {
-  for child in where(node, kind) {
-    return child;
+fun first(list) {
+  for item in list {
+    return item;
   }
 
-  fail "no child of kind: " .. str(kind);
+  fail "no first element";
 }
 
 fun extend(list, other) {
   var buffer = list;
 
   for item in other {
+    buffer = item : buffer;
+  }
+
+  return buffer;
+}
+
+fun reverse(list) {
+  var buffer = [];
+
+  for item in list {
     buffer = item : buffer;
   }
 

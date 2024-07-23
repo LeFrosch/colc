@@ -77,7 +77,7 @@ class ComptimeVisitorImpl(VisitorWithScope):
         if result is None:
             raise CannotProcessAtComptime(call.identifier)
 
-        return result
+        return ComptimeValue(result, type=Type.from_python(type(result)))
 
     def accept_defined_function(self, call: ast.Call, func: DefinedFunction) -> ComptimeValue:
         check_arguments(call, func)
@@ -105,16 +105,8 @@ class ComptimeVisitorImpl(VisitorWithScope):
 
         unreachable()
 
-    def expression_list(self, expr: ast.ExpressionList) -> ComptimeValue:
-        elements = self.accept_all(expr.elements)
-
-        if len(elements) == 0:
-            return ComptimeValue([], types.ANY_LIST)
-
-        return ComptimeValue(
-            data=[it.data for it in elements],
-            type=Type.lup(it.type for it in elements).as_list,
-        )
+    def expression_empty_list(self, _: ast.ExpressionEmptyList) -> ComptimeValue:
+        return ComptimeValue([], types.VOID_LIST)
 
     def f_block(self, expr: ast.FBlock):
         for stmt in expr.statements:
@@ -134,7 +126,11 @@ class ComptimeVisitorImpl(VisitorWithScope):
         value = self.accept(stmt.expression)
 
         definition = self.scope.lookup(stmt.identifier)
-        check_assignment(stmt.identifier, definition, value)
+        check_assignment(stmt.identifier, definition, value.type)
+
+        # update type of the definition
+        definition.value.type = value.type
+
         assert isinstance(definition, ComptimeDefinition)
 
         definition.value.data = value.data

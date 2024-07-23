@@ -1,0 +1,5 @@
+# INPUT
+first(where(root, CORE)) -> <node>
+reverse(where(root, CORE)) -> <list node>
+first(reverse(where(root, CORE))) -> <node>
+first(reverse(reverse(where(root, CORE)))) -> <node>

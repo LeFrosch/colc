@@ -1,0 +1,13 @@
+# INPUT
+fun test(attr) {
+    final runtime_int = attr + 1;
+
+    var a = [runtime_int];
+    a = "2" : a;
+    a = none : a;
+
+    return a;
+}
+
+# TYPE
+<list none | num | str>

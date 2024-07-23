@@ -4,4 +4,4 @@ fun test(a) {
 }
 
 # TYPE
-<>
+<void>

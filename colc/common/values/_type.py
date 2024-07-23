@@ -56,9 +56,6 @@ class Type:
         self.values = values
         self.is_list = list
 
-        # void list is not allowed
-        assert not list or len(values) > 0
-
     @staticmethod
     def lup(types: Iterable['Type']) -> 'Type':
         """
@@ -91,6 +88,10 @@ class Type:
         return len(self.values) == len(PrimitiveType)
 
     @property
+    def is_void(self) -> bool:
+        return len(self.values) == 0
+
+    @property
     def as_scalar(self) -> 'Type':
         return Type(self.values, list=False)
 
@@ -107,6 +108,8 @@ class Type:
     def __repr__(self):
         if self.is_any:
             type = 'any'
+        elif self.is_void:
+            type = 'void'
         else:
             # sort for testing
             sorted = list(self.values)

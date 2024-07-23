@@ -2,6 +2,8 @@ from ._type import Type, PrimitiveType
 
 ANY: Type = Type(set(PrimitiveType))
 ANY_LIST: Type = Type(set(PrimitiveType), list=True)
+VOID: Type = Type(set())
+VOID_LIST: Type = Type(set(), list=True)
 
 NONE: Type = Type({PrimitiveType.NONE})
 NUMBER: Type = Type({PrimitiveType.NUMBER})

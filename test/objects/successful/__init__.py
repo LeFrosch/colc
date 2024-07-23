@@ -1,7 +1,7 @@
 import pathlib
 import unittest
 
-from colc import Object
+from colc import Object, FatalProblem
 from test.utils import compile_object
 
 
@@ -12,7 +12,11 @@ class ObjectTest(unittest.TestCase):
 
     def compile(self, file: str) -> Object:
         text = self.dir.joinpath(f'{file}.col').read_text()
-        (_, obj) = compile_object(text)
+
+        try:
+            (_, obj) = compile_object(text)
+        except FatalProblem as e:
+            self.fail(e.render())
 
         return obj
 
@@ -21,3 +25,6 @@ class ObjectTest(unittest.TestCase):
 
         self.assertEqual([0], obj.mappings[0].labels)
         self.assertEqual([], obj.mappings[1].labels)
+
+    def test_all(self):
+        self.compile('all')

@@ -303,10 +303,21 @@ class Transformer(lark.Transformer):
         return children[1]
 
     def expression_list(self, meta, children):
-        return ast.ExpressionList(
-            location=self.location_from_meta(meta),
-            elements=[it for it in children if isinstance(it, ast.Expression)],
-        )
+        # TODO: some kind of synthetic location for lowering?
+        location = self.location_from_meta(meta)
+
+        # lower list literal to multiple prepend expressions
+
+        list: ast.Expression = ast.ExpressionEmptyList(location=location)
+        for expr in (it for it in reversed(children) if isinstance(it, ast.Expression)):
+            list = ast.ExpressionBinary(
+                location=location,
+                operator=Operator.synthetic(':', location),
+                right=list,
+                left=expr,
+            )
+
+        return list
 
     def call(self, meta, children):
         return ast.Call(

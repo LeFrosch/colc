@@ -52,5 +52,5 @@ def check_compatible(expr: ast.Expression, value: Value, type: Type):
 def check_assignment(identifier: ast.Identifier, definition: Definition, type: Type):
     if definition.final:
         fatal_problem('cannot assign to final identifier', identifier)
-    if not definition.value.type.compatible(type):
-        fatal_problem(f'cannot assign {type} to {definition.value} identifier', identifier)
+    if type.is_void:
+        fatal_problem('cannot assign void', identifier)

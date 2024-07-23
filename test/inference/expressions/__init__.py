@@ -8,7 +8,7 @@ from test.utils import FileTestMeta, create_test_context
 
 class FileTest(unittest.TestCase, metaclass=FileTestMeta, path=__file__):
     def do_single_test(self, expr, expected):
-        text = 'map main { r = %s; }' % expr
+        text = '/include/ "std"; map main { r = %s; }' % expr
         ctx = create_test_context(text)
 
         func = ctx.file.mappings[0]

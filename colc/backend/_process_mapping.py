@@ -6,7 +6,6 @@ from colc.common import (
     types,
     RuntimeValue,
     unreachable,
-    Type,
     NodeKind,
     comptime_data,
     comptime_list,
@@ -147,6 +146,9 @@ class VisitorImpl(VisitorWithScope):
 
         definition = self.scope.lookup(stmt.identifier)
         check_assignment(stmt.identifier, definition, value.type)
+
+        # update type of the definition
+        definition.value.type = value.type
 
         # it is only possible to assign to runtime definitions, comptime should always be final in this case
         assert isinstance(definition, RuntimeDefinition)
@@ -327,22 +329,6 @@ class VisitorImpl(VisitorWithScope):
 
         unreachable()
 
-    def expression_list(self, expr: ast.ExpressionList) -> Value:
-        # first push empty list to append to
+    def expression_empty_list(self, _: ast.ExpressionEmptyList) -> Value:
         self.buffer.add(Instruction(Opcode.LIST))
-
-        values: list[Value] = []
-        # prepend all elements
-        for element in reversed(expr.elements):
-            value = self.accept_expr(element)
-            self.buffer.add(Instruction(Opcode.PREPEND))
-
-            if value.type.is_list:
-                fatal_problem('nested lists are not supported', element)
-
-            values.append(value)
-
-        if len(values) == 0:
-            return RuntimeValue(types.ANY_LIST)
-        else:
-            return RuntimeValue(Type.lup(it.type for it in values).as_list)
+        return RuntimeValue(types.VOID_LIST)

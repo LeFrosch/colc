@@ -17,14 +17,18 @@ class AstEnum(enum.StrEnum):
             return cases.get(self, orelse)
 
     @classmethod
-    def from_token(cls, file: TextFile, token: lark.Token) -> Self:
+    def synthetic(cls, value: str, location: Location) -> Self:
         try:
-            value = cls.__new__(cls, token.value)
+            value = cls.__new__(cls, value)
         except ValueError as e:
             internal_problem(f'unknown element in {cls.__name__}', e)
 
-        value.location = file.location_from_token(token)
+        value.location = location
         return value
+
+    @classmethod
+    def from_token(cls, file: TextFile, token: lark.Token) -> Self:
+        return cls.synthetic(token.value, file.location_from_token(token))
 
 
 class Comparison(AstEnum):

@@ -21,6 +21,6 @@ none == none -> True: <bool>
 1 == "str" -> False: <bool>
 1 != none -> True: <bool>
 "abc" .. str(3) -> abc3: <str>
-[] -> []: <list any>
+[] -> []: <list void>
 [1, 2] -> [1, 2]: <list num>
 [1, "str", true] -> [1, 'str', True]: <list bool | num | str>

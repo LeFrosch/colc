@@ -1,0 +1,27 @@
+/include/ "std";
+
+con main { all:
+  min(1) ISLAND { all:
+    const(1) MACHINE { one:
+      os == "linux";
+    };
+    range(2, 3) MACHINE { any:
+      os == "darwin";
+
+      max(4) CORE;
+    };
+  };
+}
+
+map main {
+  final machines = where(root, MACHINE);
+  final machine_first = first(machines);
+  final machine_last = first(reverse(machines));
+
+  final cores_first = where(machine_first, CORE);
+  final cores_last = where(machine_last, CORE);
+
+  for core in extend(cores_first, cores_last) {
+    exec("command", core, [core]);
+  }
+}

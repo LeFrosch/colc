@@ -2,7 +2,7 @@
 /include/ "std";
 
 fun execute(command, node) {
-  final core = first(node, CORE);
+  final core = first(where(node, CORE));
 
   exec(command, core, children(node));
 }
@@ -13,17 +13,17 @@ map main {
 
 # CONST POOL
 000: CORE
-001: no child of kind: CORE
+001: no first element
 002: test
 
 # OUTPUT
 000: LOAD       0
 001: STORE      1
 002: LOAD       1
-003: STORE      2
-004: LOAD       2
-005: KIND       0
-006: WHERE      0
+003: KIND       0
+004: WHERE      0
+005: STORE      2
+006: LOAD       2
 007: ITER       0
 008: STORE      3
 009: HAS_NEXT   3

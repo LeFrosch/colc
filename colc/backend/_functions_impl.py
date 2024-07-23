@@ -107,7 +107,7 @@ def neg_int(value: num) -> num:
 
 @builtin(Operator.PREPEND, Opcode.PREPEND)
 def prepend_impl(item: any, value: list[any]) -> list[any]:
-    return None
+    return [item] + value
 
 
 @builtin('range', Opcode.RANGE)
