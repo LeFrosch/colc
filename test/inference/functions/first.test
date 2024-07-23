@@ -4,7 +4,7 @@ fun first(node, kind) {
     return child;
   }
 
-  fail "no child of kind: " + str(kind);
+  fail "no child of kind: " .. str(kind);
 }
 
 # TYPE

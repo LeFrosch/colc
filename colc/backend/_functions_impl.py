@@ -9,8 +9,8 @@ from ._opcode import Opcode
 any = comptime_data | Node
 
 
-@builtin(Operator.ADD, Opcode.ADD)
-def add_str(left: str, right: str) -> str:
+@builtin(Operator.CONCAT, Opcode.CONCAT)
+def concat_str(left: str, right: str) -> str:
     return left + right
 
 
@@ -105,6 +105,11 @@ def neg_int(value: num) -> num:
     return -value
 
 
+@builtin(Operator.PREPEND, Opcode.PREPEND)
+def prepend_impl(item: any, value: list[any]) -> list[any]:
+    return None
+
+
 @builtin('range', Opcode.RANGE)
 def range_impl(start: num, end: num) -> list[num]:
     return None
@@ -134,11 +139,6 @@ def str_impl(value: any) -> str:
         return 'false'
 
     return str(value)
-
-
-@builtin('append', Opcode.APPEND)
-def append_impl(target: list[any], value: any):
-    target.append(value)
 
 
 @builtin('exec', Opcode.EXEC)

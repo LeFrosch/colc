@@ -1,6 +1,6 @@
 # INPUT
 con main { all:
-  id == "abc" + "def";
+  id == "abc" .. "def";
 }
 
 # OUTPUT

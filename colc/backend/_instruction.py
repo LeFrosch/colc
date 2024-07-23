@@ -70,6 +70,8 @@ class Instruction:
                 Operator.GEQ: Opcode.GEQ,
                 Operator.MUT: Opcode.MUT,
                 Operator.POW: Opcode.POW,
+                Operator.CONCAT: Opcode.CONCAT,
+                Operator.PREPEND: Opcode.PREPEND,
             }
         )
 

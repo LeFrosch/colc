@@ -1,6 +1,6 @@
 # INPUT
 map main {
-  final a = "abc" + "def" + root.attr;
+  final a = "abc" .. "def" .. root.attr;
 }
 
 # CONST POOL
@@ -11,5 +11,5 @@ map main {
 000: CONST      0
 001: LOAD       0
 002: ATTR       1
-003: ADD        0
+003: CONCAT     0
 004: STORE      1

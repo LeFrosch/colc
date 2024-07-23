@@ -1,6 +1,6 @@
 # INPUT
 3 >= 4 -> False: <bool>
-"str" + "str" == "strstr" -> True: <bool>
+"str" .. "str" == "strstr" -> True: <bool>
 8 // 2 + 4 * 15 -> 64: <num>
 8 *= 4 -> True: <bool>
 8 **= 4 -> False: <bool>
@@ -20,7 +20,7 @@
 none == none -> True: <bool>
 1 == "str" -> False: <bool>
 1 != none -> True: <bool>
-"abc" + str(3) -> abc3: <str>
+"abc" .. str(3) -> abc3: <str>
 [] -> []: <list any>
 [1, 2] -> [1, 2]: <list num>
 [1, "str", true] -> [1, 'str', True]: <list bool | num | str>

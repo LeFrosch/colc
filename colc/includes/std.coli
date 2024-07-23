@@ -20,11 +20,15 @@ fun first(node, kind) {
     return child;
   }
 
-  fail "no child of kind: " + str(kind);
+  fail "no child of kind: " .. str(kind);
 }
 
 fun extend(list, other) {
+  var buffer = list;
+
   for item in other {
-    append(list, item);
+    buffer = item : buffer;
   }
+
+  return buffer;
 }

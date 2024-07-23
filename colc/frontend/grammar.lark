@@ -36,6 +36,8 @@ QUALIFIER.1: "final" | "const" | "var"
   | expression_prod "*" expression_unary  -> expression_binary
   | expression_prod "/" expression_unary  -> expression_binary
   | expression_prod "//" expression_unary -> expression_binary
+  | expression_prod ".." expression_unary -> expression_binary
+  | expression_prod ":" expression_unary  -> expression_binary
 
 ?expression_unary: expression_atom
   | "!" expression_unary

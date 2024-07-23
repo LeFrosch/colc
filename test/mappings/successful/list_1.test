@@ -1,13 +1,13 @@
 # INPUT
 map main {
-  final a = [];
-  append(a, 123);
+  var a = [];
+  a = 123 : a;
 }
 
 # OUTPUT
 000: LIST       0
 001: STORE      1
-002: LOAD       1
-003: INT      123
-004: APPEND     0
-005: DROP       0
+002: INT      123
+003: LOAD       1
+004: PREPEND    0
+005: STORE      1

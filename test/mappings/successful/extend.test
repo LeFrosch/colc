@@ -1,49 +1,56 @@
 # INPUT
 fun extend(list, other) {
+  var buffer = list;
+
   for item in other {
-    append(list, item);
+    buffer = item : list;
   }
+
+  return buffer;
 }
 
 map main {
   final a = [1, 2, 3];
   final b = [2, 3, 5];
 
-  extend(a, b);
+  final c = extend(a, b);
 }
 
 # OUTPUT
 000: LIST       0
-001: INT        1
-002: APPEND     0
+001: INT        3
+002: PREPEND    0
 003: INT        2
-004: APPEND     0
-005: INT        3
-006: APPEND     0
+004: PREPEND    0
+005: INT        1
+006: PREPEND    0
 007: STORE      1
 008: LIST       0
-009: INT        2
-010: APPEND     0
+009: INT        5
+010: PREPEND    0
 011: INT        3
-012: APPEND     0
-013: INT        5
-014: APPEND     0
+012: PREPEND    0
+013: INT        2
+014: PREPEND    0
 015: STORE      2
 016: LOAD       1
 017: STORE      3
 018: LOAD       2
 019: STORE      4
-020: LOAD       4
-021: ITER       0
-022: STORE      5
-023: HAS_NEXT   5
-024: JMP_FF     8
-025: NEXT       5
-026: STORE      6
-027: LOAD       3
-028: LOAD       6
-029: APPEND     0
-030: DROP       0
-031: JMP_B      8
-032: NONE       0
-033: DROP       0
+020: LOAD       3
+021: STORE      5
+022: LOAD       4
+023: ITER       0
+024: STORE      6
+025: HAS_NEXT   6
+026: JMP_FF     8
+027: NEXT       6
+028: STORE      7
+029: LOAD       7
+030: LOAD       3
+031: PREPEND    0
+032: STORE      5
+033: JMP_B      8
+034: LOAD       5
+035: JMP_F      1
+036: STORE      8

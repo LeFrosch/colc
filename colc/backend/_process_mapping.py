@@ -96,9 +96,9 @@ class VisitorImpl(VisitorWithScope):
     def instruction_for_list(self, value: comptime_list):
         self.buffer.add(Instruction(Opcode.LIST))
 
-        for element in value:
+        for element in reversed(value):
             self.instruction_for_data(element)
-            self.buffer.add(Instruction(Opcode.APPEND))
+            self.buffer.add(Instruction(Opcode.PREPEND))
 
     def instruction_for_const(self, value: ComptimeValue):
         if isinstance(value.data, list):
@@ -332,10 +332,10 @@ class VisitorImpl(VisitorWithScope):
         self.buffer.add(Instruction(Opcode.LIST))
 
         values: list[Value] = []
-        # append all elements
-        for element in expr.elements:
+        # prepend all elements
+        for element in reversed(expr.elements):
             value = self.accept_expr(element)
-            self.buffer.add(Instruction(Opcode.APPEND))
+            self.buffer.add(Instruction(Opcode.PREPEND))
 
             if value.type.is_list:
                 fatal_problem('nested lists are not supported', element)

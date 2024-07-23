@@ -55,6 +55,8 @@ class Operator(AstEnum):
     MUT = '*='
     POW = '**='
     NOT = '!'
+    CONCAT = '..'
+    PREPEND = ':'
 
     def is_comparison(self) -> bool:
         return self.switch(

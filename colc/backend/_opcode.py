@@ -36,6 +36,7 @@ class Opcode(enum.IntEnum):
     GEQ = 0x2E
     MUT = 0x2F
     POW = 0x30
+    CONCAT = 0x31
 
     # const values
     TRUE = 0x40
@@ -51,14 +52,13 @@ class Opcode(enum.IntEnum):
 
     # lists
     LIST = 0x60
-    APPEND = 0x61
-    REMOVE = 0x62
-    LENGTH = 0x63
-    RANGE = 0x64
-    ITER = 0x65
-    NEXT = 0x66
-    HAS_NEXT = 0x67
-    RESET = 0x68
+    PREPEND = 0x61
+    LENGTH = 0x62
+    RANGE = 0x63
+    ITER = 0x64
+    NEXT = 0x65
+    HAS_NEXT = 0x66
+    RESET = 0x67
 
     @property
     def is_jmp(self) -> bool:

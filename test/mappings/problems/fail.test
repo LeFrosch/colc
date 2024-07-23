@@ -1,6 +1,6 @@
 # INPUT
 fun test() {
-  fail "this " + "is a message";
+  fail "this " .. "is a message";
 }
 
 map main {
@@ -9,6 +9,6 @@ map main {
 
 # OUTPUT
 test.col @ line 2
->>   fail "this " + "is a message";
->>   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>>   fail "this " .. "is a message";
+>>   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 fatal problem: failure: this is a message

@@ -11,6 +11,6 @@ map main {
 001: LOAD       0
 002: LIST       0
 003: LOAD       0
-004: APPEND     0
+004: PREPEND    0
 005: EXEC       0
 006: DROP       0
